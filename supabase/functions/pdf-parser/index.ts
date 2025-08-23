@@ -85,29 +85,39 @@ Deno.serve(async (req) => {
 
     console.log(`Processing PDF upload for user ${user.id}, file size: ${file.size}`)
 
-    // Parse the actual PDF content
-    const pdfText = await extractTextFromPDF(file)
-    console.log('Extracted PDF text length:', pdfText.length)
-    console.log('First 500 characters:', pdfText.substring(0, 500))
+    try {
+      // Parse the actual PDF content
+      const pdfText = await extractTextFromPDF(file)
+      console.log('Extracted PDF text length:', pdfText.length)
+      console.log('First 500 characters:', pdfText.substring(0, 500))
 
-    const parsedData = parseELogbuchPDF(pdfText)
-    
-    if (!parsedData || parsedData.module.length === 0) {
+      const parsedData = parseELogbuchPDF(pdfText)
+      
+      if (!parsedData || parsedData.module.length === 0) {
+        console.log('No valid procedure data found in PDF')
+        return new Response(
+          JSON.stringify({ error: 'No valid procedure data found in PDF' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      console.log('Parsed data:', JSON.stringify(parsedData, null, 2))
+
+      // Import the parsed data into the database
+      const importResult = await importParsedData(parsedData, user.id)
+
+      if (!importResult.success) {
+        console.error('Import failed:', importResult.error)
+        return new Response(
+          JSON.stringify({ error: importResult.error }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    } catch (parseError) {
+      console.error('Error during PDF parsing:', parseError)
       return new Response(
-        JSON.stringify({ error: 'No valid procedure data found in PDF' }),
+        JSON.stringify({ error: 'PDF parsing failed', details: parseError.message }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    console.log('Parsed data:', JSON.stringify(parsedData, null, 2))
-
-    // Import the parsed data into the database
-    const importResult = await importParsedData(parsedData, user.id)
-
-    if (!importResult.success) {
-      return new Response(
-        JSON.stringify({ error: importResult.error }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
