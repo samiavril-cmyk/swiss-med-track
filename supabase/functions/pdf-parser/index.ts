@@ -437,8 +437,8 @@ async function importParsedData(data: ParsedPDFData, userId: string) {
         // Create procedure logs for each role with count > 0
         // Use correct role values that match the database constraint
         const rolesToImport = [
-          { role: 'primary_surgeon', count: procedureData.verantwortlich },
-          { role: 'supervisor', count: procedureData.instruierend },
+          { role: 'responsible', count: procedureData.verantwortlich },
+          { role: 'instructing', count: procedureData.instruierend },
           { role: 'assistant', count: procedureData.assistent }
         ]
 
@@ -448,25 +448,25 @@ async function importParsedData(data: ParsedPDFData, userId: string) {
             
             // Create individual logs for each procedure count with weight
             for (let i = 0; i < roleData.count; i++) {
-              // Set appropriate weight based on role
-              let weight = 1.0
-              if (roleData.role === 'supervisor') {
-                weight = 0.75 // Instructing role gets 0.75 weight
-              } else if (roleData.role === 'assistant') {
-                weight = 0.5 // Assistant role gets 0.5 weight
-              }
+            // Set appropriate weight based on role
+            let weight = 1.0
+            if (roleData.role === 'instructing') {
+              weight = 0.75 // Instructing role gets 0.75 weight
+            } else if (roleData.role === 'assistant') {
+              weight = 0.5 // Assistant role gets 0.5 weight
+            }
 
-              const { error: insertError } = await supabase
-                .from('procedure_logs')
-                .insert({
-                  user_id: userId,
-                  procedure_id: matchingProcedure.id,
-                  role_in_surgery: roleData.role,
-                  performed_date: today,
-                  notes: `Imported from PDF: ${data.user.elogbuch_stand}`,
-                  hospital: 'Imported from eLogbuch',
-                  weight: weight
-                })
+            const { error: insertError } = await supabase
+              .from('procedure_logs')
+              .insert({
+                user_id: userId,
+                procedure_id: matchingProcedure.id,
+                role_in_surgery: roleData.role,
+                performed_date: today,
+                notes: `Imported from PDF: ${data.user.elogbuch_stand}`,
+                hospital: 'Imported from eLogbuch',
+                weighted_score: weight
+              })
 
               if (insertError) {
                 console.error('Error inserting procedure log:', insertError)
