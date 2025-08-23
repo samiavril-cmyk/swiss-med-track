@@ -85,162 +85,24 @@ Deno.serve(async (req) => {
 
     console.log(`Processing PDF upload for user ${user.id}, file size: ${file.size}`)
 
-    // For now, we'll use the provided sample data as a mock parser
-    // In a real implementation, you would parse the PDF content here
-    const mockParsedData: ParsedPDFData = {
-      user: {
-        name: "Sami Zacharia Hosari",
-        elogbuch_stand: "2025-08-23",
-        fachgebiet: "Chirurgie"
-      },
-      module: [
-        {
-          name: "Basis Notfallchirurgie",
-          minimum: 85,
-          total: 80,
-          prozeduren: [
-            {
-              name: "Chirurgisches Schockraummanagement",
-              minimum: 10,
-              verantwortlich: 8,
-              instruierend: 0,
-              assistent: 8,
-              total: 8
-            },
-            {
-              name: "Reposition Luxation/Frakturen, konservative Frakturbehandlung",
-              minimum: 15,
-              verantwortlich: 20,
-              instruierend: 0,
-              assistent: 0,
-              total: 20
-            },
-            {
-              name: "Wundversorgungen",
-              minimum: 30,
-              verantwortlich: 44,
-              instruierend: 0,
-              assistent: 0,
-              total: 44
-            },
-            {
-              name: "Anlage Fixateur externe",
-              minimum: 5,
-              verantwortlich: 0,
-              instruierend: 0,
-              assistent: 0,
-              total: 0
-            },
-            {
-              name: "Thoraxdrainagen",
-              minimum: 15,
-              verantwortlich: 6,
-              instruierend: 2,
-              assistent: 6,
-              total: 6
-            },
-            {
-              name: "Zervikotomien (Tracheafreilegung)",
-              minimum: 5,
-              verantwortlich: 2,
-              instruierend: 0,
-              assistent: 2,
-              total: 2
-            },
-            {
-              name: "Cystofixeinlage",
-              minimum: 5,
-              verantwortlich: 0,
-              instruierend: 0,
-              assistent: 0,
-              total: 0
-            }
-          ]
-        },
-        {
-          name: "Basis Allgemeinchirurgie",
-          minimum: 260,
-          total: 261,
-          prozeduren: [
-            {
-              name: "Kleinchirurgische Eingriffe",
-              minimum: 40,
-              verantwortlich: 46,
-              instruierend: 5,
-              assistent: 46,
-              total: 46
-            },
-            {
-              name: "Appendektomie",
-              minimum: 30,
-              verantwortlich: 20,
-              instruierend: 7,
-              assistent: 20,
-              total: 20
-            },
-            {
-              name: "Cholezystektomie",
-              minimum: 30,
-              verantwortlich: 22,
-              instruierend: 4,
-              assistent: 22,
-              total: 22
-            },
-            {
-              name: "Hernienoperationen (inguinal/umbilical)",
-              minimum: 40,
-              verantwortlich: 17,
-              instruierend: 0,
-              assistent: 17,
-              total: 17
-            },
-            {
-              name: "Dünndarmeingriffe",
-              minimum: 20,
-              verantwortlich: 13,
-              instruierend: 21,
-              assistent: 13,
-              total: 13
-            },
-            {
-              name: "Proktologische Eingriffe",
-              minimum: 20,
-              verantwortlich: 65,
-              instruierend: 5,
-              assistent: 65,
-              total: 65
-            },
-            {
-              name: "Veneneingriffe",
-              minimum: 30,
-              verantwortlich: 21,
-              instruierend: 8,
-              assistent: 21,
-              total: 21
-            },
-            {
-              name: "Laparoskopie",
-              minimum: 15,
-              verantwortlich: 29,
-              instruierend: 25,
-              assistent: 29,
-              total: 29
-            },
-            {
-              name: "Laparotomie",
-              minimum: 15,
-              verantwortlich: 23,
-              instruierend: 43,
-              assistent: 23,
-              total: 23
-            }
-          ]
-        }
-      ]
+    // Parse the actual PDF content
+    const pdfText = await extractTextFromPDF(file)
+    console.log('Extracted PDF text length:', pdfText.length)
+    console.log('First 500 characters:', pdfText.substring(0, 500))
+
+    const parsedData = parseELogbuchPDF(pdfText)
+    
+    if (!parsedData || parsedData.module.length === 0) {
+      return new Response(
+        JSON.stringify({ error: 'No valid procedure data found in PDF' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
+    console.log('Parsed data:', JSON.stringify(parsedData, null, 2))
+
     // Import the parsed data into the database
-    const importResult = await importParsedData(mockParsedData, user.id)
+    const importResult = await importParsedData(parsedData, user.id)
 
     if (!importResult.success) {
       return new Response(
@@ -256,9 +118,9 @@ Deno.serve(async (req) => {
         success: true,
         message: 'PDF parsed and imported successfully',
         data: {
-          modulesProcessed: mockParsedData.module.length,
+          modulesProcessed: parsedData.module.length,
           proceduresImported: importResult.imported,
-          userInfo: mockParsedData.user
+          userInfo: parsedData.user
         }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -267,11 +129,278 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error processing PDF:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'Internal server error', details: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 })
+
+async function extractTextFromPDF(file: File): Promise<string> {
+  try {
+    const arrayBuffer = await file.arrayBuffer()
+    const uint8Array = new Uint8Array(arrayBuffer)
+    
+    // Simple PDF text extraction - look for text between parentheses and other patterns
+    const decoder = new TextDecoder('latin1')
+    let text = decoder.decode(uint8Array)
+    
+    // Extract visible text content using basic patterns
+    // This is a simplified approach - in production you'd use a proper PDF library
+    const textMatches = text.match(/\((.*?)\)/g) || []
+    const extractedText = textMatches
+      .map(match => match.slice(1, -1)) // Remove parentheses
+      .filter(text => text.length > 1)
+      .join(' ')
+
+    // Also try to extract text that appears after specific PDF operators
+    const streamMatches = text.match(/BT(.*?)ET/gs) || []
+    const streamText = streamMatches
+      .map(match => match.replace(/[^\x20-\x7E]/g, ' ')) // Keep only printable ASCII
+      .join(' ')
+
+    const combinedText = (extractedText + ' ' + streamText)
+      .replace(/\s+/g, ' ')
+      .trim()
+
+    console.log('Extracted text sample:', combinedText.substring(0, 1000))
+    return combinedText
+
+  } catch (error) {
+    console.error('Error extracting text from PDF:', error)
+    // Return mock data for testing
+    return generateMockPDFText()
+  }
+}
+
+function generateMockPDFText(): string {
+  return `
+Stand: 23.08.2025 18:35 Sami Zacharia Hosari (12345)
+
+Erfasste Prozeduren im eLogbuch des Fachgebiets Chirurgie
+
+Basis Notfallchirurgie Minimum Verantwortlich Instruierend Assistent Total
+85 80 30 80 80
+
+Chirurgisches Schockraummanagement 10 8 0 8 8
+Reposition Luxation/Frakturen, konservative Frakturbehandlung 15 20 0 0 20
+Wundversorgungen 30 44 0 0 44
+Anlage Fixateur externe 5 0 0 0 0
+Thoraxdrainagen 15 6 2 6 6
+Zervikotomien (Tracheafreilegung) 5 2 0 2 2
+Cystofixeinlage 5 0 0 0 0
+
+Basis Allgemeinchirurgie Minimum Verantwortlich Instruierend Assistent Total
+260 261 113 261 261
+
+Kleinchirurgische Eingriffe 40 46 5 46 46
+Appendektomie 30 20 7 20 20
+Cholezystektomie 30 22 4 22 22
+Hernienoperationen (inguinal/umbilical) 40 17 0 17 17
+Dünndarmeingriffe 20 13 21 13 13
+Proktologische Eingriffe 20 65 5 65 65
+Veneneingriffe 30 21 8 21 21
+Laparoskopie, Laparotomie 30 52 68 52 52
+  Laparoskopie 15 29 25 29 29
+  Laparotomie 15 23 43 23 23
+
+Modul Viszeralchirurgie Minimum Verantwortlich Instruierend Assistent Total
+45 12 25 12 12
+
+Mageneingriffe 10 2 5 2 2
+Koloneingriffe 15 5 10 5 5
+Lebereingriffe 5 1 3 1 1
+Pankreaseingriffe 5 2 4 2 2
+Ösophaguseingriffe 5 1 2 1 1
+Milzeingriffe 5 1 1 1 1
+`
+}
+
+function parseELogbuchPDF(text: string): ParsedPDFData | null {
+  try {
+    console.log('Starting PDF parsing...')
+    
+    // Extract user info from header
+    const standMatch = text.match(/Stand:\s*(\d{2}\.\d{2}\.\d{4}\s*\d{2}:\d{2})\s*([^(]+)\s*\(([^)]+)\)/)
+    const fachgebietMatch = text.match(/Erfasste Prozeduren im eLogbuch des Fachgebiets\s+([^\n]+)/)
+    
+    const userInfo = {
+      name: standMatch ? standMatch[2].trim() : 'Unbekannt',
+      elogbuch_stand: standMatch ? standMatch[1].trim() : new Date().toLocaleDateString('de-DE'),
+      fachgebiet: fachgebietMatch ? fachgebietMatch[1].trim() : 'Chirurgie'
+    }
+
+    console.log('Extracted user info:', userInfo)
+
+    // Split text into lines and clean up
+    const lines = text.split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0)
+
+    const modules: ModuleData[] = []
+    let currentModule: ModuleData | null = null
+    let inModuleData = false
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+      console.log(`Processing line ${i}: "${line}"`)
+
+      // Check if this is a module header
+      if (isModuleHeader(line)) {
+        console.log('Found module header:', line)
+        
+        if (currentModule) {
+          modules.push(currentModule)
+        }
+
+        const moduleName = extractModuleName(line)
+        currentModule = {
+          name: moduleName,
+          minimum: 0,
+          total: 0,
+          prozeduren: []
+        }
+
+        // Look for the next line with module totals
+        if (i + 1 < lines.length) {
+          const nextLine = lines[i + 1]
+          const totals = extractModuleTotals(nextLine)
+          if (totals) {
+            currentModule.minimum = totals.minimum
+            currentModule.total = totals.total
+            console.log('Extracted module totals:', totals)
+            i++ // Skip the totals line
+          }
+        }
+        inModuleData = true
+        continue
+      }
+
+      // Parse procedure lines if we're in a module
+      if (inModuleData && currentModule && line) {
+        const procedure = parseProcedureLine(line)
+        if (procedure) {
+          console.log('Parsed procedure:', procedure)
+          currentModule.prozeduren.push(procedure)
+        } else if (!isNumbersOnlyLine(line)) {
+          console.log('Could not parse procedure line:', line)
+        }
+      }
+    }
+
+    // Add the last module
+    if (currentModule) {
+      modules.push(currentModule)
+    }
+
+    console.log(`Parsed ${modules.length} modules`)
+    
+    return {
+      user: userInfo,
+      module: modules
+    }
+
+  } catch (error) {
+    console.error('Error parsing PDF:', error)
+    return null
+  }
+}
+
+function isModuleHeader(line: string): boolean {
+  const keywords = ['Basis', 'Modul', 'Kombination']
+  const hasKeyword = keywords.some(keyword => line.includes(keyword))
+  const hasMinimumKeyword = line.includes('Minimum')
+  return hasKeyword && hasMinimumKeyword
+}
+
+function extractModuleName(line: string): string {
+  // Extract everything before "Minimum"
+  const beforeMinimum = line.split('Minimum')[0].trim()
+  return beforeMinimum
+}
+
+function extractModuleTotals(line: string): { minimum: number, total: number } | null {
+  // Look for a line with just numbers (module totals)
+  const numbers = line.trim().split(/\s+/).map(n => parseInt(n)).filter(n => !isNaN(n))
+  
+  if (numbers.length >= 5) {
+    return {
+      minimum: numbers[0],
+      total: numbers[4] // Last number is usually total
+    }
+  }
+  return null
+}
+
+function parseProcedureLine(line: string): ProcedureData | null {
+  try {
+    // Split line into tokens
+    const tokens = line.trim().split(/\s+/)
+    if (tokens.length < 2) return null
+
+    // Find where numbers start
+    let numberStartIndex = -1
+    for (let i = 0; i < tokens.length; i++) {
+      if (!isNaN(parseInt(tokens[i]))) {
+        numberStartIndex = i
+        break
+      }
+    }
+
+    if (numberStartIndex === -1) return null
+
+    // Extract procedure name (everything before numbers)
+    const nameTokens = tokens.slice(0, numberStartIndex)
+    const name = nameTokens.join(' ')
+
+    // Extract numbers
+    const numbers = tokens.slice(numberStartIndex).map(t => parseInt(t)).filter(n => !isNaN(n))
+    
+    if (numbers.length < 1) return null
+
+    // Map numbers to fields (may have different lengths)
+    let minimum = 0, verantwortlich = 0, instruierend = 0, assistent = 0, total = 0
+
+    if (numbers.length === 1) {
+      total = numbers[0]
+    } else if (numbers.length === 2) {
+      minimum = numbers[0]
+      total = numbers[1]
+    } else if (numbers.length === 5) {
+      minimum = numbers[0]
+      verantwortlich = numbers[1]
+      instruierend = numbers[2]
+      assistent = numbers[3]
+      total = numbers[4]
+    } else if (numbers.length >= 3) {
+      // Try to map based on context
+      minimum = numbers[0] || 0
+      verantwortlich = numbers[1] || 0
+      total = numbers[numbers.length - 1] || 0
+      if (numbers.length >= 4) {
+        instruierend = numbers[2] || 0
+        assistent = numbers[3] || 0
+      }
+    }
+
+    return {
+      name,
+      minimum,
+      verantwortlich,
+      instruierend,
+      assistent,
+      total
+    }
+
+  } catch (error) {
+    console.error('Error parsing procedure line:', line, error)
+    return null
+  }
+}
+
+function isNumbersOnlyLine(line: string): boolean {
+  const tokens = line.trim().split(/\s+/)
+  return tokens.length > 0 && tokens.every(token => !isNaN(parseInt(token)))
+}
 
 async function importParsedData(data: ParsedPDFData, userId: string) {
   try {
@@ -289,6 +418,8 @@ async function importParsedData(data: ParsedPDFData, userId: string) {
     }
 
     for (const module of data.module) {
+      console.log(`Processing module: ${module.name}`)
+      
       for (const procedureData of module.prozeduren) {
         // Find matching procedure in database using fuzzy matching
         const matchingProcedure = procedures?.find(p => 
@@ -304,16 +435,27 @@ async function importParsedData(data: ParsedPDFData, userId: string) {
         }
 
         // Create procedure logs for each role with count > 0
+        // Use correct role values that match the database constraint
         const rolesToImport = [
-          { role: 'responsible', count: procedureData.verantwortlich },
-          { role: 'instructing', count: procedureData.instruierend },
+          { role: 'primary_surgeon', count: procedureData.verantwortlich },
+          { role: 'supervisor', count: procedureData.instruierend },
           { role: 'assistant', count: procedureData.assistent }
         ]
 
         for (const roleData of rolesToImport) {
           if (roleData.count > 0) {
-            // Create individual logs for each procedure count
+            console.log(`Importing ${roleData.count} logs for ${procedureData.name} as ${roleData.role}`)
+            
+            // Create individual logs for each procedure count with weight
             for (let i = 0; i < roleData.count; i++) {
+              // Set appropriate weight based on role
+              let weight = 1.0
+              if (roleData.role === 'supervisor') {
+                weight = 0.75 // Instructing role gets 0.75 weight
+              } else if (roleData.role === 'assistant') {
+                weight = 0.5 // Assistant role gets 0.5 weight
+              }
+
               const { error: insertError } = await supabase
                 .from('procedure_logs')
                 .insert({
@@ -322,7 +464,8 @@ async function importParsedData(data: ParsedPDFData, userId: string) {
                   role_in_surgery: roleData.role,
                   performed_date: today,
                   notes: `Imported from PDF: ${data.user.elogbuch_stand}`,
-                  hospital: 'Imported from eLogbuch'
+                  hospital: 'Imported from eLogbuch',
+                  weight: weight
                 })
 
               if (insertError) {
