@@ -245,44 +245,85 @@ async function extractTextFromPDF(file: File): Promise<string> {
 
 function generateMockPDFText(): string {
   return `
-Stand: 23.08.2025 18:35 Sami Zacharia Hosari (12345)
+Stand: 23.08.2025 17:24 Sami Zacharia Hosari (175214)
 
 Erfasste Prozeduren im eLogbuch des Fachgebiets Chirurgie
 
 Basis Notfallchirurgie Minimum Verantwortlich Instruierend Assistent Total
-85 80 30 80 80
+85 80 0 2 80
 
-Chirurgisches Schockraummanagement 10 8 0 8 8
+Chirurgisches Schockraummanagement 10 8 0 0 8
 Reposition Luxation/Frakturen, konservative Frakturbehandlung 15 20 0 0 20
 Wundversorgungen 30 44 0 0 44
 Anlage Fixateur externe 5 0 0 0 0
-Thoraxdrainagen 15 6 2 6 6
-Zervikotomien (Tracheafreilegung) 5 2 0 2 2
+Thoraxdrainagen 15 6 0 2 6
+Zervikotomien (Tracheafreilegung) 5 2 0 0 2
 Cystofixeinlage 5 0 0 0 0
 
 Basis Allgemeinchirurgie Minimum Verantwortlich Instruierend Assistent Total
-260 261 113 261 261
+280 261 0 121 261
 
-Kleinchirurgische Eingriffe 40 46 5 46 46
-Appendektomie 30 20 7 20 20
-Cholezystektomie 30 22 4 22 22
-Hernienoperationen (inguinal/umbilical) 40 17 0 17 17
-Dünndarmeingriffe 20 13 21 13 13
-Proktologische Eingriffe 20 65 5 65 65
-Veneneingriffe 30 21 8 21 21
-Laparoskopie, Laparotomie 30 52 68 52 52
-  Laparoskopie 15 29 25 29 29
-  Laparotomie 15 23 43 23 23
+Kleinchirurgische Eingriffe (Atherom/Lipom, Kocher, Thiersch, LK Excisionen etc.) 40 46 0 5 46
+Appendektomie 30 20 0 7 20
+Cholezystektomie 30 22 0 4 22
+Hernienoperationen (inguinal/umbilical) 40 17 0 0 17
+Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata) 20 13 0 21 13
+Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie 20 65 0 5 65
+Veneneingriffe (Varizenchirurgie, Port/Pacemaker) 30 21 0 8 21
+Laparoskopie, Laparotomie 30 52 0 68 52
+  Laparoskopie 15 29 0 25 29
+  Laparotomie 15 23 0 43 23
+Weitere zählbare Eingriffe 20 5 0 3 5
+  Thoraxchirurgische Eingriffe 0 1 0 1 1
+  Urologische Eingriffe 0 0 0 0 0
+  Gefässchirurgische Eingriffe 0 0 0 2 0
+  Kompartmentelle Spaltungen 0 0 0 0 0
+  diagnostische und therapeutische Endoskopien 0 4 0 0 4
+  Mamma-Eingriffe 0 0 0 0 0
+  Operation an Nerven 0 0 0 0 0
 
 Modul Viszeralchirurgie Minimum Verantwortlich Instruierend Assistent Total
-45 12 25 12 12
+165 142 0 125 142
 
-Mageneingriffe 10 2 5 2 2
-Koloneingriffe 15 5 10 5 5
-Lebereingriffe 5 1 3 1 1
-Pankreaseingriffe 5 2 4 2 2
-Ösophaguseingriffe 5 1 2 1 1
-Milzeingriffe 5 1 1 1 1
+Abdominalhernien (Narbenhernien, videoskopischer Repair) 25 2 0 21 2
+Mageneingriffe (Ulkusnaht, Gastroenterostomie, chir. Gastrostomie, Resektion) 7 3 0 5 3
+Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata) 25 13 0 21 13
+Kolorektal (Segment- und Teilresektion) 10 0 0 0 0
+Hepatobiliär (exkl. Cholezystektomie), Leberteilresektion, Pankreasteilresektion, Bariatrische Chirurgie. 5 4 0 2 4
+Endokrine Chirurgie (Thyreoidektomie, Parathyreoidektomie, Adrenalektomie) 10 0 0 3 0
+Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie 35 65 0 5 65
+Splenektomie 3 0 0 0 0
+Dickdarmstoma 5 3 0 0 3
+Laparoskopie, Laparotomie 40 52 0 68 52
+  Laparoskopie 0 29 0 25 29
+  Laparotomie 0 23 0 43 23
+
+Modul Traumatologie des Bewegungsapparates Minimum Verantwortlich Instruierend Assistent Total
+165 20 0 0 20
+
+Metallentfernungen, Spickungen 30 0 0 0 0
+Reposition Luxation/Frakturen, konservative Frakturbehandlung 25 20 0 0 20
+Eingriffe Sehnen/Ligamente 15 0 0 0 0
+Arthroskopie 10 0 0 0 0
+Osteosynthese Schaftfrakturen 15 0 0 0 0
+Osteosynthese gelenksnäher (metaphysärer) Frakturen 40 0 0 0 0
+Osteosynthese komplexer Frakturen (intraartikulären Frakturen an den grossen Röhrenknochen und am Mittel- und Rückfuss sowie Becken-/Azetabulumfrakturen) 5 0 0 0 0
+Handchirurgie (exklusiv Wundversorgung) 15 0 0 0 0
+Amputationen 10 0 0 0 0
+  Kleine Amputationen 5 0 0 0 0
+  Grosse Amputationen 5 0 0 0 0
+
+Modul Kombination Minimum Verantwortlich Instruierend Assistent Total
+165 158 0 123 158
+
+Abdominalhernien (Narbenhernien, videoskopischer Repair) 15 2 0 21 2
+Mageneingriffe (Ulkusnaht, Gastroenterostomie, chir. Gastrostomie, Resektion) 5 3 0 5 3
+Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata) 15 13 0 21 13
+Kolorektal (Segment- und Teilresektion) 5 0 0 0 0
+Endokrine Chirurgie (Thyreoidektomie, Parathyreoidektomie, Adrenalektomie) 5 0 0 3 0
+Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie 20 65 0 5 65
+Dickdarmstoma 5 3 0 0 3
+Metallentfernungen, Spickungen 20 0 0 0 0
 `
 }
 
@@ -491,10 +532,14 @@ function isNumbersOnlyLine(line: string): boolean {
 
 async function importParsedData(data: ParsedPDFData, userId: string) {
   try {
+    console.log('Starting import process...')
+    console.log('Import data structure:', JSON.stringify(data, null, 2))
+    
     let totalImported = 0
     const today = new Date().toISOString().split('T')[0]
 
     // Get all procedures from database for mapping
+    console.log('Fetching procedures from database...')
     const { data: procedures, error: proceduresError } = await supabase
       .from('procedures')
       .select('id, title_de, title_en, code')
@@ -504,30 +549,54 @@ async function importParsedData(data: ParsedPDFData, userId: string) {
       return { success: false, error: 'Failed to fetch procedures' }
     }
 
+    console.log(`Found ${procedures?.length || 0} procedures in database`)
+    console.log('Sample procedures:', procedures?.slice(0, 5).map(p => ({ id: p.id, title_de: p.title_de })))
+
     for (const module of data.module) {
       console.log(`Processing module: ${module.name}`)
+      console.log(`Module has ${module.prozeduren.length} procedures`)
       
       for (const procedureData of module.prozeduren) {
+        console.log(`\n--- Processing procedure: "${procedureData.name}" ---`)
+        console.log('Procedure data:', procedureData)
+        
         // Find matching procedure in database using fuzzy matching
-        const matchingProcedure = procedures?.find(p => 
-          p.title_de?.toLowerCase().includes(procedureData.name.toLowerCase()) ||
-          p.title_en?.toLowerCase().includes(procedureData.name.toLowerCase()) ||
-          procedureData.name.toLowerCase().includes(p.title_de?.toLowerCase() || '') ||
-          procedureData.name.toLowerCase().includes(p.title_en?.toLowerCase() || '')
-        )
+        const matchingProcedure = procedures?.find(p => {
+          const matches = [
+            p.title_de?.toLowerCase().includes(procedureData.name.toLowerCase()),
+            p.title_en?.toLowerCase().includes(procedureData.name.toLowerCase()),
+            procedureData.name.toLowerCase().includes(p.title_de?.toLowerCase() || ''),
+            procedureData.name.toLowerCase().includes(p.title_en?.toLowerCase() || '')
+          ].some(match => match)
+          
+          if (matches) {
+            console.log(`Found match: "${procedureData.name}" -> "${p.title_de}" (ID: ${p.id})`)
+          }
+          return matches
+        })
 
         if (!matchingProcedure) {
-          console.warn(`No matching procedure found for: ${procedureData.name}`)
+          console.warn(`❌ No matching procedure found for: "${procedureData.name}"`)
+          // Show similar procedures for debugging
+          const similar = procedures?.filter(p => {
+            const name = procedureData.name.toLowerCase()
+            const title = p.title_de?.toLowerCase() || ''
+            return name.split(' ').some(word => word.length > 3 && title.includes(word))
+          }).slice(0, 3)
+          console.log('Similar procedures found:', similar?.map(p => p.title_de))
           continue
         }
 
+        console.log(`✅ Matched procedure: "${procedureData.name}" -> "${matchingProcedure.title_de}"`)
+
         // Create procedure logs for each role with count > 0
-        // Use correct role values that match the database constraint
         const rolesToImport = [
           { role: 'responsible', count: procedureData.verantwortlich },
           { role: 'instructing', count: procedureData.instruierend },
           { role: 'assistant', count: procedureData.assistent }
         ]
+
+        console.log('Roles to import:', rolesToImport)
 
         for (const roleData of rolesToImport) {
           if (roleData.count > 0) {
@@ -535,41 +604,55 @@ async function importParsedData(data: ParsedPDFData, userId: string) {
             
             // Create individual logs for each procedure count with weight
             for (let i = 0; i < roleData.count; i++) {
-            // Set appropriate weight based on role
-            let weight = 1.0
-            if (roleData.role === 'instructing') {
-              weight = 0.75 // Instructing role gets 0.75 weight
-            } else if (roleData.role === 'assistant') {
-              weight = 0.5 // Assistant role gets 0.5 weight
-            }
+              // Set appropriate weight based on role
+              let weight = 1.0
+              if (roleData.role === 'instructing') {
+                weight = 0.75
+              } else if (roleData.role === 'assistant') {
+                weight = 0.5
+              }
 
-            const { error: insertError } = await supabase
-              .from('procedure_logs')
-              .insert({
-                user_id: userId,
-                procedure_id: matchingProcedure.id,
-                role_in_surgery: roleData.role,
-                performed_date: today,
-                notes: `Imported from PDF: ${data.user.elogbuch_stand}`,
-                hospital: 'Imported from eLogbuch',
-                weighted_score: weight
-              })
+              console.log(`Inserting log ${i + 1}/${roleData.count} for role ${roleData.role} with weight ${weight}`)
+
+              const { error: insertError } = await supabase
+                .from('procedure_logs')
+                .insert({
+                  user_id: userId,
+                  procedure_id: matchingProcedure.id,
+                  role_in_surgery: roleData.role,
+                  performed_date: today,
+                  notes: `Imported from PDF: ${data.user.elogbuch_stand}`,
+                  hospital: 'Imported from eLogbuch',
+                  weighted_score: weight
+                })
 
               if (insertError) {
-                console.error('Error inserting procedure log:', insertError)
+                console.error('❌ Error inserting procedure log:', insertError)
+                console.error('Attempted to insert:', {
+                  user_id: userId,
+                  procedure_id: matchingProcedure.id,
+                  role_in_surgery: roleData.role,
+                  performed_date: today,
+                  weighted_score: weight
+                })
               } else {
+                console.log(`✅ Successfully inserted log for ${procedureData.name}`)
                 totalImported++
               }
             }
+          } else {
+            console.log(`Skipping role ${roleData.role} (count: ${roleData.count})`)
           }
         }
       }
     }
 
+    console.log(`\n=== Import completed ===`)
+    console.log(`Total imported: ${totalImported}`)
     return { success: true, imported: totalImported }
   } catch (error) {
     console.error('Error importing parsed data:', error)
-    return { success: false, error: 'Failed to import data' }
+    return { success: false, error: 'Failed to import data: ' + error.message }
   }
 }
 
