@@ -54,9 +54,11 @@ export const HeroSection: React.FC = () => {
             
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <Button variant="hero" size="xl" className="gap-2 shadow-medical">
-                Als Resident starten
-                <ArrowRight className="w-5 h-5" />
+              <Button variant="hero" size="xl" className="gap-2 shadow-medical" asChild>
+                <a href="/dashboard">
+                  Als Resident starten
+                  <ArrowRight className="w-5 h-5" />
+                </a>
               </Button>
               <Button variant="swiss" size="xl" className="gap-2">
                 <BookOpen className="w-5 h-5" />
