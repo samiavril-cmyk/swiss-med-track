@@ -19,67 +19,67 @@ export default {
 		},
 		extend: {
 			colors: {
-				border: 'hsl(var(--border))',
-				input: 'hsl(var(--input))',
-				ring: 'hsl(var(--ring))',
-				background: 'hsl(var(--background))',
-				foreground: 'hsl(var(--foreground))',
+				border: 'var(--border)',
+				input: 'var(--input)',
+				ring: 'var(--ring)',
+				background: 'var(--background)',
+				foreground: 'var(--foreground)',
 				
 				/* Primary Deep Teal */
 				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))',
-					hover: 'hsl(var(--primary-hover))'
+					DEFAULT: 'var(--primary)',
+					foreground: 'var(--primary-foreground)',
+					hover: 'var(--primary-hover)'
 				},
 				
 				/* Secondary Fresh Mint */
 				secondary: {
-					DEFAULT: 'hsl(var(--secondary))',
-					foreground: 'hsl(var(--secondary-foreground))',
-					hover: 'hsl(var(--secondary-hover))'
+					DEFAULT: 'var(--secondary)',
+					foreground: 'var(--secondary-foreground)',
+					hover: 'var(--secondary-hover)'
 				},
 
 				/* Enhanced Typography Colors */
 				text: {
-					primary: 'hsl(var(--text-primary))',
-					secondary: 'hsl(var(--text-secondary))',
-					muted: 'hsl(var(--text-muted))'
+					primary: 'var(--text-primary)',
+					secondary: 'var(--text-secondary)',
+					muted: 'var(--text-muted)'
 				},
 
 				/* Activity Ring Colors - Vibrant but Professional */
 				activity: {
-					mint: 'hsl(var(--activity-mint))',
-					coral: 'hsl(var(--activity-coral))',
-					lavender: 'hsl(var(--activity-lavender))',
-					amber: 'hsl(var(--activity-amber))'
+					mint: 'var(--activity-mint)',
+					coral: 'var(--activity-coral)',
+					lavender: 'var(--activity-lavender)',
+					amber: 'var(--activity-amber)'
 				},
 
 				/* Accent Colors - Sparingly Used */
 				accent: {
-					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'hsl(var(--accent-foreground))',
-					coral: 'hsl(var(--accent-coral))',
-					gold: 'hsl(var(--accent-gold))',
-					lavender: 'hsl(var(--accent-lavender))'
+					DEFAULT: 'var(--accent)',
+					foreground: 'var(--accent-foreground)',
+					coral: 'var(--accent-coral)',
+					gold: 'var(--accent-gold)',
+					lavender: 'var(--accent-lavender)'
 				},
 
 				/* Professional Card System */
 				card: {
-					DEFAULT: 'hsl(var(--card))',
-					foreground: 'hsl(var(--card-foreground))',
-					border: 'hsl(var(--card-border))'
+					DEFAULT: 'var(--card)',
+					foreground: 'var(--card-foreground)',
+					border: 'var(--card-border)'
 				},
 
 				/* Muted Backgrounds */
 				muted: {
-					DEFAULT: 'hsl(var(--muted))',
-					foreground: 'hsl(var(--muted-foreground))'
+					DEFAULT: 'var(--muted)',
+					foreground: 'var(--muted-foreground)'
 				},
 
 				/* Status Colors */
-				success: 'hsl(var(--success))',
-				warning: 'hsl(var(--warning))',
-				error: 'hsl(var(--error))'
+				success: 'var(--success)',
+				warning: 'var(--warning)',
+				error: 'var(--error)'
 			},
 
 			/* Professional Gradients */
