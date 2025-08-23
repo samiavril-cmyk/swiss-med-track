@@ -288,11 +288,13 @@ Milzeingriffe 5 1 1 1 1
 
 function parseELogbuchPDF(text: string): ParsedPDFData | null {
   try {
-    console.log('Starting PDF parsing...')
+    console.log('Starting advanced PDF parsing...')
     
-    // Extract user info from header
-    const standMatch = text.match(/Stand:\s*(\d{2}\.\d{2}\.\d{4}\s*\d{2}:\d{2})\s*([^(]+)\s*\(([^)]+)\)/)
-    const fachgebietMatch = text.match(/Erfasste Prozeduren im eLogbuch des Fachgebiets\s+([^\n]+)/)
+    // Extract user info from header - more flexible pattern
+    const standMatch = text.match(/Stand:\s*(\d{2}\.\d{2}\.\d{4}[\s\d:]*)\s*([A-Za-z\s]+)\s*\(([^)]+)\)/) ||
+                      text.match(/(\d{2}\.\d{2}\.\d{4}[\s\d:]*)\s*([A-Za-z\s]+)\s*\(([^)]+)\)/);
+    const fachgebietMatch = text.match(/Fachgebiets?\s+([A-Za-z]+)/) || 
+                           text.match(/eLogbuch.*?([A-Za-z]+)/);
     
     const userInfo = {
       name: standMatch ? standMatch[2].trim() : 'Unbekannt',
@@ -309,62 +311,76 @@ function parseELogbuchPDF(text: string): ParsedPDFData | null {
 
     const modules: ModuleData[] = []
     let currentModule: ModuleData | null = null
-    let inModuleData = false
+    let expectingModuleTotals = false
+    let inProcedureData = false
+
+    console.log('Processing', lines.length, 'lines')
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
-      console.log(`Processing line ${i}: "${line}"`)
+      console.log(`Line ${i}: "${line}"`)
 
-      // Check if this is a module header
-      if (isModuleHeader(line)) {
+      // Detect module headers - improved patterns
+      if (isModuleHeaderImproved(line)) {
         console.log('Found module header:', line)
         
         if (currentModule) {
           modules.push(currentModule)
         }
 
-        const moduleName = extractModuleName(line)
+        const moduleName = extractModuleNameImproved(line)
         currentModule = {
           name: moduleName,
           minimum: 0,
           total: 0,
           prozeduren: []
         }
-
-        // Look for the next line with module totals
-        if (i + 1 < lines.length) {
-          const nextLine = lines[i + 1]
-          const totals = extractModuleTotals(nextLine)
-          if (totals) {
-            currentModule.minimum = totals.minimum
-            currentModule.total = totals.total
-            console.log('Extracted module totals:', totals)
-            i++ // Skip the totals line
-          }
-        }
-        inModuleData = true
+        expectingModuleTotals = true
+        inProcedureData = false
         continue
       }
 
-      // Parse procedure lines if we're in a module
-      if (inModuleData && currentModule && line) {
-        const procedure = parseProcedureLine(line)
+      // Look for module totals (first line of numbers after module header)
+      if (expectingModuleTotals && currentModule && isNumbersLine(line)) {
+        const totals = extractModuleTotalsImproved(line)
+        if (totals) {
+          currentModule.minimum = totals.minimum
+          currentModule.total = totals.total
+          console.log('Extracted module totals:', totals)
+        }
+        expectingModuleTotals = false
+        inProcedureData = true
+        continue
+      }
+
+      // Skip header lines with column names
+      if (line.includes('Minimum') && line.includes('Verantwortlich')) {
+        inProcedureData = true
+        continue
+      }
+
+      // Parse procedure lines
+      if (inProcedureData && currentModule && line && !isNumbersLine(line)) {
+        const procedure = parseProcedureLineImproved(line, lines[i + 1] || '')
         if (procedure) {
           console.log('Parsed procedure:', procedure)
           currentModule.prozeduren.push(procedure)
-        } else if (!isNumbersOnlyLine(line)) {
-          console.log('Could not parse procedure line:', line)
         }
       }
     }
 
     // Add the last module
-    if (currentModule) {
+    if (currentModule && currentModule.prozeduren.length > 0) {
       modules.push(currentModule)
     }
 
-    console.log(`Parsed ${modules.length} modules`)
+    console.log(`Parsed ${modules.length} modules with ${modules.reduce((sum, m) => sum + m.prozeduren.length, 0)} total procedures`)
     
+    if (modules.length === 0) {
+      console.log('No modules found, parsing failed')
+      return null
+    }
+
     return {
       user: userInfo,
       module: modules
@@ -554,5 +570,115 @@ async function importParsedData(data: ParsedPDFData, userId: string) {
   } catch (error) {
     console.error('Error importing parsed data:', error)
     return { success: false, error: 'Failed to import data' }
+  }
+}
+
+// Improved helper functions for better parsing
+function isModuleHeaderImproved(line: string): boolean {
+  const keywords = ['Basis', 'Modul', 'Kombination']
+  return keywords.some(keyword => line.includes(keyword)) && 
+         (line.includes('Minimum') || line.includes('Verantwortlich') || 
+          line.includes('chirurgie') || line.includes('Traumatologie'))
+}
+
+function extractModuleNameImproved(line: string): string {
+  // Remove column headers and extract just the module name
+  return line.split(/\s+(Minimum|Verantwortlich|Instruierend|Assistent|Total)/)[0].trim()
+}
+
+function isNumbersLine(line: string): boolean {
+  const tokens = line.trim().split(/\s+/)
+  return tokens.length >= 3 && tokens.every(token => !isNaN(parseInt(token)))
+}
+
+function extractModuleTotalsImproved(line: string): { minimum: number, total: number } | null {
+  const numbers = line.trim().split(/\s+/).map(n => parseInt(n)).filter(n => !isNaN(n))
+  
+  if (numbers.length >= 2) {
+    return {
+      minimum: numbers[0],
+      total: numbers[numbers.length - 1] // Last number is total
+    }
+  }
+  return null
+}
+
+function parseProcedureLineImproved(line: string, nextLine: string = ''): ProcedureData | null {
+  try {
+    // Skip lines that are clearly not procedures
+    if (line.includes('Minimum') || line.includes('Total') || 
+        line.includes('Stand:') || line.includes('Seite')) {
+      return null
+    }
+
+    // Look for procedure name followed by numbers in the same line or split across lines
+    const combinedLine = (line + ' ' + nextLine).trim()
+    const tokens = combinedLine.split(/\s+/)
+    
+    // Find where numbers start
+    let numberStartIndex = -1
+    for (let i = 0; i < tokens.length; i++) {
+      if (!isNaN(parseInt(tokens[i])) && parseInt(tokens[i]) > 0) {
+        numberStartIndex = i
+        break
+      }
+    }
+
+    if (numberStartIndex === -1 || numberStartIndex === 0) return null
+
+    // Extract procedure name (everything before numbers)
+    const nameTokens = tokens.slice(0, numberStartIndex)
+    const name = nameTokens.join(' ').trim()
+    
+    // Skip if name is too short or contains unwanted patterns
+    if (name.length < 3 || name.includes('(') || name.includes(')')) {
+      return null
+    }
+
+    // Extract numbers
+    const numbers = tokens.slice(numberStartIndex)
+      .map(t => parseInt(t))
+      .filter(n => !isNaN(n) && n >= 0)
+    
+    if (numbers.length < 2) return null
+
+    // Map numbers based on Swiss eLogbook format
+    let minimum = 0, verantwortlich = 0, instruierend = 0, assistent = 0, total = 0
+
+    if (numbers.length >= 5) {
+      // Full format: minimum, verantwortlich, instruierend, assistent, total
+      minimum = numbers[0]
+      verantwortlich = numbers[1]  
+      instruierend = numbers[2]
+      assistent = numbers[3]
+      total = numbers[4]
+    } else if (numbers.length === 4) {
+      // Missing one field, assume no instruierend
+      minimum = numbers[0]
+      verantwortlich = numbers[1]
+      assistent = numbers[2]
+      total = numbers[3]
+    } else if (numbers.length === 3) {
+      // Minimal format
+      minimum = numbers[0]
+      verantwortlich = numbers[1]
+      total = numbers[2]
+    } else if (numbers.length === 2) {
+      minimum = numbers[0]
+      total = numbers[1]
+    }
+
+    return {
+      name,
+      minimum,
+      verantwortlich,
+      instruierend,
+      assistent,
+      total: Math.max(total, verantwortlich, instruierend, assistent)
+    }
+
+  } catch (error) {
+    console.error('Error parsing procedure line:', line, error)
+    return null
   }
 }
