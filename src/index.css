@@ -75,6 +75,13 @@
     --radius: 8px;
     --radius-medical: 12px;
     --radius-progress: 16px;
+
+    /* Progress Colors */
+    --progress-complete: 155 55% 50%; /* Success green */
+    --progress-partial: 35 100% 64%; /* Warning amber */
+    --progress-pending: 210 15% 58%; /* Muted gray */
+    --swiss-gray: 210 15% 96%; /* Light gray background */
+    --medical-primary: 195 100% 18%; /* Same as primary */
   }
 
   .dark {
@@ -190,11 +197,34 @@
     border-radius: var(--radius-progress);
   }
 
+
   /* Activity Ring Colors */
   .ring-mint { stroke: hsl(var(--activity-mint)); }
   .ring-coral { stroke: hsl(var(--activity-coral)); }
   .ring-lavender { stroke: hsl(var(--activity-lavender)); }
   .ring-amber { stroke: hsl(var(--activity-amber)); }
+
+  /* Progress stroke colors */
+  .stroke-progress-complete { stroke: hsl(var(--progress-complete)); }
+  .stroke-progress-partial { stroke: hsl(var(--progress-partial)); }
+  .stroke-progress-pending { stroke: hsl(var(--progress-pending)); }
+
+  /* Background progress colors */
+  .bg-progress-complete { background-color: hsl(var(--progress-complete)); }
+  .bg-progress-partial { background-color: hsl(var(--progress-partial)); }
+  .bg-progress-pending { background-color: hsl(var(--progress-pending)); }
+
+  /* Swiss gray background */
+  .bg-swiss-gray { background-color: hsl(var(--swiss-gray)); }
+
+  /* Gradient progress */
+  .bg-gradient-progress { background: var(--gradient-progress); }
+
+  /* Shadow progress */
+  .shadow-progress { box-shadow: var(--shadow-progress); }
+
+  /* Transition progress */
+  .transition-progress { transition: var(--transition-progress); }
 
   /* Text Colors for Activity Rings */
   .text-activity-mint { color: hsl(var(--activity-mint)); }

@@ -80,7 +80,7 @@ export const InteractiveProgressDemo: React.FC = () => {
       <div className="flex justify-center gap-4 mb-8">
         <Button
           onClick={startDemo}
-          variant="medical"
+          variant="default"
           size="lg"
           className="gap-2"
           disabled={isAnimating}
@@ -127,7 +127,7 @@ export const InteractiveProgressDemo: React.FC = () => {
               key={level.level}
               className={`medical-card p-6 cursor-pointer transition-all duration-300 ${
                 selectedLevel === level.level 
-                  ? 'ring-2 ring-medical-primary shadow-medical scale-105' 
+                  ? 'ring-2 ring-primary shadow-card-hover scale-105' 
                   : 'hover:shadow-card'
               }`}
               onClick={() => setSelectedLevel(
@@ -138,7 +138,7 @@ export const InteractiveProgressDemo: React.FC = () => {
                 <Badge variant={getPGYBadgeVariant(progress)} className="text-sm font-semibold">
                   PGY{level.level}
                 </Badge>
-                <span className="text-2xl font-bold text-medical-primary">
+                <span className="text-2xl font-bold text-primary">
                   {Math.round(displayProgress)}%
                 </span>
               </div>
@@ -176,7 +176,7 @@ export const InteractiveProgressDemo: React.FC = () => {
 
       {/* Selected Level Details */}
       {selectedLevel && (
-        <Card className="medical-card p-6 bg-gradient-hero">
+        <Card className="medical-card p-6 hero-gradient">
           <div className="text-center">
             <h4 className="text-xl font-bold mb-4 text-card-foreground">
               {pgyData.find(l => l.level === selectedLevel)?.title} - Detailansicht
@@ -186,7 +186,7 @@ export const InteractiveProgressDemo: React.FC = () => {
               absolvierten Kursen und fehlenden Anforderungen angezeigt.
             </p>
             <div className="flex justify-center gap-4">
-              <Button variant="medical" size="sm">
+              <Button variant="default" size="sm">
                 Prozeduren anzeigen
               </Button>
               <Button variant="secondary" size="sm">

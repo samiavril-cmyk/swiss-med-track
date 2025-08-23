@@ -54,33 +54,31 @@ export const HeroSection: React.FC = () => {
             
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <Button variant="medical" size="xl" className="gap-2 shadow-medical" asChild>
-                <a href="/dashboard">
-                  Als Resident starten
-                  <ArrowRight className="w-5 h-5" />
-                </a>
-              </Button>
-              <Button variant="secondary" size="xl" className="gap-2">
-                <BookOpen className="w-5 h-5" />
-                Demo ansehen
-              </Button>
-              <Button variant="outline" size="xl">
-                Kurs anbieten
-              </Button>
+            <Button variant="default" size="lg" className="gap-2 shadow-card-hover">
+              Als Resident starten
+              <ArrowRight className="w-5 h-5" />
+            </Button>
+            <Button variant="secondary" size="lg" className="gap-2">
+              <BookOpen className="w-5 h-5" />
+              Demo ansehen
+            </Button>
+            <Button variant="outline" size="lg">
+              Kurs anbieten
+            </Button>
             </div>
             
             {/* Trust Indicators */}
             <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-progress-complete" />
+                <CheckCircle className="w-4 h-4 text-activity-mint" />
                 <span>FMH-zertifiziert</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-progress-complete" />
+                <CheckCircle className="w-4 h-4 text-activity-mint" />
                 <span>DSGVO-konform</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-progress-complete" />
+                <CheckCircle className="w-4 h-4 text-activity-mint" />
                 <span>500+ Residents</span>
               </div>
             </div>
@@ -107,12 +105,12 @@ export const HeroSection: React.FC = () => {
       </div>
       
       {/* Features Grid */}
-      <div className="bg-swiss-gray/30">
+      <div className="bg-muted/30">
         <div className="container mx-auto px-4 py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
               <Card key={index} className="medical-card p-6 text-center">
-                <div className="w-12 h-12 bg-gradient-medical rounded-medical flex items-center justify-center mx-auto mb-4">
+                <div className="w-12 h-12 bg-primary rounded-medical flex items-center justify-center mx-auto mb-4">
                   <feature.icon className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <h3 className="font-semibold text-card-foreground mb-2">
