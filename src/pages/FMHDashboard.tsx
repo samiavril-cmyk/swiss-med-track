@@ -15,12 +15,14 @@ import {
   TrendingUp,
   Users,
   Plus,
-  Download
+  Download,
+  Upload
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { FMHModuleDetail } from '@/components/FMHModuleDetail';
 import { ProcedureQuickAdd } from '@/components/ProcedureQuickAdd';
 import { GapAnalysis } from '@/components/GapAnalysis';
+import { PDFUploadModal } from '@/components/PDFUploadModal';
 
 interface ModuleProgress {
   module_name: string;
@@ -46,6 +48,7 @@ export const FMHDashboard: React.FC = () => {
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [showPDFUpload, setShowPDFUpload] = useState(false);
   const [userPgyLevel, setUserPgyLevel] = useState<number>(4);
 
   useEffect(() => {
@@ -174,6 +177,15 @@ export const FMHDashboard: React.FC = () => {
             >
               <Plus className="w-4 h-4" />
               Prozedur erfassen
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2"
+              onClick={() => setShowPDFUpload(true)}
+            >
+              <Upload className="w-4 h-4" />
+              PDF Upload
             </Button>
             <Button variant="outline" size="sm" className="gap-2">
               <Download className="w-4 h-4" />
@@ -313,6 +325,13 @@ export const FMHDashboard: React.FC = () => {
             }}
           />
         )}
+
+        {/* PDF Upload Modal */}
+        <PDFUploadModal
+          open={showPDFUpload}
+          onOpenChange={setShowPDFUpload}
+          onSuccess={loadModulesAndProgress}
+        />
       </main>
     </div>
   );
