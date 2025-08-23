@@ -189,7 +189,7 @@ export const InteractiveProgressDemo: React.FC = () => {
               <Button variant="medical" size="sm">
                 Prozeduren anzeigen
               </Button>
-              <Button variant="swiss" size="sm">
+              <Button variant="secondary" size="sm">
                 Passende Kurse finden
               </Button>
             </div>

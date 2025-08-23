@@ -170,10 +170,10 @@ export const FMHDashboard: React.FC = () => {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-card-foreground mb-2">
+            <h1 className="text-medical-title text-card-foreground mb-2">
               FMH Chirurgie Tracking
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-medical-subtitle">
               Überwachung Ihres FMH-konformen Ausbildungsfortschritts - PGY {userPgyLevel}
             </p>
           </div>
@@ -209,12 +209,12 @@ export const FMHDashboard: React.FC = () => {
         </div>
 
         {/* FMH Module Rings */}
-        <Card className="medical-card p-8 mb-8">
+        <div className="medical-card-elegant p-8 mb-8">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-card-foreground mb-2">
               FMH Module Progress
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-text-secondary">
               Gewichtete Erfüllung der FMH-Mindestanforderungen pro Modul
             </p>
           </div>
@@ -250,7 +250,7 @@ export const FMHDashboard: React.FC = () => {
               );
             })}
           </div>
-        </Card>
+        </div>
 
         {/* Module Detail View */}
         {selectedModule && (
