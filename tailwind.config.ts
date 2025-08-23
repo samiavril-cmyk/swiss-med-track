@@ -25,12 +25,21 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				
-				/* Medical Design System Colors */
+				/* Medical Aurora Color System */
 				medical: {
 					primary: 'hsl(var(--medical-primary))',
 					'primary-light': 'hsl(var(--medical-primary-light))',
 					'primary-dark': 'hsl(var(--medical-primary-dark))'
 				},
+
+				/* Activity Ring Colors */
+				activity: {
+					mint: 'hsl(var(--activity-mint))',
+					coral: 'hsl(var(--activity-coral))',
+					lavender: 'hsl(var(--activity-lavender))',
+					amber: 'hsl(var(--activity-amber))'
+				},
+
 				swiss: {
 					blue: 'hsl(var(--swiss-blue))',
 					'blue-foreground': 'hsl(var(--swiss-blue-foreground))',
@@ -73,6 +82,7 @@ export default {
 			backgroundImage: {
 				'gradient-medical': 'var(--gradient-medical)',
 				'gradient-progress': 'var(--gradient-progress)',
+				'gradient-aurora': 'var(--gradient-aurora)',
 				'gradient-hero': 'var(--gradient-hero)'
 			},
 			boxShadow: {

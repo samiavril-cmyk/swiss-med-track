@@ -11,23 +11,43 @@ interface ActivityRingProps {
   showPercentage?: boolean;
   className?: string;
   onClick?: () => void;
+  variant?: 'mint' | 'coral' | 'lavender' | 'amber';
 }
 
 export const ActivityRing: React.FC<ActivityRingProps> = ({
   progress,
   size = 80,
   strokeWidth = 6,
-  color = 'hsl(var(--medical-primary))',
+  color,
   backgroundColor = 'hsl(var(--swiss-gray))',
   label,
   showPercentage = false,
   className,
-  onClick
+  onClick,
+  variant = 'mint'
 }) => {
   const clampedProgress = Math.min(Math.max(progress, 0), 100);
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const offset = circumference - (clampedProgress / 100) * circumference;
+
+  // Get color based on variant
+  const getVariantColor = () => {
+    if (color) return color;
+    
+    switch (variant) {
+      case 'mint':
+        return 'hsl(var(--activity-mint))';
+      case 'coral':
+        return 'hsl(var(--activity-coral))';
+      case 'lavender':
+        return 'hsl(var(--activity-lavender))';
+      case 'amber':
+        return 'hsl(var(--activity-amber))';
+      default:
+        return 'hsl(var(--activity-mint))';
+    }
+  };
 
   return (
     <div 
@@ -58,7 +78,7 @@ export const ActivityRing: React.FC<ActivityRingProps> = ({
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke={color}
+            stroke={getVariantColor()}
             strokeWidth={strokeWidth}
             fill="transparent"
             strokeDasharray={`${circumference} ${circumference}`}

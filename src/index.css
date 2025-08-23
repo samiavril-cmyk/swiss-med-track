@@ -6,61 +6,70 @@
 
 @layer base {
   :root {
-    /* Core Medical Palette */
-    --background: 0 0% 100%;
-    --foreground: 214 15% 18%;
+    /* Medical Aurora Color Scheme */
+    --background: 0 0% 98%; /* Soft Off-White #FAFAFA */
+    --foreground: 210 22% 22%; /* Charcoal #2D3748 */
 
-    /* Medical Blue Theme */
-    --medical-primary: 210 89% 44%;
-    --medical-primary-light: 210 89% 92%;
-    --medical-primary-dark: 210 89% 32%;
-    
-    /* Swiss Precision Colors */
-    --swiss-blue: 210 100% 94%;
-    --swiss-blue-foreground: 210 89% 24%;
-    --swiss-gray: 210 11% 96%;
-    --swiss-gray-foreground: 214 15% 45%;
+    /* Primary: Deep Teal */
+    --primary: 195 71% 21%; /* Deep Teal #0F4C5C */
+    --primary-foreground: 0 0% 98%;
+    --primary-hover: 195 71% 18%;
+
+    /* Secondary: Mint Green */
+    --secondary: 177 56% 51%; /* Mint Green #36CFC9 */
+    --secondary-foreground: 0 0% 100%;
+    --secondary-hover: 177 56% 45%; /* Darker mint #2BB8B2 */
+
+    /* Medical Aurora Colors */
+    --medical-primary: 195 71% 21%; /* Deep Teal */
+    --medical-primary-light: 195 71% 85%;
+    --medical-primary-dark: 195 71% 18%;
+
+    /* Activity Ring Colors */
+    --activity-mint: 177 56% 51%; /* Mint Green for OPs */
+    --activity-coral: 0 100% 70%; /* Coral #FF6B6B for courses */
+    --activity-lavender: 259 73% 63%; /* Lavender #9B5DE5 for mandatory */
+    --activity-amber: 35 100% 64%; /* Golden Amber #FFB347 for awards */
+
+    /* Swiss Professional Colors */
+    --swiss-blue: 195 71% 21%; /* Deep Teal */
+    --swiss-blue-foreground: 0 0% 98%;
+    --swiss-gray: 214 20% 69%; /* Cool Gray #A0AEC0 */
+    --swiss-gray-foreground: 210 22% 22%;
 
     /* Progress & Status Colors */
-    --progress-complete: 142 71% 45%;
-    --progress-partial: 43 96% 56%;
-    --progress-pending: 210 11% 85%;
-    --success: 142 71% 45%;
-    --warning: 43 96% 56%;
+    --progress-complete: 177 56% 51%; /* Mint Green */
+    --progress-partial: 0 100% 70%; /* Coral */
+    --progress-pending: 214 20% 69%; /* Cool Gray */
+    --success: 177 56% 51%;
+    --warning: 35 100% 64%;
     --error: 0 72% 51%;
 
     /* Semantic Design Tokens */
     --card: 0 0% 100%;
-    --card-foreground: 214 15% 18%;
-    --card-border: 210 11% 90%;
+    --card-foreground: 210 22% 22%;
+    --card-border: 214 20% 89%;
 
-    --primary: 210 89% 44%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 210 89% 38%;
+    --muted: 214 20% 89%;
+    --muted-foreground: 214 20% 50%;
 
-    --secondary: 210 11% 96%;
-    --secondary-foreground: 214 15% 18%;
-    --secondary-hover: 210 11% 90%;
+    --accent: 177 56% 51%; /* Mint Green */
+    --accent-foreground: 0 0% 100%;
 
-    --muted: 210 11% 96%;
-    --muted-foreground: 214 15% 45%;
+    --border: 214 20% 89%;
+    --input: 214 20% 89%;
+    --ring: 195 71% 21%;
 
-    --accent: 210 100% 94%;
-    --accent-foreground: 210 89% 24%;
-
-    --border: 210 11% 90%;
-    --input: 210 11% 90%;
-    --ring: 210 89% 44%;
-
-    /* Medical Gradients */
-    --gradient-medical: linear-gradient(135deg, hsl(var(--medical-primary)), hsl(var(--medical-primary-dark)));
-    --gradient-progress: linear-gradient(90deg, hsl(var(--progress-complete)), hsl(var(--medical-primary)));
-    --gradient-hero: linear-gradient(135deg, hsl(var(--swiss-blue)), hsl(var(--background)));
+    /* Medical Aurora Gradients */
+    --gradient-medical: linear-gradient(135deg, hsl(195, 71%, 21%), hsl(177, 56%, 51%));
+    --gradient-progress: linear-gradient(90deg, hsl(177, 56%, 51%), hsl(195, 71%, 21%));
+    --gradient-aurora: linear-gradient(135deg, hsl(177, 56%, 51%), hsl(259, 73%, 63%), hsl(35, 100%, 64%));
+    --gradient-hero: linear-gradient(135deg, hsl(195, 71%, 21%), hsl(0, 0%, 98%));
 
     /* Shadows & Effects */
-    --shadow-medical: 0 4px 20px -2px hsl(var(--medical-primary) / 0.1);
-    --shadow-card: 0 2px 8px -1px hsl(210 11% 85% / 0.4);
-    --shadow-progress: 0 2px 12px -2px hsl(var(--medical-primary) / 0.3);
+    --shadow-medical: 0 4px 20px -2px hsl(195 71% 21% / 0.15);
+    --shadow-card: 0 2px 8px -1px hsl(214 20% 69% / 0.1);
+    --shadow-progress: 0 2px 12px -2px hsl(177 56% 51% / 0.25);
 
     /* Animations */
     --transition-medical: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -71,44 +80,44 @@
   }
 
   .dark {
-    --background: 214 32% 7%;
-    --foreground: 210 40% 95%;
+    --background: 210 22% 12%; /* Dark Charcoal */
+    --foreground: 0 0% 98%;
 
-    --medical-primary: 210 89% 55%;
-    --medical-primary-light: 210 89% 15%;
-    --medical-primary-dark: 210 89% 42%;
-    
-    --swiss-blue: 210 30% 12%;
-    --swiss-blue-foreground: 210 89% 70%;
-    --swiss-gray: 214 25% 10%;
-    --swiss-gray-foreground: 214 15% 65%;
+    --primary: 177 56% 51%; /* Mint Green in dark */
+    --primary-foreground: 210 22% 12%;
+    --primary-hover: 177 56% 45%;
+
+    --secondary: 195 71% 30%; /* Lighter teal in dark */
+    --secondary-foreground: 0 0% 98%;
+    --secondary-hover: 195 71% 25%;
+
+    --medical-primary: 177 56% 51%;
+    --medical-primary-light: 177 56% 25%;
+    --medical-primary-dark: 177 56% 45%;
+
+    --swiss-blue: 177 56% 51%;
+    --swiss-blue-foreground: 210 22% 12%;
+    --swiss-gray: 214 20% 40%;
+    --swiss-gray-foreground: 214 20% 70%;
 
     --card: 214 25% 10%;
-    --card-foreground: 210 40% 95%;
+    --card-foreground: 0 0% 98%;
     --card-border: 214 25% 18%;
-
-    --primary: 210 89% 55%;
-    --primary-foreground: 214 32% 7%;
-    --primary-hover: 210 89% 48%;
-
-    --secondary: 214 25% 12%;
-    --secondary-foreground: 210 40% 95%;
-    --secondary-hover: 214 25% 18%;
 
     --muted: 214 25% 12%;
     --muted-foreground: 214 15% 65%;
 
-    --accent: 210 30% 12%;
-    --accent-foreground: 210 89% 70%;
+    --accent: 177 56% 51%;
+    --accent-foreground: 210 22% 12%;
 
     --border: 214 25% 18%;
     --input: 214 25% 18%;
-    --ring: 210 89% 55%;
+    --ring: 177 56% 51%;
 
-    --gradient-medical: linear-gradient(135deg, hsl(var(--medical-primary)), hsl(var(--medical-primary-dark)));
-    --gradient-hero: linear-gradient(135deg, hsl(var(--swiss-blue)), hsl(var(--background)));
+    --gradient-medical: linear-gradient(135deg, hsl(177, 56%, 51%), hsl(195, 71%, 30%));
+    --gradient-hero: linear-gradient(135deg, hsl(195, 71%, 21%), hsl(210, 22%, 12%));
 
-    --shadow-medical: 0 4px 20px -2px hsl(var(--medical-primary) / 0.2);
+    --shadow-medical: 0 4px 20px -2px hsl(177 56% 51% / 0.2);
     --shadow-card: 0 2px 8px -1px hsl(214 25% 5% / 0.6);
   }
 }

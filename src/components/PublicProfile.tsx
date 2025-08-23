@@ -82,7 +82,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
         id: 'courses',
         label: 'Kurse',
         progress: activityData.courses.total > 0 ? (activityData.courses.completed / activityData.courses.total) * 100 : 0,
-        color: 'hsl(var(--medical-primary))',
+        variant: 'coral' as const,
         icon: BookOpen
       });
       
@@ -90,7 +90,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
         id: 'mandatory',
         label: 'Pflicht',
         progress: activityData.courses.mandatory_total > 0 ? (activityData.courses.mandatory_completed / activityData.courses.mandatory_total) * 100 : 0,
-        color: 'hsl(var(--progress-complete))',
+        variant: 'lavender' as const,
         icon: BookOpen
       });
     }
@@ -100,7 +100,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
         id: 'procedures',
         label: 'OPs',
         progress: activityData.procedures.required > 0 ? (activityData.procedures.completed / activityData.procedures.required) * 100 : 0,
-        color: 'hsl(var(--swiss-blue))',
+        variant: 'mint' as const,
         icon: Stethoscope
       });
     }
@@ -110,7 +110,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
         id: 'publications',
         label: 'Papers',
         progress: Math.min(activityData.publications.count * 20, 100), // 5 publications = 100%
-        color: 'hsl(var(--progress-partial))',
+        variant: 'amber' as const,
         icon: FileText
       });
     }
@@ -209,7 +209,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
               <ActivityRing
                 key={ring.id}
                 progress={ring.progress}
-                color={ring.color}
+                variant={ring.variant}
                 label={ring.label}
                 showPercentage
                 onClick={() => setSelectedActivity(selectedActivity === ring.id ? null : ring.id)}
@@ -228,14 +228,14 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
               <div>
                 <h3 className="text-lg font-semibold mb-4">Absolvierte Kurse</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-lg bg-muted">
-                    <div className="text-2xl font-bold text-medical-primary">
+                  <div className="p-4 rounded-lg bg-activity-coral/10 border border-activity-coral/20">
+                    <div className="text-2xl font-bold text-activity-coral">
                       {activityData.courses.completed}
                     </div>
                     <div className="text-sm text-muted-foreground">von {activityData.courses.total} Kursen</div>
                   </div>
-                  <div className="p-4 rounded-lg bg-muted">
-                    <div className="text-2xl font-bold text-progress-complete">
+                  <div className="p-4 rounded-lg bg-activity-lavender/10 border border-activity-lavender/20">
+                    <div className="text-2xl font-bold text-activity-lavender">
                       {activityData.courses.mandatory_completed}
                     </div>
                     <div className="text-sm text-muted-foreground">von {activityData.courses.mandatory_total} Pflichtkursen</div>
@@ -247,8 +247,8 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
             {selectedActivity === 'procedures' && profile.public_fields.procedures && (
               <div>
                 <h3 className="text-lg font-semibold mb-4">Chirurgische Eingriffe</h3>
-                <div className="p-4 rounded-lg bg-muted">
-                  <div className="text-2xl font-bold text-swiss-blue">
+                <div className="p-4 rounded-lg bg-activity-mint/10 border border-activity-mint/20">
+                  <div className="text-2xl font-bold text-activity-mint">
                     {activityData.procedures.completed}
                   </div>
                   <div className="text-sm text-muted-foreground">
@@ -263,8 +263,8 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                 <h3 className="text-lg font-semibold mb-4">Publikationen</h3>
                 <div className="space-y-3">
                   {activityData.publications.recent.map((pub, index) => (
-                    <div key={index} className="p-4 rounded-lg bg-muted">
-                      <h4 className="font-medium">{pub.title}</h4>
+                    <div key={index} className="p-4 rounded-lg bg-activity-amber/10 border border-activity-amber/20">
+                      <h4 className="font-medium text-activity-amber">{pub.title}</h4>
                       <div className="text-sm text-muted-foreground mt-1">
                         {pub.journal && <span>{pub.journal}</span>}
                         {pub.publication_date && (
@@ -314,9 +314,9 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {activityData.awards.map((award, index) => (
-                <div key={index} className="p-4 rounded-lg bg-gradient-to-r from-progress-complete/10 to-transparent border border-progress-complete/20">
+                <div key={index} className="p-4 rounded-lg bg-gradient-to-r from-activity-amber/20 to-activity-coral/10 border border-activity-amber/30">
                   <div className="flex items-start gap-3">
-                    <Award className="w-5 h-5 text-progress-complete mt-0.5" />
+                    <Award className="w-5 h-5 text-activity-amber mt-0.5" />
                     <div>
                       <h4 className="font-medium">{award.title}</h4>
                       {award.organization && (
