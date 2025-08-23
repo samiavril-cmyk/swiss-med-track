@@ -78,6 +78,155 @@ export type Database = {
           },
         ]
       }
+      awards: {
+        Row: {
+          awarded_date: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          organization: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          awarded_date?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          organization?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          awarded_date?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          organization?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      course_enrollments: {
+        Row: {
+          certificate_url: string | null
+          completion_date: string | null
+          course_id: string | null
+          created_at: string
+          id: string
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          certificate_url?: string | null
+          completion_date?: string | null
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          certificate_url?: string | null
+          completion_date?: string | null
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          capacity: number | null
+          city: string | null
+          cme_points: number | null
+          country: string | null
+          cover_image_url: string | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          id: string
+          is_mandatory: boolean | null
+          language: string | null
+          modality: string | null
+          points: number | null
+          price: number | null
+          provider_id: string
+          requirements: string | null
+          specialty: string | null
+          status: string | null
+          title: string
+          updated_at: string
+          venue: string | null
+        }
+        Insert: {
+          capacity?: number | null
+          city?: string | null
+          cme_points?: number | null
+          country?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          is_mandatory?: boolean | null
+          language?: string | null
+          modality?: string | null
+          points?: number | null
+          price?: number | null
+          provider_id: string
+          requirements?: string | null
+          specialty?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+          venue?: string | null
+        }
+        Update: {
+          capacity?: number | null
+          city?: string | null
+          cme_points?: number | null
+          country?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          is_mandatory?: boolean | null
+          language?: string | null
+          modality?: string | null
+          points?: number | null
+          price?: number | null
+          provider_id?: string
+          requirements?: string | null
+          specialty?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+          venue?: string | null
+        }
+        Relationships: []
+      }
       group_members: {
         Row: {
           group_id: string
@@ -143,15 +292,157 @@ export type Database = {
         }
         Relationships: []
       }
+      procedure_categories: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          sort_index: number | null
+          title_de: string
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          sort_index?: number | null
+          title_de: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          sort_index?: number | null
+          title_de?: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      procedure_logs: {
+        Row: {
+          case_id: string | null
+          created_at: string
+          hospital: string | null
+          id: string
+          notes: string | null
+          performed_date: string
+          procedure_id: string | null
+          role_in_surgery: string | null
+          supervisor: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          case_id?: string | null
+          created_at?: string
+          hospital?: string | null
+          id?: string
+          notes?: string | null
+          performed_date: string
+          procedure_id?: string | null
+          role_in_surgery?: string | null
+          supervisor?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          case_id?: string | null
+          created_at?: string
+          hospital?: string | null
+          id?: string
+          notes?: string | null
+          performed_date?: string
+          procedure_id?: string | null
+          role_in_surgery?: string | null
+          supervisor?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "procedure_logs_procedure_id_fkey"
+            columns: ["procedure_id"]
+            isOneToOne: false
+            referencedRelation: "procedures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      procedures: {
+        Row: {
+          active: boolean | null
+          category_id: string | null
+          code: string
+          created_at: string
+          fmh_ref: string | null
+          id: string
+          min_required_by_pgy: Json | null
+          notes: string | null
+          pgy_recommended: number[] | null
+          tags: string[] | null
+          title_de: string
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          category_id?: string | null
+          code: string
+          created_at?: string
+          fmh_ref?: string | null
+          id?: string
+          min_required_by_pgy?: Json | null
+          notes?: string | null
+          pgy_recommended?: number[] | null
+          tags?: string[] | null
+          title_de: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          category_id?: string | null
+          code?: string
+          created_at?: string
+          fmh_ref?: string | null
+          id?: string
+          min_required_by_pgy?: Json | null
+          notes?: string | null
+          pgy_recommended?: number[] | null
+          tags?: string[] | null
+          title_de?: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "procedures_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "procedure_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
           email: string
           full_name: string
+          handle: string | null
           id: string
           institution: string | null
+          is_public: boolean | null
+          linkedin_url: string | null
+          pgy_level: number | null
+          public_fields: Json | null
           role: string | null
+          specialty: string | null
           updated_at: string
           user_id: string
         }
@@ -160,9 +451,15 @@ export type Database = {
           created_at?: string
           email: string
           full_name: string
+          handle?: string | null
           id?: string
           institution?: string | null
+          is_public?: boolean | null
+          linkedin_url?: string | null
+          pgy_level?: number | null
+          public_fields?: Json | null
           role?: string | null
+          specialty?: string | null
           updated_at?: string
           user_id: string
         }
@@ -171,9 +468,54 @@ export type Database = {
           created_at?: string
           email?: string
           full_name?: string
+          handle?: string | null
           id?: string
           institution?: string | null
+          is_public?: boolean | null
+          linkedin_url?: string | null
+          pgy_level?: number | null
+          public_fields?: Json | null
           role?: string | null
+          specialty?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      publications: {
+        Row: {
+          created_at: string
+          doi: string | null
+          id: string
+          journal: string | null
+          link: string | null
+          notes: string | null
+          publication_date: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          doi?: string | null
+          id?: string
+          journal?: string | null
+          link?: string | null
+          notes?: string | null
+          publication_date?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          doi?: string | null
+          id?: string
+          journal?: string | null
+          link?: string | null
+          notes?: string | null
+          publication_date?: string | null
+          title?: string
           updated_at?: string
           user_id?: string
         }
