@@ -23,11 +23,11 @@ export const Header: React.FC = () => {
           <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
             Features
           </a>
-          <a href="#demo" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
-            Demo
+          <a href="/courses" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
+            Courses
           </a>
-          <a href="#pricing" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
-            Preise
+          <a href="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
+            Dashboard
           </a>
           <a href="#contact" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
             Kontakt

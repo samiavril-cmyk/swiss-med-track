@@ -155,9 +155,191 @@ export type Database = {
           },
         ]
       }
+      course_materials: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          description: string | null
+          file_size: number | null
+          file_type: string | null
+          file_url: string | null
+          id: string
+          is_preview: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          description?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          is_preview?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          description?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          is_preview?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_materials_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_reviews: {
+        Row: {
+          comment: string | null
+          course_id: string | null
+          created_at: string
+          id: string
+          rating: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          comment?: string | null
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_reviews_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_sessions: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          current_participants: number
+          end_date: string
+          id: string
+          instructor_notes: string | null
+          location: string | null
+          max_participants: number | null
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          current_participants?: number
+          end_date: string
+          id?: string
+          instructor_notes?: string | null
+          location?: string | null
+          max_participants?: number | null
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          current_participants?: number
+          end_date?: string
+          id?: string
+          instructor_notes?: string | null
+          location?: string | null
+          max_participants?: number | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_sessions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_videos: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          id: string
+          is_preview: boolean
+          order_index: number
+          video_id: string | null
+          video_type: string
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          is_preview?: boolean
+          order_index?: number
+          video_id?: string | null
+          video_type?: string
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          is_preview?: boolean
+          order_index?: number
+          video_id?: string | null
+          video_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_videos_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_videos_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
+          average_rating: number | null
           capacity: number | null
+          certificate_template_url: string | null
           city: string | null
           cme_points: number | null
           country: string | null
@@ -165,7 +347,10 @@ export type Database = {
           created_at: string
           currency: string | null
           description: string | null
+          difficulty_level: string | null
+          has_certificate: boolean | null
           id: string
+          is_featured: boolean | null
           is_mandatory: boolean | null
           language: string | null
           modality: string | null
@@ -175,12 +360,16 @@ export type Database = {
           requirements: string | null
           specialty: string | null
           status: string | null
+          tags: string[] | null
           title: string
+          total_reviews: number | null
           updated_at: string
           venue: string | null
         }
         Insert: {
+          average_rating?: number | null
           capacity?: number | null
+          certificate_template_url?: string | null
           city?: string | null
           cme_points?: number | null
           country?: string | null
@@ -188,7 +377,10 @@ export type Database = {
           created_at?: string
           currency?: string | null
           description?: string | null
+          difficulty_level?: string | null
+          has_certificate?: boolean | null
           id?: string
+          is_featured?: boolean | null
           is_mandatory?: boolean | null
           language?: string | null
           modality?: string | null
@@ -198,12 +390,16 @@ export type Database = {
           requirements?: string | null
           specialty?: string | null
           status?: string | null
+          tags?: string[] | null
           title: string
+          total_reviews?: number | null
           updated_at?: string
           venue?: string | null
         }
         Update: {
+          average_rating?: number | null
           capacity?: number | null
+          certificate_template_url?: string | null
           city?: string | null
           cme_points?: number | null
           country?: string | null
@@ -211,7 +407,10 @@ export type Database = {
           created_at?: string
           currency?: string | null
           description?: string | null
+          difficulty_level?: string | null
+          has_certificate?: boolean | null
           id?: string
+          is_featured?: boolean | null
           is_mandatory?: boolean | null
           language?: string | null
           modality?: string | null
@@ -221,7 +420,9 @@ export type Database = {
           requirements?: string | null
           specialty?: string | null
           status?: string | null
+          tags?: string[] | null
           title?: string
+          total_reviews?: number | null
           updated_at?: string
           venue?: string | null
         }
@@ -291,6 +492,128 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      invoices: {
+        Row: {
+          amount: number
+          billing_address: Json | null
+          created_at: string
+          currency: string
+          due_date: string | null
+          id: string
+          invoice_number: string
+          paid_date: string | null
+          payment_id: string | null
+          pdf_url: string | null
+          status: string
+          total_amount: number
+          updated_at: string
+          user_id: string | null
+          vat_amount: number | null
+          vat_rate: number | null
+        }
+        Insert: {
+          amount: number
+          billing_address?: Json | null
+          created_at?: string
+          currency?: string
+          due_date?: string | null
+          id?: string
+          invoice_number: string
+          paid_date?: string | null
+          payment_id?: string | null
+          pdf_url?: string | null
+          status?: string
+          total_amount: number
+          updated_at?: string
+          user_id?: string | null
+          vat_amount?: number | null
+          vat_rate?: number | null
+        }
+        Update: {
+          amount?: number
+          billing_address?: Json | null
+          created_at?: string
+          currency?: string
+          due_date?: string | null
+          id?: string
+          invoice_number?: string
+          paid_date?: string | null
+          payment_id?: string | null
+          pdf_url?: string | null
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          user_id?: string | null
+          vat_amount?: number | null
+          vat_rate?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          course_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          payment_method: string | null
+          session_id: string | null
+          status: string
+          stripe_payment_intent_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          course_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          payment_method?: string | null
+          session_id?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          course_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          payment_method?: string | null
+          session_id?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "course_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       procedure_categories: {
         Row: {
@@ -713,6 +1036,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_invoice_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
