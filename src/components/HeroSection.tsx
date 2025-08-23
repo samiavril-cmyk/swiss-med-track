@@ -71,7 +71,7 @@ export const HeroSection: React.FC = () => {
             <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-activity-mint" />
-                <span>FMH-zertifiziert</span>
+                <span>FMH optimiert</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-activity-mint" />
