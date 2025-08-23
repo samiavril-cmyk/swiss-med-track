@@ -7,6 +7,7 @@ import { Dashboard } from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
+import { FMHDashboard } from "./pages/FMHDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
         <Route path="/courses" element={<Courses />} />
         <Route path="/courses/:id" element={<CourseDetail />} />
         <Route path="/profile/:handle" element={<Profile />} />
+        <Route path="/fmh" element={<FMHDashboard />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

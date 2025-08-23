@@ -620,28 +620,37 @@ export type Database = {
           created_at: string
           id: string
           key: string
+          minimum_required: number | null
+          module_type: string | null
           sort_index: number | null
           title_de: string
           title_en: string | null
           updated_at: string
+          weighted_scoring: boolean | null
         }
         Insert: {
           created_at?: string
           id?: string
           key: string
+          minimum_required?: number | null
+          module_type?: string | null
           sort_index?: number | null
           title_de: string
           title_en?: string | null
           updated_at?: string
+          weighted_scoring?: boolean | null
         }
         Update: {
           created_at?: string
           id?: string
           key?: string
+          minimum_required?: number | null
+          module_type?: string | null
           sort_index?: number | null
           title_de?: string
           title_en?: string | null
           updated_at?: string
+          weighted_scoring?: boolean | null
         }
         Relationships: []
       }
@@ -658,6 +667,7 @@ export type Database = {
           supervisor: string | null
           updated_at: string
           user_id: string
+          weighted_score: number | null
         }
         Insert: {
           case_id?: string | null
@@ -671,6 +681,7 @@ export type Database = {
           supervisor?: string | null
           updated_at?: string
           user_id: string
+          weighted_score?: number | null
         }
         Update: {
           case_id?: string | null
@@ -684,6 +695,7 @@ export type Database = {
           supervisor?: string | null
           updated_at?: string
           user_id?: string
+          weighted_score?: number | null
         }
         Relationships: [
           {
@@ -694,6 +706,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      procedure_role_weights: {
+        Row: {
+          created_at: string
+          id: string
+          role_type: string
+          updated_at: string
+          weight_factor: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role_type: string
+          updated_at?: string
+          weight_factor?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role_type?: string
+          updated_at?: string
+          weight_factor?: number
+        }
+        Relationships: []
       }
       procedures: {
         Row: {
@@ -1036,6 +1072,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_weighted_score: {
+        Args: { role_text: string }
+        Returns: number
+      }
       generate_invoice_number: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -1043,6 +1083,18 @@ export type Database = {
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_module_progress: {
+        Args: { module_key: string; user_id_param: string }
+        Returns: {
+          assistant_count: number
+          instructing_count: number
+          module_name: string
+          progress_percentage: number
+          responsible_count: number
+          total_minimum: number
+          total_weighted_score: number
+        }[]
       }
       get_public_profile: {
         Args: { profile_user_id: string }

@@ -1,0 +1,319 @@
+import React, { useState, useEffect } from 'react';
+import { Header } from '@/components/Header';
+import { ActivityRing } from '@/components/ActivityRing';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Activity, 
+  AlertTriangle, 
+  Calendar, 
+  Settings, 
+  TrendingUp,
+  Users,
+  Plus,
+  Download
+} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { FMHModuleDetail } from '@/components/FMHModuleDetail';
+import { ProcedureQuickAdd } from '@/components/ProcedureQuickAdd';
+import { GapAnalysis } from '@/components/GapAnalysis';
+
+interface ModuleProgress {
+  module_name: string;
+  total_weighted_score: number;
+  total_minimum: number;
+  progress_percentage: number;
+  responsible_count: number;
+  instructing_count: number;
+  assistant_count: number;
+}
+
+interface FMHModule {
+  id: string;
+  key: string;
+  title_de: string;
+  module_type: string;
+  minimum_required: number;
+  progress: ModuleProgress | null;
+}
+
+export const FMHDashboard: React.FC = () => {
+  const [modules, setModules] = useState<FMHModule[]>([]);
+  const [selectedModule, setSelectedModule] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [userPgyLevel, setUserPgyLevel] = useState<number>(4);
+
+  useEffect(() => {
+    loadModulesAndProgress();
+  }, []);
+
+  const loadModulesAndProgress = async () => {
+    try {
+      setLoading(true);
+      
+      // Get user profile for PGY level
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('pgy_level')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (profile?.pgy_level) {
+          setUserPgyLevel(profile.pgy_level);
+        }
+      }
+
+      // Load FMH modules
+      const { data: moduleData, error: moduleError } = await supabase
+        .from('procedure_categories')
+        .select('*')
+        .not('module_type', 'is', null)
+        .order('sort_index');
+
+      if (moduleError) throw moduleError;
+
+      const modulesWithProgress: FMHModule[] = [];
+
+      for (const module of moduleData || []) {
+        if (user) {
+          const { data: progressData } = await supabase
+            .rpc('get_module_progress', {
+              user_id_param: user.id,
+              module_key: module.key
+            });
+
+          modulesWithProgress.push({
+            ...module,
+            progress: progressData?.[0] || null
+          });
+        } else {
+          modulesWithProgress.push({
+            ...module,
+            progress: null
+          });
+        }
+      }
+
+      setModules(modulesWithProgress);
+    } catch (error) {
+      console.error('Error loading modules:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getModuleVariant = (moduleKey: string) => {
+    const variants = {
+      'basis_notfall': 'coral' as const,
+      'basis_allgemein': 'mint' as const, 
+      'viszeralchirurgie': 'lavender' as const,
+      'traumatologie': 'amber' as const,
+      'kombination': 'coral' as const
+    };
+    return variants[moduleKey as keyof typeof variants] || 'mint';
+  };
+
+  const getRoleBalanceStatus = () => {
+    const totalResponsible = modules.reduce((sum, m) => sum + (m.progress?.responsible_count || 0), 0);
+    const totalProcedures = modules.reduce((sum, m) => 
+      sum + (m.progress?.responsible_count || 0) + 
+      (m.progress?.instructing_count || 0) + 
+      (m.progress?.assistant_count || 0), 0);
+    
+    const responsiblePercentage = totalProcedures > 0 ? (totalResponsible / totalProcedures) * 100 : 0;
+    
+    if (responsiblePercentage >= 30) return { status: 'good', color: 'bg-green-500' };
+    if (responsiblePercentage >= 20) return { status: 'warning', color: 'bg-yellow-500' };
+    return { status: 'critical', color: 'bg-red-500' };
+  };
+
+  const roleBalance = getRoleBalanceStatus();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-4 py-8">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      <main className="container mx-auto px-4 py-8">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-card-foreground mb-2">
+              FMH Chirurgie Tracking
+            </h1>
+            <p className="text-muted-foreground">
+              Überwachung Ihres FMH-konformen Ausbildungsfortschritts - PGY {userPgyLevel}
+            </p>
+          </div>
+          
+          <div className="flex gap-3 mt-4 md:mt-0">
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="gap-2"
+              onClick={() => setShowQuickAdd(true)}
+            >
+              <Plus className="w-4 h-4" />
+              Prozedur erfassen
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Download className="w-4 h-4" />
+              Export
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Einstellungen
+            </Button>
+          </div>
+        </div>
+
+        {/* FMH Module Rings */}
+        <Card className="medical-card p-8 mb-8">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-card-foreground mb-2">
+              FMH Module Progress
+            </h2>
+            <p className="text-muted-foreground">
+              Gewichtete Erfüllung der FMH-Mindestanforderungen pro Modul
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 justify-items-center">
+            {modules.map((module) => {
+              const progress = module.progress?.progress_percentage || 0;
+              
+              return (
+                <div key={module.id} className="flex flex-col items-center">
+                  <ActivityRing
+                    progress={progress}
+                    variant={getModuleVariant(module.key)}
+                    size={120}
+                    strokeWidth={8}
+                    label={module.title_de}
+                    showPercentage
+                    onClick={() => setSelectedModule(module.key)}
+                    className="mb-3 transform transition-all duration-300 hover:scale-110 cursor-pointer"
+                  />
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <Activity className="w-4 h-4 text-muted-foreground" />
+                      <Badge variant="outline" className="text-xs">
+                        {module.progress?.total_weighted_score.toFixed(1) || '0'}/{module.minimum_required || '?'}
+                      </Badge>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      V:{module.progress?.responsible_count || 0} I:{module.progress?.instructing_count || 0} A:{module.progress?.assistant_count || 0}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+
+        {/* Module Detail View */}
+        {selectedModule && (
+          <FMHModuleDetail
+            moduleKey={selectedModule}
+            onClose={() => setSelectedModule(null)}
+          />
+        )}
+
+        {/* Key Indicators */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card className="medical-card p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-activity-mint/20 rounded-medical">
+                <TrendingUp className="w-6 h-6 text-activity-mint" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Gesamtfortschritt</p>
+                <p className="text-2xl font-bold text-card-foreground">
+                  {modules.length > 0 
+                    ? Math.round(modules.reduce((sum, m) => sum + (m.progress?.progress_percentage || 0), 0) / modules.length)
+                    : 0}%
+                </p>
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="medical-card p-6">
+            <div className="flex items-center gap-4">
+              <div className={`p-3 ${roleBalance.color}/20 rounded-medical`}>
+                <Users className="w-6 h-6" style={{ color: roleBalance.color.replace('/20', '').replace('bg-', '') }} />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Rollen-Balance</p>
+                <p className="text-2xl font-bold text-card-foreground capitalize">
+                  {roleBalance.status === 'good' ? 'Gut' : roleBalance.status === 'warning' ? 'Achtung' : 'Kritisch'}
+                </p>
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="medical-card p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-activity-coral/20 rounded-medical">
+                <Activity className="w-6 h-6 text-activity-coral" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Eingriffe Total</p>
+                <p className="text-2xl font-bold text-card-foreground">
+                  {modules.reduce((sum, m) => 
+                    sum + (m.progress?.responsible_count || 0) + 
+                    (m.progress?.instructing_count || 0) + 
+                    (m.progress?.assistant_count || 0), 0)}
+                </p>
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="medical-card p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-activity-amber/20 rounded-medical">
+                <Calendar className="w-6 h-6 text-activity-amber" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Aktueller PGY</p>
+                <p className="text-2xl font-bold text-card-foreground">PGY-{userPgyLevel}</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Gap Analysis */}
+        <GapAnalysis modules={modules} userPgyLevel={userPgyLevel} />
+
+        {/* Quick Add Modal */}
+        {showQuickAdd && (
+          <ProcedureQuickAdd
+            onClose={() => setShowQuickAdd(false)}
+            onSuccess={() => {
+              setShowQuickAdd(false);
+              loadModulesAndProgress();
+            }}
+          />
+        )}
+      </main>
+    </div>
+  );
+};
