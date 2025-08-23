@@ -90,9 +90,11 @@ export const PDFUploadModal = ({ open, onOpenChange, onSuccess }: PDFUploadModal
       formData.append('pdf', file);
 
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('Not authenticated');
+      if (!session?.access_token) {
+        throw new Error('No valid session found. Please log in again.');
       }
+
+      console.log('Uploading with session token');
 
       const response = await supabase.functions.invoke('pdf-parser', {
         body: formData,
