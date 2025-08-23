@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
+import { useAuth } from '@/hooks/useAuth';
 import { ActivityRing } from '@/components/ActivityRing';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -44,6 +46,8 @@ interface FMHModule {
 }
 
 export const FMHDashboard: React.FC = () => {
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [modules, setModules] = useState<FMHModule[]>([]);
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,8 +56,14 @@ export const FMHDashboard: React.FC = () => {
   const [userPgyLevel, setUserPgyLevel] = useState<number>(4);
 
   useEffect(() => {
-    loadModulesAndProgress();
-  }, []);
+    if (!authLoading && !user) {
+      navigate('/auth');
+      return;
+    }
+    if (user) {
+      loadModulesAndProgress();
+    }
+  }, [user, authLoading, navigate]);
 
   const loadModulesAndProgress = async () => {
     try {
