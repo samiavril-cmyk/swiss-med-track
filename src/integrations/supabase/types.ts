@@ -493,6 +493,117 @@ export type Database = {
         }
         Relationships: []
       }
+      import_procedure_staging: {
+        Row: {
+          assistant: number | null
+          created_at: string
+          error_message: string | null
+          id: string
+          instructing: number | null
+          match_confidence: number | null
+          match_method: string | null
+          matched_proc_id: string | null
+          minimum: number | null
+          module_name: string
+          proc_name: string
+          responsible: number | null
+          run_id: string
+          status: string
+          total: number | null
+        }
+        Insert: {
+          assistant?: number | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          instructing?: number | null
+          match_confidence?: number | null
+          match_method?: string | null
+          matched_proc_id?: string | null
+          minimum?: number | null
+          module_name: string
+          proc_name: string
+          responsible?: number | null
+          run_id: string
+          status?: string
+          total?: number | null
+        }
+        Update: {
+          assistant?: number | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          instructing?: number | null
+          match_confidence?: number | null
+          match_method?: string | null
+          matched_proc_id?: string | null
+          minimum?: number | null
+          module_name?: string
+          proc_name?: string
+          responsible?: number | null
+          run_id?: string
+          status?: string
+          total?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_procedure_staging_matched_proc_id_fkey"
+            columns: ["matched_proc_id"]
+            isOneToOne: false
+            referencedRelation: "procedures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_procedure_staging_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "import_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_runs: {
+        Row: {
+          created_at: string
+          finished_at: string | null
+          id: string
+          pdf_filename: string | null
+          pdf_stand_date: string | null
+          source: string
+          started_at: string
+          status: string
+          summary_json: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          finished_at?: string | null
+          id?: string
+          pdf_filename?: string | null
+          pdf_stand_date?: string | null
+          source?: string
+          started_at?: string
+          status?: string
+          summary_json?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          finished_at?: string | null
+          id?: string
+          pdf_filename?: string | null
+          pdf_stand_date?: string | null
+          source?: string
+          started_at?: string
+          status?: string
+          summary_json?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           amount: number
@@ -611,6 +722,38 @@ export type Database = {
             columns: ["session_id"]
             isOneToOne: false
             referencedRelation: "course_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      procedure_aliases: {
+        Row: {
+          alias_name: string
+          created_at: string
+          created_by: string | null
+          id: string
+          procedure_id: string
+        }
+        Insert: {
+          alias_name: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          procedure_id: string
+        }
+        Update: {
+          alias_name?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          procedure_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "procedure_aliases_procedure_id_fkey"
+            columns: ["procedure_id"]
+            isOneToOne: false
+            referencedRelation: "procedures"
             referencedColumns: ["id"]
           },
         ]

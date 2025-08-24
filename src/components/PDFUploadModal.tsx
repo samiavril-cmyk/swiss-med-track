@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Upload, FileText, CheckCircle, AlertCircle } from "lucide-react";
+import { Upload, FileText, CheckCircle, AlertCircle, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { PDFImportPreview } from "./PDFImportPreview";
 
 interface PDFUploadModalProps {
   open: boolean;
@@ -14,16 +15,18 @@ interface PDFUploadModalProps {
 
 interface UploadResult {
   success: boolean;
-  message: string;
-  data?: {
-    modulesProcessed: number;
-    proceduresImported: number;
-    userInfo: {
-      name: string;
-      elogbuch_stand: string;
-      fachgebiet: string;
-    };
+  runId?: string;
+  summary?: {
+    filename: string;
+    standDate?: string;
+    totalProcedures: number;
+    modules: any[];
+    matched: number;
+    needsReview: number;
   };
+  stagingData?: any[];
+  parsedModules?: any[];
+  message?: string;
   error?: string;
 }
 
@@ -32,6 +35,7 @@ export const PDFUploadModal = ({ open, onOpenChange, onSuccess }: PDFUploadModal
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const { toast } = useToast();
 
   const handleDrag = (e: React.DragEvent) => {
@@ -113,12 +117,12 @@ export const PDFUploadModal = ({ open, onOpenChange, onSuccess }: PDFUploadModal
       const result = response.data as UploadResult;
       setUploadResult(result);
 
-      if (result.success) {
+      if (result.success && result.summary) {
+        setShowPreview(true);
         toast({
-          title: "PDF erfolgreich verarbeitet",
-          description: `${result.data?.proceduresImported} Prozeduren aus ${result.data?.modulesProcessed} Modulen importiert.`,
+          title: "PDF erfolgreich analysiert",
+          description: `${result.summary.totalProcedures} Prozeduren erkannt. ${result.summary.matched} automatisch zugeordnet.`,
         });
-        onSuccess?.();
       } else {
         toast({
           title: "Fehler beim Verarbeiten",
@@ -147,12 +151,36 @@ export const PDFUploadModal = ({ open, onOpenChange, onSuccess }: PDFUploadModal
     setUploadProgress(0);
     setUploadResult(null);
     setIsUploading(false);
+    setShowPreview(false);
   };
 
   const handleClose = () => {
     resetModal();
     onOpenChange(false);
   };
+
+  const handlePreviewClose = () => {
+    setShowPreview(false);
+    resetModal();
+  };
+
+  const handleImportComplete = () => {
+    onSuccess?.();
+    handleClose();
+  };
+
+  // Show preview if we have successful result
+  if (showPreview && uploadResult?.success && uploadResult.runId && uploadResult.summary && uploadResult.stagingData) {
+    return (
+      <PDFImportPreview
+        runId={uploadResult.runId}
+        summary={uploadResult.summary}
+        stagingData={uploadResult.stagingData}
+        onClose={handlePreviewClose}
+        onImportComplete={handleImportComplete}
+      />
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -215,39 +243,19 @@ export const PDFUploadModal = ({ open, onOpenChange, onSuccess }: PDFUploadModal
             </>
           )}
 
-          {uploadResult && (
+          {uploadResult && !uploadResult.success && (
             <div className="space-y-4">
-              <div className={`
-                flex items-center gap-3 p-4 rounded-lg
-                ${uploadResult.success 
-                  ? 'bg-green-50 text-green-800 border border-green-200' 
-                  : 'bg-red-50 text-red-800 border border-red-200'
-                }
-              `}>
-                {uploadResult.success ? (
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                ) : (
-                  <AlertCircle className="h-5 w-5 text-red-600" />
-                )}
+              <div className="flex items-center gap-3 p-4 rounded-lg bg-destructive/10 text-destructive border border-destructive/20">
+                <AlertCircle className="h-5 w-5" />
                 <div className="flex-1">
-                  <p className="font-medium">{uploadResult.message}</p>
-                  {uploadResult.success && uploadResult.data && (
-                    <div className="mt-2 space-y-1 text-sm">
-                      <p>Patient: {uploadResult.data.userInfo.name}</p>
-                      <p>Stand: {uploadResult.data.userInfo.elogbuch_stand}</p>
-                      <p>Module verarbeitet: {uploadResult.data.modulesProcessed}</p>
-                      <p>Prozeduren importiert: {uploadResult.data.proceduresImported}</p>
-                    </div>
-                  )}
-                  {!uploadResult.success && uploadResult.error && (
-                    <p className="mt-1 text-sm">{uploadResult.error}</p>
-                  )}
+                  <p className="font-medium">Fehler beim Verarbeiten</p>
+                  <p className="mt-1 text-sm">{uploadResult.error}</p>
                 </div>
               </div>
 
               <div className="flex gap-2 justify-end">
                 <Button variant="outline" onClick={resetModal}>
-                  Weitere PDF hochladen
+                  Erneut versuchen
                 </Button>
                 <Button onClick={handleClose}>
                   Schließen
