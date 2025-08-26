@@ -641,7 +641,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                                       min="0"
                                       value={procedure.verantwortlich}
                                       onChange={(e) => updateProcedureValue(moduleKey, index, 'verantwortlich', parseInt(e.target.value) || 0)}
-                                      className="w-16 h-8 text-center"
+                                      className="w-16 h-8 text-center bg-background text-foreground border-input focus:border-ring"
                                     />
                                     <Button
                                       variant="ghost"
@@ -668,7 +668,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                                       min="0"
                                       value={procedure.instruierend}
                                       onChange={(e) => updateProcedureValue(moduleKey, index, 'instruierend', parseInt(e.target.value) || 0)}
-                                      className="w-16 h-8 text-center"
+                                      className="w-16 h-8 text-center bg-background text-foreground border-input focus:border-ring"
                                     />
                                     <Button
                                       variant="ghost"
@@ -695,7 +695,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                                       min="0"
                                       value={procedure.assistent}
                                       onChange={(e) => updateProcedureValue(moduleKey, index, 'assistent', parseInt(e.target.value) || 0)}
-                                      className="w-16 h-8 text-center"
+                                      className="w-16 h-8 text-center bg-background text-foreground border-input focus:border-ring"
                                     />
                                     <Button
                                       variant="ghost"
