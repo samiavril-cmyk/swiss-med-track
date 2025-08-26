@@ -160,8 +160,8 @@ export const FMHDashboard: React.FC = () => {
 
   const getModuleVariant = (moduleKey: string) => {
     const variants = {
-      'basis_notfall': 'coral' as const,
-      'basis_allgemein': 'mint' as const, 
+      'basis_notfallchirurgie': 'coral' as const,
+      'basis_allgemeinchirurgie': 'mint' as const, 
       'viszeralchirurgie': 'lavender' as const,
       'traumatologie': 'amber' as const,
       'kombination': 'coral' as const
