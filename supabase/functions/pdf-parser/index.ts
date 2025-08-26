@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.56.0';
+import PDFParser from "https://esm.sh/pdf2json@3.0.4";
 
 // CORS headers
 const corsHeaders = {
@@ -154,7 +155,7 @@ function extractStandDate(text: string): string | undefined {
 function parsePDFContent(text: string, filename: string): ParsedPDFData {
   console.log('📄 Starting PDF parsing...');
   
-  const lines = cleanPDFText(text);
+  const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
   const modules: ModuleData[] = [];
   const procedures: ProcedureData[] = [];
   let currentModule = '';
@@ -162,45 +163,100 @@ function parsePDFContent(text: string, filename: string): ParsedPDFData {
   const standDate = extractStandDate(text);
   console.log(`📅 Extracted stand date: ${standDate || 'None found'}`);
   
-  for (let i = 0; i < lines.length; i++) {
+  let i = 0;
+  while (i < lines.length) {
     const line = lines[i];
     
-    // Check for module header
-    if (isModuleHeader(line)) {
-      const modulePattern = /^(Basis .*|Modul .*) Minimum Verantwortlich Instruierend Assistent Total$/;
-      const match = line.match(modulePattern);
-      if (match) {
-        currentModule = match[1].trim();
-        console.log(`📦 Found module: ${currentModule}`);
-        
-        // Look for totals on next non-empty line
-        for (let j = i + 1; j < lines.length; j++) {
-          const nextLine = lines[j];
-          if (nextLine.trim() === '') continue;
+    // Skip headers and metadata
+    if (line.includes('Stand:') || line.includes('SIWF') || line.includes('Seite') || 
+        line.includes('Erfasste Prozeduren') || line.includes('Sami Zacharia')) {
+      i++;
+      continue;
+    }
+    
+    // Check for module header (simplified pattern for SIWF structure)
+    if (/^(Basis|Modul)\s+(.+)$/.test(line)) {
+      currentModule = line;
+      console.log(`📦 Found module: ${currentModule}`);
+      
+      // Skip column headers (next 5 lines: Minimum, Verantwortlich, Instruierend, Assistent, Total)
+      i += 6;
+      
+      // Parse module totals (next 5 lines should be numbers)
+      if (i + 4 < lines.length) {
+        try {
+          const minimum = parseInt(lines[i]);
+          const responsible = parseInt(lines[i + 1]);
+          const instructing = parseInt(lines[i + 2]);
+          const assistant = parseInt(lines[i + 3]);
+          const total = parseInt(lines[i + 4]);
           
-          const moduleData = parseModuleTotals(nextLine);
-          if (moduleData) {
-            moduleData.name = currentModule;
-            modules.push(moduleData);
-            console.log(`✅ Module totals: ${JSON.stringify(moduleData)}`);
-            i = j; // Skip to after totals line
-            break;
-          } else {
-            // No totals found, break to continue parsing
-            break;
-          }
+          modules.push({
+            name: currentModule,
+            minimum,
+            responsible,
+            instructing,
+            assistant,
+            total
+          });
+          
+          console.log(`✅ Module totals: ${minimum}/${responsible}/${instructing}/${assistant}/${total}`);
+          i += 5;
+        } catch (error) {
+          console.error(`Failed to parse module totals at line ${i}`);
+          i++;
         }
       }
       continue;
     }
     
-    // Try to parse as procedure line if we have a current module
-    if (currentModule) {
-      const procData = parseProcedureLine(line, currentModule);
-      if (procData) {
-        procedures.push(procData);
-        console.log(`📋 Parsed procedure: ${procData.name} (${procData.responsible}/${procData.instructing}/${procData.assistant})`);
+    // Parse procedure lines (text followed by numbers on separate lines)
+    if (currentModule && !/^\d+$/.test(line) && 
+        !/(Minimum|Verantwortlich|Instruierend|Assistent|Total)/.test(line)) {
+      
+      const procedureName = line;
+      const numbers: number[] = [];
+      
+      // Collect numbers from following lines
+      let j = i + 1;
+      while (j < lines.length && j < i + 10) {
+        const nextLine = lines[j].trim();
+        if (/^\d+$/.test(nextLine)) {
+          numbers.push(parseInt(nextLine));
+          j++;
+        } else if (/^(Basis|Modul)\s+(.+)$/.test(nextLine)) {
+          break; // Hit next module
+        } else if (nextLine && !/^\d+$/.test(nextLine) && 
+                  !/(Minimum|Verantwortlich|Instruierend|Assistent|Total)/.test(nextLine)) {
+          break; // Hit next procedure
+        } else {
+          j++;
+        }
       }
+      
+      if (numbers.length > 0) {
+        const minimum = numbers[0] || 0;
+        const responsible = numbers[1] || 0;
+        const instructing = numbers[2] || 0;
+        const assistant = numbers[3] || 0;
+        const total = numbers[4] || (responsible + instructing + assistant);
+        
+        procedures.push({
+          name: procedureName,
+          module: currentModule,
+          minimum,
+          responsible,
+          instructing,
+          assistant,
+          total
+        });
+        
+        console.log(`📋 Parsed procedure: ${procedureName} (${responsible}/${instructing}/${assistant})`);
+      }
+      
+      i = Math.max(i + 1, j);
+    } else {
+      i++;
     }
   }
   
@@ -368,101 +424,73 @@ async function stageProcedures(runId: string, procedures: ProcedureData[]): Prom
   console.log(`✅ Staged ${stagingData.length} procedures`);
 }
 
-// Mock PDF parser for testing (will be replaced with real implementation)
+// Extract text from PDF buffer
+async function extractTextFromPDF(buffer: ArrayBuffer): Promise<string> {
+  try {
+    console.log('🔄 Extracting text from PDF...');
+    const uint8Array = new Uint8Array(buffer);
+    
+    return new Promise((resolve, reject) => {
+      const pdfParser = new PDFParser();
+      
+      pdfParser.on("pdfParser_dataError", (errData: any) => {
+        console.error('PDF parsing error:', errData.parserError);
+        reject(new Error(`PDF parsing failed: ${errData.parserError}`));
+      });
+      
+      pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
+        try {
+          console.log('✅ PDF data extracted successfully');
+          
+          // Extract text from all pages
+          let fullText = '';
+          if (pdfData.Pages) {
+            for (const page of pdfData.Pages) {
+              if (page.Texts) {
+                for (const text of page.Texts) {
+                  if (text.R) {
+                    for (const run of text.R) {
+                      if (run.T) {
+                        fullText += decodeURIComponent(run.T) + ' ';
+                      }
+                    }
+                  }
+                  fullText += '\n';
+                }
+              }
+            }
+          }
+          
+          console.log(`📄 Extracted ${fullText.length} characters from PDF`);
+          resolve(fullText);
+        } catch (error) {
+          console.error('Error processing PDF data:', error);
+          reject(new Error(`PDF data processing failed: ${error.message}`));
+        }
+      });
+      
+      pdfParser.parseBuffer(uint8Array);
+    });
+  } catch (error) {
+    console.error('PDF extraction failed:', error);
+    throw new Error(`PDF text extraction failed: ${error.message}`);
+  }
+}
+
+// Real PDF parser implementation
 async function parsePDFBuffer(buffer: ArrayBuffer, filename: string): Promise<ParsedPDFData> {
   console.log(`📁 Processing PDF: ${filename} (${buffer.byteLength} bytes)`);
   
-  // For now, return structured test data that matches the expected format
-  // This simulates a real SIWF PDF structure
-  const mockData: ParsedPDFData = {
-    filename,
-    standDate: '2025-08-23',
-    modules: [
-      {
-        name: 'Basis Notfallchirurgie',
-        minimum: 85,
-        responsible: 80,
-        instructing: 0,
-        assistant: 2,
-        total: 80
-      },
-      {
-        name: 'Basis Allgemeinchirurgie',
-        minimum: 260,
-        responsible: 261,
-        instructing: 0,
-        assistant: 121,
-        total: 261
-      },
-      {
-        name: 'Modul Viszeralchirurgie',
-        minimum: 165,
-        responsible: 142,
-        instructing: 0,
-        assistant: 125,
-        total: 142
-      }
-    ],
-    procedures: [
-      {
-        name: 'Chirurgisches Schockraummanagement',
-        module: 'Basis Notfallchirurgie',
-        minimum: 10,
-        responsible: 8,
-        instructing: 0,
-        assistant: 0,
-        total: 8
-      },
-      {
-        name: 'Thoraxdrainagen',
-        module: 'Basis Notfallchirurgie',
-        minimum: 15,
-        responsible: 6,
-        instructing: 2,
-        assistant: 0,
-        total: 6
-      },
-      {
-        name: 'Wundversorgungen',
-        module: 'Basis Allgemeinchirurgie',
-        minimum: 30,
-        responsible: 44,
-        instructing: 0,
-        assistant: 0,
-        total: 44
-      },
-      {
-        name: 'Appendektomie',
-        module: 'Basis Allgemeinchirurgie',
-        minimum: 20,
-        responsible: 15,
-        instructing: 2,
-        assistant: 8,
-        total: 15
-      },
-      {
-        name: 'Cholezystektomie',
-        module: 'Modul Viszeralchirurgie',
-        minimum: 25,
-        responsible: 18,
-        instructing: 1,
-        assistant: 6,
-        total: 18
-      },
-      {
-        name: 'Hernienreparatur',
-        module: 'Basis Allgemeinchirurgie',
-        minimum: 15,
-        responsible: 12,
-        instructing: 0,
-        assistant: 3,
-        total: 12
-      }
-    ]
-  };
-  
-  console.log(`🎯 Mock parsing complete: ${mockData.modules.length} modules, ${mockData.procedures.length} procedures`);
-  return mockData;
+  try {
+    // Extract text from PDF
+    const text = await extractTextFromPDF(buffer);
+    console.log('📄 PDF text extracted, starting parsing...');
+    
+    return parsePDFContent(text, filename);
+  } catch (error) {
+    console.error('❌ PDF parsing failed:', error);
+    throw new Error(`PDF parsing failed: ${error.message}`);
+  }
 }
 
 // Main handler
