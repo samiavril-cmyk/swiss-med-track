@@ -78,6 +78,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [dbProcedures, setDbProcedures] = useState<DbProcedure[]>([]);
+  const [userPgyLevel, setUserPgyLevel] = useState<number>(5); // Default to PGY5
 
   // Load modules and procedures from database
   useEffect(() => {
@@ -89,17 +90,25 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
   const loadModulesAndProcedures = async () => {
     setIsLoading(true);
     try {
-      // Load categories (modules)
+      // Load user's PGY level first
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('pgy_level')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (profile?.pgy_level) {
+          setUserPgyLevel(profile.pgy_level);
+        }
+      }
+
+      // Load categories (modules) - only the 5 correct FMH modules
       const { data: categories, error: categoriesError } = await supabase
         .from('procedure_categories')
         .select('*')
+        .in('key', ['basis_notfallchirurgie', 'basis_allgemeinchirurgie', 'viszeralchirurgie', 'traumatologie', 'kombination'])
         .order('sort_index');
-
-      if (categoriesError) {
-        console.error('Error loading categories:', categoriesError);
-        toast.error('Fehler beim Laden der Module');
-        return;
-      }
 
       // Load procedures
       const { data: procedures, error: proceduresError } = await supabase
