@@ -381,9 +381,9 @@ export const AdminCMS: React.FC = () => {
 
         {/* Edit/Create Course Dialog */}
         <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-card text-card-foreground border border-border shadow-lg">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white text-gray-900 border border-gray-200 shadow-lg">
             <DialogHeader>
-              <DialogTitle className="text-card-foreground">
+              <DialogTitle className="text-gray-900">
                 {editingCourse ? 'Kurs bearbeiten' : 'Neuen Kurs erstellen'}
               </DialogTitle>
             </DialogHeader>
@@ -400,7 +400,7 @@ export const AdminCMS: React.FC = () => {
                     value={formData.title || ''}
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     placeholder="Kurstitel eingeben"
-                    className="bg-card text-card-foreground border-input focus:border-ring"
+                    className="bg-white text-gray-900 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
 
@@ -411,7 +411,7 @@ export const AdminCMS: React.FC = () => {
                     value={formData.venue || ''}
                     onChange={(e) => handleInputChange('venue', e.target.value)}
                     placeholder="Veranstalter eingeben"
-                    className="bg-card text-card-foreground border-input focus:border-ring"
+                    className="bg-white text-gray-900 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
 
@@ -423,7 +423,7 @@ export const AdminCMS: React.FC = () => {
                       value={formData.city || ''}
                       onChange={(e) => handleInputChange('city', e.target.value)}
                       placeholder="Stadt eingeben"
-                      className="bg-card text-card-foreground border-input focus:border-ring"
+                      className="bg-white text-gray-900 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
                   <div className="space-y-2">
@@ -433,7 +433,7 @@ export const AdminCMS: React.FC = () => {
                       value={formData.country || ''}
                       onChange={(e) => handleInputChange('country', e.target.value)}
                       placeholder="Land eingeben"
-                      className="bg-card text-card-foreground border-input focus:border-ring"
+                      className="bg-white text-gray-900 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -446,7 +446,7 @@ export const AdminCMS: React.FC = () => {
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     placeholder="Kursbeschreibung eingeben"
                     rows={4}
-                    className="bg-card text-card-foreground border-input focus:border-ring"
+                    className="bg-white text-gray-900 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
               </div>
