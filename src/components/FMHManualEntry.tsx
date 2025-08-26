@@ -14,19 +14,30 @@ import {
   User,
   Stethoscope,
   Plus,
-  Minus
+  Minus,
+  Loader2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
-interface Procedure {
+interface DbProcedure {
   id: string;
   title_de: string;
   code: string;
+  min_required_by_pgy: any;
+  category_id: string;
+}
+
+interface DbCategory {
+  id: string;
+  key: string;
+  title_de: string;
+  minimum_required: number;
 }
 
 interface ProcedureEntry {
+  id: string;
   name: string;
   minimum: number;
   verantwortlich: number;
@@ -36,6 +47,8 @@ interface ProcedureEntry {
 }
 
 interface ModuleData {
+  id: string;
+  key: string;
   title: string;
   procedures: ProcedureEntry[];
   totalMinimum: number;
@@ -48,111 +61,14 @@ interface FMHManualEntryProps {
   onSuccess?: () => void;
 }
 
-const initialModules: Record<string, ModuleData> = {
-  'basis_notfall': {
-    title: 'Basis Notfallchirurgie',
-    totalMinimum: 85,
-    totalCount: 0,
-    procedures: [
-      { name: 'Chirurgisches Schockraummanagement', minimum: 10, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Reposition Luxation/Frakturen, konservative Frakturbehandlung', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Wundversorgungen', minimum: 30, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Anlage Fixateur externe', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Thoraxdrainagen', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Zervikotomien (Tracheafreilegung)', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Cystofixeinlage', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 }
-    ]
-  },
-  'basis_allgemein': {
-    title: 'Basis Allgemeinchirurgie',
-    totalMinimum: 260,
-    totalCount: 0,
-    procedures: [
-      { name: 'Kleinchirurgische Eingriffe (Atherom/Lipom, Kocher, Thiersch, LK Excisionen etc.)', minimum: 40, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Appendektomie', minimum: 30, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Cholezystektomie', minimum: 30, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Hernienoperationen (inguinal/umbilical)', minimum: 40, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata)', minimum: 20, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie', minimum: 20, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Veneneingriffe (Varizenchirurgie, Port/Pacemaker)', minimum: 30, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Laparoskopie, Laparotomie', minimum: 30, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Weitere zählbare Eingriffe', minimum: 20, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Thoraxchirurgische Eingriffe', minimum: 0, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Urologische Eingriffe', minimum: 0, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Gefässchirurgische Eingriffe', minimum: 0, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Kompartimentelle Spaltungen', minimum: 0, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Diagnostische und therapeutische Endoskopien', minimum: 0, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Mamma-Eingriffe', minimum: 0, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Operation an Nerven', minimum: 0, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 }
-    ]
-  },
-  'viszeralchirurgie': {
-    title: 'Modul Viszeralchirurgie',
-    totalMinimum: 165,
-    totalCount: 0,
-    procedures: [
-      { name: 'Abdominalhernien (Narbenhernien, videoskopischer Repair)', minimum: 25, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Mageneingriffe (Ulkusnaht, Gastroenterostomie, chir. Gastrostomie, Resektion)', minimum: 7, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata)', minimum: 25, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Kolorektal (Segment- und Teilresektion)', minimum: 10, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Hepatobiliär (exkl. Cholezystektomie), Leberteilresektion, Pankreasteilresektion, Bariatrische Chirurgie', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Endokrine Chirurgie (Thyreoidektomie, Parathyreoidektomie, Adrenalektomie)', minimum: 10, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie', minimum: 35, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Splenektomie', minimum: 3, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Dickdarmstoma', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Laparoskopie, Laparotomie', minimum: 40, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 }
-    ]
-  },
-  'traumatologie': {
-    title: 'Modul Traumatologie des Bewegungsapparates',
-    totalMinimum: 165,
-    totalCount: 0,
-    procedures: [
-      { name: 'Metallentfernungen, Spickungen', minimum: 30, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Reposition Luxation/Frakturen, konservative Frakturbehandlung', minimum: 25, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Eingriffe Sehnen/Ligamente', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Arthroskopie', minimum: 10, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Osteosynthese Schaftfrakturen', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Osteosynthese gelenksnaher (metaphysärer) Frakturen', minimum: 40, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Osteosynthese komplexer Frakturen (intraartikulären Frakturen an den grossen Röhrenknochen und am Mittel- und Rückfuss sowie Becken-/Azetabulumfrakturen)', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Handchirurgie (exklusiv Wundversorgung)', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Kleine Amputationen', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Grosse Amputationen', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 }
-    ]
-  },
-  'kombination': {
-    title: 'Modul Kombination',
-    totalMinimum: 165,
-    totalCount: 0,
-    procedures: [
-      { name: 'Abdominalhernien (Narbenhernien, videoskopischer Repair)', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Mageneingriffe (Ulkusnaht, Gastroenterostomie, chir. Gastrostomie, Resektion)', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata)', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Kolorektal (Segment- und Teilresektion)', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Endokrine Chirurgie (Thyreoidektomie, Parathyreoidektomie, Adrenalektomie)', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie', minimum: 20, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Dickdarmstoma', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Metallentfernungen, Spickungen', minimum: 20, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Reposition Luxation/Frakturen, konservative Frakturbehandlung', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Eingriffe Sehnen/Ligamente', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Osteosynthese Schaftfrakturen', minimum: 10, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Osteosynthese gelenksnaher (metaphysärer) Frakturen', minimum: 20, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Handchirurgie (exklusiv Wundversorgung)', minimum: 10, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Laparoskopie, Laparotomie', minimum: 11, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Kleine Amputationen', minimum: 2, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Grosse Amputationen', minimum: 2, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 }
-    ]
-  }
-};
-
 export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
   open,
   onOpenChange,
   onSuccess
 }) => {
   const { user } = useAuth();
-  const [modules, setModules] = useState<Record<string, ModuleData>>(initialModules);
-  const [savedModules, setSavedModules] = useState<Record<string, ModuleData>>(initialModules);
+  const [modules, setModules] = useState<Record<string, ModuleData>>({});
+  const [savedModules, setSavedModules] = useState<Record<string, ModuleData>>({});
   const [currentDate, setCurrentDate] = useState(new Date().toLocaleDateString('de-CH'));
   const [patientInfo, setPatientInfo] = useState({
     name: 'Sami Zacharia Hosari',
@@ -160,33 +76,84 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
     institution: 'USZ'
   });
   const [isSaving, setIsSaving] = useState(false);
-  const [procedures, setProcedures] = useState<Procedure[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [dbProcedures, setDbProcedures] = useState<DbProcedure[]>([]);
 
-  // Load procedures from database
+  // Load modules and procedures from database
   useEffect(() => {
-    const loadProcedures = async () => {
-      const { data, error } = await supabase
-        .from('procedures')
-        .select('id, title_de, code')
-        .eq('active', true);
-      
-      if (error) {
-        console.error('Error loading procedures:', error);
+    if (open) {
+      loadModulesAndProcedures();
+    }
+  }, [open]);
+
+  const loadModulesAndProcedures = async () => {
+    setIsLoading(true);
+    try {
+      // Load categories (modules)
+      const { data: categories, error: categoriesError } = await supabase
+        .from('procedure_categories')
+        .select('*')
+        .order('sort_index');
+
+      if (categoriesError) {
+        console.error('Error loading categories:', categoriesError);
+        toast.error('Fehler beim Laden der Module');
         return;
       }
-      
-      setProcedures(data || []);
-    };
-    
-    loadProcedures();
-  }, []);
 
-  // Load existing procedure logs when modal opens
-  useEffect(() => {
-    if (open && user) {
-      loadExistingData();
+      // Load procedures
+      const { data: procedures, error: proceduresError } = await supabase
+        .from('procedures')
+        .select('*')
+        .eq('active', true)
+        .order('code');
+
+      if (proceduresError) {
+        console.error('Error loading procedures:', proceduresError);
+        toast.error('Fehler beim Laden der Prozeduren');
+        return;
+      }
+
+      setDbProcedures(procedures || []);
+
+      // Build module structure
+      const moduleData: Record<string, ModuleData> = {};
+      
+      categories?.forEach(category => {
+        const categoryProcedures = procedures?.filter(p => p.category_id === category.id) || [];
+        
+        moduleData[category.key] = {
+          id: category.id,
+          key: category.key,
+          title: category.title_de,
+          totalMinimum: category.minimum_required || 0,
+          totalCount: 0,
+          procedures: categoryProcedures.map(procedure => ({
+            id: procedure.id,
+            name: procedure.title_de,
+            minimum: (procedure.min_required_by_pgy as any)?.PGY5 || 0, // Default to PGY5 requirement
+            verantwortlich: 0,
+            instruierend: 0,
+            assistent: 0,
+            total: 0
+          }))
+        };
+      });
+
+      setModules(moduleData);
+      setSavedModules(moduleData);
+      
+      // Load existing data after modules are set
+      if (user) {
+        await loadExistingData(moduleData);
+      }
+    } catch (error) {
+      console.error('Error loading modules and procedures:', error);
+      toast.error('Fehler beim Laden der Daten');
+    } finally {
+      setIsLoading(false);
     }
-  }, [open, user]);
+  };
 
   // Prevent background scrolling when modal is open
   useEffect(() => {
@@ -212,29 +179,20 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
     }
   }, [user]);
 
-  const loadExistingData = async () => {
+  const loadExistingData = async (moduleData: Record<string, ModuleData>) => {
     if (!user) return;
 
     try {
       console.log('🔍 FMHManualEntry - Loading data for user ID:', user.id);
       
-      // Load existing procedure logs for the user grouped by procedure and role
+      // Load existing procedure logs for the user
       const { data: logs, error } = await supabase
         .from('procedure_logs')
         .select(`
           id,
           procedure_id,
           role_in_surgery,
-          performed_date,
-          procedures!inner(
-            id,
-            title_de,
-            category_id,
-            procedure_categories!inner(
-              key,
-              title_de
-            )
-          )
+          performed_date
         `)
         .eq('user_id', user.id)
         .gte('performed_date', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
@@ -246,98 +204,53 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
 
       console.log('📊 FMHManualEntry - Loaded', logs?.length || 0, 'procedure logs for user', user.id);
 
-      // Group logs by module and procedure name, count by role
-      const moduleData: Record<string, Record<string, { verantwortlich: number; instruierend: number; assistent: number }>> = {};
+      // Group logs by procedure ID and count by role
+      const procedureCounts: Record<string, { verantwortlich: number; instruierend: number; assistent: number }> = {};
       
       logs?.forEach(log => {
-        const moduleKey = log.procedures.procedure_categories.key;
-        const procedureName = log.procedures.title_de;
-        
-        if (!moduleData[moduleKey]) {
-          moduleData[moduleKey] = {};
-        }
-        if (!moduleData[moduleKey][procedureName]) {
-          moduleData[moduleKey][procedureName] = { verantwortlich: 0, instruierend: 0, assistent: 0 };
+        if (!procedureCounts[log.procedure_id]) {
+          procedureCounts[log.procedure_id] = { verantwortlich: 0, instruierend: 0, assistent: 0 };
         }
         
         if (log.role_in_surgery === 'responsible') {
-          moduleData[moduleKey][procedureName].verantwortlich++;
+          procedureCounts[log.procedure_id].verantwortlich++;
         } else if (log.role_in_surgery === 'instructing') {
-          moduleData[moduleKey][procedureName].instruierend++;
+          procedureCounts[log.procedure_id].instruierend++;
         } else if (log.role_in_surgery === 'assistant') {
-          moduleData[moduleKey][procedureName].assistent++;
+          procedureCounts[log.procedure_id].assistent++;
         }
       });
 
-      // Match procedure data to our form structure
-      const newSavedModules = { ...initialModules };
-      const newCurrentModules = { ...initialModules };
+      // Update module data with existing counts
+      const newSavedModules = { ...moduleData };
+      const newCurrentModules = { ...moduleData };
       
-      Object.keys(moduleData).forEach(moduleKey => {
-        if (newSavedModules[moduleKey]) {
-          newSavedModules[moduleKey].procedures.forEach((procedure, index) => {
-            // Try to find matching procedure in database logs
-            const matchingProcedure = Object.keys(moduleData[moduleKey]).find(dbProcName => {
-              const normalizedForm = procedure.name.toLowerCase().trim();
-              const normalizedDb = dbProcName.toLowerCase().trim();
-              
-              // Exact match
-              if (normalizedForm === normalizedDb) return true;
-              
-              // Partial match - check if either contains the other
-              if (normalizedForm.includes(normalizedDb) || normalizedDb.includes(normalizedForm)) return true;
-              
-              // Check for common abbreviations/variations
-              const commonMappings = {
-                'appendektomie': ['appendix', 'appendek'],
-                'cholezystektomie': ['cholezystek', 'galle'],
-                'wundversorgung': ['wund', 'naht'],
-                'thoraxdrainage': ['thorax', 'drainage'],
-                'laparoskopie': ['lap', 'minimalinvasiv']
-              };
-              
-              for (const [key, variants] of Object.entries(commonMappings)) {
-                if (normalizedForm.includes(key)) {
-                  return variants.some(variant => normalizedDb.includes(variant));
-                }
-                if (normalizedDb.includes(key)) {
-                  return variants.some(variant => normalizedForm.includes(variant));
-                }
-              }
-              
-              return false;
-            });
+      Object.keys(newSavedModules).forEach(moduleKey => {
+        newSavedModules[moduleKey].procedures.forEach((procedure, index) => {
+          const counts = procedureCounts[procedure.id];
+          if (counts) {
+            const updatedProcedure = {
+              ...procedure,
+              verantwortlich: counts.verantwortlich,
+              instruierend: counts.instruierend,
+              assistent: counts.assistent,
+              total: counts.verantwortlich + counts.instruierend + counts.assistent
+            };
             
-            if (matchingProcedure && moduleData[moduleKey][matchingProcedure]) {
-              const counts = moduleData[moduleKey][matchingProcedure];
-              newSavedModules[moduleKey].procedures[index] = {
-                ...procedure,
-                verantwortlich: counts.verantwortlich,
-                instruierend: counts.instruierend,
-                assistent: counts.assistent,
-                total: counts.verantwortlich + counts.instruierend + counts.assistent
-              };
-              // Initialize current modules with same values (so form shows saved data)
-              newCurrentModules[moduleKey].procedures[index] = {
-                ...procedure,
-                verantwortlich: counts.verantwortlich,
-                instruierend: counts.instruierend,
-                assistent: counts.assistent,
-                total: counts.verantwortlich + counts.instruierend + counts.assistent
-              };
-              
-              console.log(`✅ Matched "${procedure.name}" to "${matchingProcedure}" - V:${counts.verantwortlich} I:${counts.instruierend} A:${counts.assistent}`);
-            }
-          });
-          
-          // Update module totals
-          newSavedModules[moduleKey].totalCount = newSavedModules[moduleKey].procedures.reduce(
-            (sum, proc) => sum + proc.total, 0
-          );
-          newCurrentModules[moduleKey].totalCount = newCurrentModules[moduleKey].procedures.reduce(
-            (sum, proc) => sum + proc.total, 0
-          );
-        }
+            newSavedModules[moduleKey].procedures[index] = updatedProcedure;
+            newCurrentModules[moduleKey].procedures[index] = { ...updatedProcedure };
+            
+            console.log(`✅ Loaded counts for "${procedure.name}" - V:${counts.verantwortlich} I:${counts.instruierend} A:${counts.assistent}`);
+          }
+        });
+        
+        // Update module totals
+        newSavedModules[moduleKey].totalCount = newSavedModules[moduleKey].procedures.reduce(
+          (sum, proc) => sum + proc.total, 0
+        );
+        newCurrentModules[moduleKey].totalCount = newCurrentModules[moduleKey].procedures.reduce(
+          (sum, proc) => sum + proc.total, 0
+        );
       });
       
       setSavedModules(newSavedModules);
@@ -380,118 +293,42 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
     });
   };
 
-  // Synonym mapping for common procedure name variations
-  const procedureSynonyms: Record<string, string[]> = {
-    'Wundversorgung': ['Wundversorgungen', 'Wundbehandlung', 'Wundrevision'],
-    'Thoraxdrainage': ['Thoraxdrainagen', 'Pleuradrainage', 'Thorakale Drainage'],
-    'Appendektomie': ['Appendektomie', 'Appendix-Entfernung'],
-    'Cholezystektomie': ['Cholezystektomie', 'Gallenblasen-Entfernung'],
-    'Hernienoperation': ['Hernienoperationen', 'Hernie-Repair'],
-    'Dünndarmeingriff': ['Dünndarmeingriffe', 'Dünndarm-Operation'],
-    'Proktologischer Eingriff': ['Proktologische Eingriffe', 'Proktologie'],
-    'Veneneingriff': ['Veneneingriffe', 'Venenchirurgie'],
-    'Laparoskopie': ['Laparoskopie, Laparotomie', 'Laparoskopische Operation'],
-    'Metallentfernung': ['Metallentfernungen, Spickungen', 'ME', 'Implantat-Entfernung'],
-    'Osteosynthese': ['Osteosynthese', 'Fraktur-Osteosynthese'],
-    'Handchirurgie': ['Handchirurgie (exklusiv Wundversorgung)', 'Hand-Operation'],
-    'Amputation': ['Kleine Amputationen', 'Grosse Amputationen', 'Amputation']
-  };
-
   // Find or create procedure by name with improved matching
   const findOrCreateProcedure = async (procedureName: string): Promise<string | null> => {
     console.log(`🔍 Searching for procedure: "${procedureName}"`);
     
-    // 1. Exact match (case insensitive)
-    let procedure = procedures.find(p => 
-      p.title_de.toLowerCase() === procedureName.toLowerCase()
+    // First try exact match in our loaded procedures
+    let matchedProcedure = dbProcedures.find(p => 
+      p.title_de.toLowerCase().trim() === procedureName.toLowerCase().trim()
     );
     
-    if (procedure) {
-      console.log(`✅ Exact match found: ${procedure.title_de} (ID: ${procedure.id})`);
-      return procedure.id;
-    }
-
-    // 2. Synonym matching
-    for (const [baseName, synonyms] of Object.entries(procedureSynonyms)) {
-      if (synonyms.some(synonym => 
-        synonym.toLowerCase() === procedureName.toLowerCase() ||
-        procedureName.toLowerCase().includes(synonym.toLowerCase()) ||
-        synonym.toLowerCase().includes(procedureName.toLowerCase())
-      )) {
-        procedure = procedures.find(p => 
-          p.title_de.toLowerCase().includes(baseName.toLowerCase()) ||
-          baseName.toLowerCase().includes(p.title_de.toLowerCase())
-        );
-        
-        if (procedure) {
-          console.log(`✅ Synonym match found: "${procedureName}" → ${procedure.title_de} (ID: ${procedure.id})`);
-          return procedure.id;
-        }
-      }
+    if (matchedProcedure) {
+      console.log(`✅ Exact match found: ${matchedProcedure.title_de} (${matchedProcedure.id})`);
+      return matchedProcedure.id;
     }
     
-    // 3. Partial match (contains)
-    procedure = procedures.find(p => {
-      const pName = p.title_de.toLowerCase();
-      const searchName = procedureName.toLowerCase();
+    // Try fuzzy match
+    const normalizedName = procedureName.toLowerCase().trim();
+    
+    const fuzzyMatches = dbProcedures.filter(p => {
+      const procName = p.title_de.toLowerCase().trim();
       
-      // Remove common suffixes/prefixes for better matching
-      const cleanSearchName = searchName
-        .replace(/eingriffe?$/i, '')
-        .replace(/operationen?$/i, '')
-        .replace(/^(laparoskopische|offene)\s+/i, '')
-        .trim();
+      // Check if either contains the other (partial match)
+      if (procName.includes(normalizedName) || normalizedName.includes(procName)) {
+        return true;
+      }
       
-      const cleanPName = pName
-        .replace(/eingriffe?$/i, '')
-        .replace(/operationen?$/i, '')
-        .replace(/^(laparoskopische|offene)\s+/i, '')
-        .trim();
-      
-      return (
-        pName.includes(searchName) ||
-        searchName.includes(pName) ||
-        cleanPName.includes(cleanSearchName) ||
-        cleanSearchName.includes(cleanPName)
-      );
+      return false;
     });
     
-    if (procedure) {
-      console.log(`✅ Partial match found: "${procedureName}" → ${procedure.title_de} (ID: ${procedure.id})`);
-      return procedure.id;
+    if (fuzzyMatches.length > 0) {
+      matchedProcedure = fuzzyMatches[0];
+      console.log(`✅ Fuzzy match found: ${matchedProcedure.title_de} (${matchedProcedure.id})`);
+      return matchedProcedure.id;
     }
-
-    // 4. Try to find procedure category and create with appropriate category_id
-    console.log(`⚠️ No match found for "${procedureName}", creating new procedure...`);
     
-    try {
-      // Get the appropriate category based on context (we'll use a default for now)
-      const { data: categories } = await supabase
-        .from('procedure_categories')
-        .select('id, key')
-        .limit(1);
-
-      const categoryId = categories?.[0]?.id || null;
-
-      const { data, error } = await supabase
-        .from('procedures')
-        .insert({
-          title_de: procedureName,
-          code: `MANUAL_${Date.now()}`,
-          active: true,
-          category_id: categoryId
-        })
-        .select('id')
-        .single();
-        
-      if (error) throw error;
-      
-      console.log(`✅ Created new procedure: "${procedureName}" (ID: ${data.id})`);
-      return data.id;
-    } catch (error) {
-      console.error(`❌ Error creating procedure "${procedureName}":`, error);
-      return null;
-    }
+    console.log(`❌ No match found for: "${procedureName}"`);
+    return null;
   };
 
   const handleSave = async () => {
@@ -529,10 +366,10 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
           
           console.log(`📝 Processing procedure: "${currentProcedure.name}" (Changes: V:${diffVerantwortlich} I:${diffInstruierend} A:${diffAssistent})`);
           
-          // Find or create procedure ID
-          const procedureId = await findOrCreateProcedure(currentProcedure.name);
+          // Use existing procedure ID instead of finding/creating
+          const procedureId = currentProcedure.id;
           if (!procedureId) {
-            console.warn(`❌ Could not find or create procedure: ${currentProcedure.name}`);
+            console.warn(`❌ No procedure ID for: ${currentProcedure.name}`);
             failedProcedures.push(currentProcedure.name);
             continue;
           }
@@ -701,250 +538,223 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-md flex items-center justify-center p-4">
-      <Card className="medical-card-elegant w-full max-w-6xl max-h-[90vh] overflow-hidden" style={{ overscrollBehavior: 'contain' }}>
-        <CardHeader className="border-b border-card-border bg-gradient-subtle">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-2 bg-primary/10 rounded-medical">
-                <FileText className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <CardTitle className="text-medical-title">
-                  FMH eLogbuch - Manuelle Eingabe
-                </CardTitle>
-                <p className="text-medical-subtitle">
-                  Erfasste Prozeduren im eLogbuch des Fachgebiets Chirurgie
-                </p>
-              </div>
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-background border rounded-lg shadow-lg w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b">
+          <div className="flex items-center gap-3">
+            <FileText className="h-6 w-6 text-primary" />
+            <div>
+              <h1 className="text-xl font-semibold">FMH Operationsstatistik</h1>
+              <p className="text-sm text-muted-foreground">Manuelle Eingabe der Operationen</p>
             </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => onOpenChange(false)}
-              className="hover:bg-destructive/10"
-            >
-              <X className="w-4 h-4" />
-            </Button>
           </div>
-          
-          {/* Save Button at Top */}
-          <div className="mt-4 flex justify-end">
-            <Button 
-              onClick={handleSave}
-              disabled={isSaving || Object.values(modules).every(mod => mod.totalCount === 0)}
-              className="gap-2"
-            >
-              <Save className="w-4 h-4" />
-              {isSaving ? 'Speichere...' : 'Prozeduren speichern'}
-            </Button>
-          </div>
-          
-          {/* Header Information */}
-          <div className="mt-6 bg-primary/5 border-2 border-primary/20 rounded-medical p-4 shadow-md">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-primary" />
-                  <span className="font-semibold text-card-foreground">Stand:</span>
-                  <span className="font-medium text-card-foreground">{currentDate}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-primary" />
-                  <span className="font-medium text-card-foreground">{patientInfo.name} ({patientInfo.id})</span>
-                </div>
-              </div>
-              <Badge variant="default" className="gap-1 bg-primary text-primary-foreground">
-                <Stethoscope className="w-3 h-3" />
-                {patientInfo.institution}
-              </Badge>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onOpenChange(false)}
+            className="h-8 w-8 p-0"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {isLoading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <span>Module und Prozeduren werden geladen...</span>
             </div>
-            <p className="text-sm text-primary/70 font-medium">
-              SIWF | ISFM | info@siwf.ch | www.siwf.ch
-            </p>
           </div>
-        </CardHeader>
+        ) : Object.keys(modules).length === 0 ? (
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-muted-foreground">Keine Module gefunden</p>
+          </div>
+        ) : (
+        <div className="flex-1 overflow-hidden">
+          <div className="p-6 h-full overflow-auto">
+            <Tabs defaultValue={Object.keys(modules)[0]} className="w-full h-full flex flex-col">
+              <TabsList className="grid w-full grid-cols-5 mb-6">
+                {Object.entries(modules).map(([key, module]) => (
+                  <TabsTrigger key={key} value={key}>
+                    {module.title}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
 
-        <CardContent className="p-6 overflow-auto max-h-[60vh]" style={{ overscrollBehavior: 'contain' }}>
-          <Tabs defaultValue="basis_notfall" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="basis_notfall">Basis Notfallchirurgie</TabsTrigger>
-              <TabsTrigger value="basis_allgemein">Basis Allgemeinchirurgie</TabsTrigger>
-              <TabsTrigger value="viszeralchirurgie">Modul Viszeralchirurgie</TabsTrigger>
-              <TabsTrigger value="traumatologie">Modul Traumatologie</TabsTrigger>
-              <TabsTrigger value="kombination">Modul Kombination</TabsTrigger>
-            </TabsList>
-
-            {Object.entries(modules).map(([moduleKey, moduleData]) => (
-              <TabsContent key={moduleKey} value={moduleKey} className="mt-6">
-                <Card className="medical-card">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">{moduleData.title}</CardTitle>
-                      <div className="flex items-center gap-4">
-                        <Badge variant="secondary">
-                          Minimum: {moduleData.totalMinimum}
-                        </Badge>
-                        <Badge variant={moduleData.totalCount >= moduleData.totalMinimum ? "default" : "outline"}>
-                          Total: {moduleData.totalCount}
-                        </Badge>
+              {Object.entries(modules).map(([moduleKey, moduleData]) => (
+                <TabsContent key={moduleKey} value={moduleKey} className="flex-1 mt-0">
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg">{moduleData.title}</CardTitle>
+                        <div className="flex items-center gap-4">
+                          <Badge variant="secondary">
+                            Minimum: {moduleData.totalMinimum}
+                          </Badge>
+                          <Badge variant={moduleData.totalCount >= moduleData.totalMinimum ? "default" : "outline"}>
+                            Total: {moduleData.totalCount}
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent className="p-0">
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead className="border-b border-card-border bg-primary/5">
-                          <tr>
-                            <th className="text-left p-4 font-medium">Prozedur</th>
-                            <th className="text-center p-4 font-medium w-24">Minimum</th>
-                            <th className="text-center p-4 font-medium w-32">Verantwortlich</th>
-                            <th className="text-center p-4 font-medium w-32">Instruierend</th>
-                            <th className="text-center p-4 font-medium w-32">Assistent</th>
-                            <th className="text-center p-4 font-medium w-24">Total</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {moduleData.procedures.map((procedure, index) => (
-                            <tr key={index} className="border-b border-card-border hover:bg-primary/5 transition-colors">
-                               <td className="p-4">
-                                <div className="font-medium">{procedure.name}</div>
-                                {savedModules[moduleKey].procedures[index].total > 0 && (
-                                  <div className="text-xs text-muted-foreground mt-1">
-                                    Gespeichert: V:{savedModules[moduleKey].procedures[index].verantwortlich} I:{savedModules[moduleKey].procedures[index].instruierend} A:{savedModules[moduleKey].procedures[index].assistent}
-                                  </div>
-                                )}
-                               </td>
-                              <td className="text-center p-4">
-                                <Badge variant="outline">{procedure.minimum}</Badge>
-                              </td>
-                              <td className="text-center p-4">
-                                <div className="flex items-center justify-center gap-1">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 w-6 p-0"
-                                    onClick={() => updateProcedureValue(moduleKey, index, 'verantwortlich', procedure.verantwortlich - 1)}
-                                  >
-                                    <Minus className="w-3 h-3" />
-                                  </Button>
-                                  <Input
-                                    type="number"
-                                    min="0"
-                                    value={procedure.verantwortlich}
-                                    onChange={(e) => updateProcedureValue(moduleKey, index, 'verantwortlich', parseInt(e.target.value) || 0)}
-                                     className="w-16 h-8 text-center bg-background border-2 border-primary/20 focus:border-primary font-medium"
-                                  />
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 w-6 p-0"
-                                    onClick={() => updateProcedureValue(moduleKey, index, 'verantwortlich', procedure.verantwortlich + 1)}
-                                  >
-                                    <Plus className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                              </td>
-                              <td className="text-center p-4">
-                                <div className="flex items-center justify-center gap-1">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 w-6 p-0"
-                                    onClick={() => updateProcedureValue(moduleKey, index, 'instruierend', procedure.instruierend - 1)}
-                                  >
-                                    <Minus className="w-3 h-3" />
-                                  </Button>
-                                  <Input
-                                    type="number"
-                                    min="0"
-                                    value={procedure.instruierend}
-                                    onChange={(e) => updateProcedureValue(moduleKey, index, 'instruierend', parseInt(e.target.value) || 0)}
-                                     className="w-16 h-8 text-center bg-background border-2 border-primary/20 focus:border-primary font-medium"
-                                  />
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 w-6 p-0"
-                                    onClick={() => updateProcedureValue(moduleKey, index, 'instruierend', procedure.instruierend + 1)}
-                                  >
-                                    <Plus className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                              </td>
-                              <td className="text-center p-4">
-                                <div className="flex items-center justify-center gap-1">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 w-6 p-0"
-                                    onClick={() => updateProcedureValue(moduleKey, index, 'assistent', procedure.assistent - 1)}
-                                  >
-                                    <Minus className="w-3 h-3" />
-                                  </Button>
-                                  <Input
-                                    type="number"
-                                    min="0"
-                                    value={procedure.assistent}
-                                    onChange={(e) => updateProcedureValue(moduleKey, index, 'assistent', parseInt(e.target.value) || 0)}
-                                    className="w-16 h-8 text-center bg-background border-2 border-primary/20 focus:border-primary font-medium"
-                                  />
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 w-6 p-0"
-                                    onClick={() => updateProcedureValue(moduleKey, index, 'assistent', procedure.assistent + 1)}
-                                  >
-                                    <Plus className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                              </td>
-                              <td className="text-center p-4">
-                                <Badge 
-                                  variant={procedure.total >= procedure.minimum ? "default" : "secondary"}
-                                  className="font-medium"
-                                >
-                                  {procedure.total}
-                                </Badge>
-                              </td>
+                    </CardHeader>
+                    
+                    <CardContent className="p-0">
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead className="border-b bg-muted/50">
+                            <tr>
+                              <th className="text-left p-4 font-medium">Prozedur</th>
+                              <th className="text-center p-4 font-medium w-24">Minimum</th>
+                              <th className="text-center p-4 font-medium w-32">Verantwortlich</th>
+                              <th className="text-center p-4 font-medium w-32">Instruierend</th>
+                              <th className="text-center p-4 font-medium w-32">Assistent</th>
+                              <th className="text-center p-4 font-medium w-24">Total</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            ))}
-          </Tabs>
-        </CardContent>
-
-        <div className="border-t border-card-border p-6 bg-gradient-subtle">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-muted-foreground">
-              Gesamtanzahl Eingriffe: {Object.values(modules).reduce((sum, mod) => sum + mod.totalCount, 0)}
-            </div>
-            <div className="flex gap-3">
-              <Button 
-                variant="outline" 
-                onClick={() => onOpenChange(false)}
-                disabled={isSaving}
-              >
-                Abbrechen
-              </Button>
-              <Button 
-                onClick={handleSave}
-                disabled={isSaving || Object.values(modules).every(mod => mod.totalCount === 0)}
-                className="gap-2"
-              >
-                <Save className="w-4 h-4" />
-                {isSaving ? 'Speichere...' : 'Prozeduren speichern'}
-              </Button>
+                          </thead>
+                          <tbody>
+                            {moduleData.procedures.map((procedure, index) => (
+                              <tr key={procedure.id} className="border-b hover:bg-muted/50 transition-colors">
+                                <td className="p-4">
+                                  <div className="font-medium">{procedure.name}</div>
+                                  {savedModules[moduleKey]?.procedures[index]?.total > 0 && (
+                                    <div className="text-xs text-muted-foreground mt-1">
+                                      Gespeichert: V:{savedModules[moduleKey].procedures[index].verantwortlich} I:{savedModules[moduleKey].procedures[index].instruierend} A:{savedModules[moduleKey].procedures[index].assistent}
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="text-center p-4">
+                                  <Badge variant="outline">{procedure.minimum}</Badge>
+                                </td>
+                                <td className="text-center p-4">
+                                  <div className="flex items-center justify-center gap-1">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 w-6 p-0"
+                                      onClick={() => updateProcedureValue(moduleKey, index, 'verantwortlich', procedure.verantwortlich - 1)}
+                                    >
+                                      <Minus className="w-3 h-3" />
+                                    </Button>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      value={procedure.verantwortlich}
+                                      onChange={(e) => updateProcedureValue(moduleKey, index, 'verantwortlich', parseInt(e.target.value) || 0)}
+                                      className="w-16 h-8 text-center"
+                                    />
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 w-6 p-0"
+                                      onClick={() => updateProcedureValue(moduleKey, index, 'verantwortlich', procedure.verantwortlich + 1)}
+                                    >
+                                      <Plus className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                </td>
+                                <td className="text-center p-4">
+                                  <div className="flex items-center justify-center gap-1">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 w-6 p-0"
+                                      onClick={() => updateProcedureValue(moduleKey, index, 'instruierend', procedure.instruierend - 1)}
+                                    >
+                                      <Minus className="w-3 h-3" />
+                                    </Button>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      value={procedure.instruierend}
+                                      onChange={(e) => updateProcedureValue(moduleKey, index, 'instruierend', parseInt(e.target.value) || 0)}
+                                      className="w-16 h-8 text-center"
+                                    />
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 w-6 p-0"
+                                      onClick={() => updateProcedureValue(moduleKey, index, 'instruierend', procedure.instruierend + 1)}
+                                    >
+                                      <Plus className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                </td>
+                                <td className="text-center p-4">
+                                  <div className="flex items-center justify-center gap-1">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 w-6 p-0"
+                                      onClick={() => updateProcedureValue(moduleKey, index, 'assistent', procedure.assistent - 1)}
+                                    >
+                                      <Minus className="w-3 h-3" />
+                                    </Button>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      value={procedure.assistent}
+                                      onChange={(e) => updateProcedureValue(moduleKey, index, 'assistent', parseInt(e.target.value) || 0)}
+                                      className="w-16 h-8 text-center"
+                                    />
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 w-6 p-0"
+                                      onClick={() => updateProcedureValue(moduleKey, index, 'assistent', procedure.assistent + 1)}
+                                    >
+                                      <Plus className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                </td>
+                                <td className="text-center p-4">
+                                  <Badge 
+                                    variant={procedure.total >= procedure.minimum ? "default" : "secondary"}
+                                    className="font-medium"
+                                  >
+                                    {procedure.total}
+                                  </Badge>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              ))}
+            </Tabs>
+          </div>
+          
+          {/* Footer */}
+          <div className="border-t p-6 bg-muted/20">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                Gesamtanzahl Eingriffe: {Object.values(modules).reduce((sum, mod) => sum + mod.totalCount, 0)}
+              </div>
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={() => onOpenChange(false)}
+                  disabled={isSaving}
+                >
+                  Abbrechen
+                </Button>
+                <Button 
+                  onClick={handleSave}
+                  disabled={isSaving || Object.values(modules).every(mod => mod.totalCount === 0)}
+                  className="gap-2"
+                >
+                  <Save className="w-4 h-4" />
+                  {isSaving ? 'Speichere...' : 'Prozeduren speichern'}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </Card>
+        )}
+      </div>
     </div>
   );
 };
