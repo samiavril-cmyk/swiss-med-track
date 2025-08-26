@@ -54,6 +54,17 @@ export const AdminCMS: React.FC = () => {
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [formData, setFormData] = useState<Partial<Course>>({});
 
+  // Price formatting utility
+  const formatPrice = (price: number | null, currency: string = 'CHF') => {
+    if (price === null || price === undefined) {
+      return 'k.A.';
+    }
+    if (price === 0) {
+      return 'Kostenlos';
+    }
+    return `${price} ${currency}`;
+  };
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/auth');
@@ -121,8 +132,8 @@ export const AdminCMS: React.FC = () => {
       specialty: '',
       language: 'Deutsch',
       modality: 'onsite',
-      price: 0,
-      currency: 'EUR',
+      price: null, // Default to price unknown
+      currency: 'CHF', // Default currency
       difficulty_level: 'beginner',
       tags: [],
       status: 'draft'
@@ -294,7 +305,7 @@ export const AdminCMS: React.FC = () => {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {course.price ? `${course.price} ${course.currency}` : 'k.A.'}
+                          {formatPrice(course.price, course.currency)}
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-2">
@@ -352,9 +363,9 @@ export const AdminCMS: React.FC = () => {
 
         {/* Edit/Create Course Dialog */}
         <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background text-foreground border border-border">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-foreground">
                 {editingCourse ? 'Kurs bearbeiten' : 'Neuen Kurs erstellen'}
               </DialogTitle>
             </DialogHeader>
@@ -461,32 +472,67 @@ export const AdminCMS: React.FC = () => {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="price">Preis</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  value={formData.price || ''}
-                  onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
-                  placeholder="0.00"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="currency">Währung</Label>
-                <Select
-                  value={formData.currency || 'EUR'}
-                  onValueChange={(value) => handleInputChange('currency', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="EUR">EUR</SelectItem>
-                    <SelectItem value="CHF">CHF</SelectItem>
-                    <SelectItem value="USD">USD</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="price" className="text-foreground">Preis</Label>
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  <Button
+                    type="button"
+                    variant={formData.price === 0 ? "default" : "outline"}
+                    onClick={() => handleInputChange('price', 0)}
+                    className="text-xs"
+                  >
+                    Kostenlos
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={formData.price === null ? "default" : "outline"}
+                    onClick={() => handleInputChange('price', null)}
+                    className="text-xs"
+                  >
+                    k.A.
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={formData.price && formData.price > 0 ? "default" : "outline"}
+                    onClick={() => handleInputChange('price', 1)}
+                    className="text-xs"
+                  >
+                    Kostenpflichtig
+                  </Button>
+                </div>
+                
+                {formData.price && formData.price > 0 && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Input
+                        type="number"
+                        placeholder="Preis eingeben"
+                        value={formData.price || ''}
+                        onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 1)}
+                        className="bg-background text-foreground border-input"
+                      />
+                    </div>
+                    <div>
+                      <Select
+                        value={formData.currency || 'CHF'}
+                        onValueChange={(value) => handleInputChange('currency', value)}
+                      >
+                        <SelectTrigger className="bg-background text-foreground border-input">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-background text-foreground border-border">
+                          <SelectItem value="CHF">CHF</SelectItem>
+                          <SelectItem value="EUR">EUR</SelectItem>
+                          <SelectItem value="USD">USD</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="text-sm text-muted-foreground mt-2">
+                  Aktuelle Anzeige: <span className="font-medium">{formatPrice(formData.price, formData.currency)}</span>
+                </div>
               </div>
 
               <div className="space-y-2">
