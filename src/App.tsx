@@ -8,6 +8,7 @@ import Profile from "./pages/Profile";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
 import { FMHDashboard } from "./pages/FMHDashboard";
+import { AdminCMS } from "./pages/AdminCMS";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./hooks/useAuth";
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/courses/:id" element={<CourseDetail />} />
           <Route path="/profile/:handle" element={<Profile />} />
           <Route path="/fmh" element={<FMHDashboard />} />
+          <Route path="/admin" element={<AdminCMS />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

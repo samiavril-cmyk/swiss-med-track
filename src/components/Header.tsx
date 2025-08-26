@@ -1,12 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { User, BookOpen, GraduationCap, LogOut } from 'lucide-react';
+import { User, BookOpen, GraduationCap, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 export const Header: React.FC = () => {
   const { user, signOut } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      checkAdminRole();
+    }
+  }, [user]);
+
+  const checkAdminRole = async () => {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('user_id', user?.id)
+        .single();
+
+      setIsAdmin(profile?.role === 'admin');
+    } catch (error) {
+      console.error('Error checking admin role:', error);
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -40,6 +62,12 @@ export const Header: React.FC = () => {
               <Link to="/courses" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
                 Courses
               </Link>
+              {isAdmin && (
+                <Link to="/admin" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors flex items-center gap-1">
+                  <Settings className="h-4 w-4" />
+                  Admin
+                </Link>
+              )}
             </>
           ) : (
             <>
