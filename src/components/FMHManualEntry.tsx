@@ -230,7 +230,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-md flex items-center justify-center p-4">
       <Card className="medical-card-elegant w-full max-w-6xl max-h-[90vh] overflow-hidden">
         <CardHeader className="border-b border-card-border bg-gradient-subtle">
           <div className="flex items-center justify-between">
@@ -258,25 +258,25 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
           </div>
           
           {/* Header Information */}
-          <div className="mt-6 bg-card border border-card-border rounded-medical p-4">
+          <div className="mt-6 bg-primary/5 border-2 border-primary/20 rounded-medical p-4 shadow-md">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-medium">Stand:</span>
-                  <span>{currentDate}</span>
+                  <Calendar className="w-4 h-4 text-primary" />
+                  <span className="font-semibold text-card-foreground">Stand:</span>
+                  <span className="font-medium text-card-foreground">{currentDate}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-muted-foreground" />
-                  <span>{patientInfo.name} ({patientInfo.id})</span>
+                  <User className="w-4 h-4 text-primary" />
+                  <span className="font-medium text-card-foreground">{patientInfo.name} ({patientInfo.id})</span>
                 </div>
               </div>
-              <Badge variant="outline" className="gap-1">
+              <Badge variant="default" className="gap-1 bg-primary text-primary-foreground">
                 <Stethoscope className="w-3 h-3" />
                 {patientInfo.institution}
               </Badge>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-primary/70 font-medium">
               SIWF | ISFM | info@siwf.ch | www.siwf.ch
             </p>
           </div>
@@ -310,7 +310,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                   <CardContent className="p-0">
                     <div className="overflow-x-auto">
                       <table className="w-full">
-                        <thead className="border-b border-card-border bg-muted/50">
+                        <thead className="border-b border-card-border bg-primary/5">
                           <tr>
                             <th className="text-left p-4 font-medium">Prozedur</th>
                             <th className="text-center p-4 font-medium w-24">Minimum</th>
@@ -322,7 +322,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                         </thead>
                         <tbody>
                           {moduleData.procedures.map((procedure, index) => (
-                            <tr key={index} className="border-b border-card-border hover:bg-muted/30">
+                            <tr key={index} className="border-b border-card-border hover:bg-primary/5 transition-colors">
                               <td className="p-4">
                                 <div className="font-medium">{procedure.name}</div>
                               </td>
@@ -344,7 +344,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                                     min="0"
                                     value={procedure.verantwortlich}
                                     onChange={(e) => updateProcedureValue(moduleKey, index, 'verantwortlich', parseInt(e.target.value) || 0)}
-                                    className="w-16 h-8 text-center"
+                                     className="w-16 h-8 text-center bg-background border-2 border-primary/20 focus:border-primary font-medium"
                                   />
                                   <Button
                                     variant="ghost"
@@ -371,7 +371,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                                     min="0"
                                     value={procedure.instruierend}
                                     onChange={(e) => updateProcedureValue(moduleKey, index, 'instruierend', parseInt(e.target.value) || 0)}
-                                    className="w-16 h-8 text-center"
+                                     className="w-16 h-8 text-center bg-background border-2 border-primary/20 focus:border-primary font-medium"
                                   />
                                   <Button
                                     variant="ghost"
@@ -398,7 +398,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                                     min="0"
                                     value={procedure.assistent}
                                     onChange={(e) => updateProcedureValue(moduleKey, index, 'assistent', parseInt(e.target.value) || 0)}
-                                    className="w-16 h-8 text-center"
+                                    className="w-16 h-8 text-center bg-background border-2 border-primary/20 focus:border-primary font-medium"
                                   />
                                   <Button
                                     variant="ghost"
