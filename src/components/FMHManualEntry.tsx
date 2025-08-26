@@ -70,7 +70,14 @@ const initialModules: Record<string, ModuleData> = {
       { name: 'Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie', minimum: 20, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
       { name: 'Veneneingriffe (Varizenchirurgie, Port/Pacemaker)', minimum: 30, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
       { name: 'Laparoskopie, Laparotomie', minimum: 30, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Weitere zählbare Eingriffe', minimum: 20, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 }
+      { name: 'Weitere zählbare Eingriffe', minimum: 20, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Thoraxchirurgische Eingriffe', minimum: 0, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Urologische Eingriffe', minimum: 0, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Gefässchirurgische Eingriffe', minimum: 0, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Kompartimentelle Spaltungen', minimum: 0, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Diagnostische und therapeutische Endoskopien', minimum: 0, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Mamma-Eingriffe', minimum: 0, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Operation an Nerven', minimum: 0, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 }
     ]
   },
   'viszeralchirurgie': {
@@ -79,15 +86,55 @@ const initialModules: Record<string, ModuleData> = {
     totalCount: 0,
     procedures: [
       { name: 'Abdominalhernien (Narbenhernien, videoskopischer Repair)', minimum: 25, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Endokrine Chirurgie', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Splenektomie', minimum: 10, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Dickdarmstoma', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Kolonresektionen', minimum: 25, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Rektumresektionen', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Ösophaguschirurgie', minimum: 10, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Magenchirurgie', minimum: 20, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Pankreaschirurgie', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
-      { name: 'Leberschirurgie', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 }
+      { name: 'Mageneingriffe (Ulkusnaht, Gastroenterostomie, chir. Gastrostomie, Resektion)', minimum: 7, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata)', minimum: 25, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Kolorektal (Segment- und Teilresektion)', minimum: 10, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Hepatobiliär (exkl. Cholezystektomie), Leberteilresektion, Pankreasteilresektion, Bariatrische Chirurgie', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Endokrine Chirurgie (Thyreoidektomie, Parathyreoidektomie, Adrenalektomie)', minimum: 10, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie', minimum: 35, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Splenektomie', minimum: 3, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Dickdarmstoma', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Laparoskopie, Laparotomie', minimum: 40, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 }
+    ]
+  },
+  'traumatologie': {
+    title: 'Modul Traumatologie des Bewegungsapparates',
+    totalMinimum: 165,
+    totalCount: 0,
+    procedures: [
+      { name: 'Metallentfernungen, Spickungen', minimum: 30, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Reposition Luxation/Frakturen, konservative Frakturbehandlung', minimum: 25, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Eingriffe Sehnen/Ligamente', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Arthroskopie', minimum: 10, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Osteosynthese Schaftfrakturen', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Osteosynthese gelenksnaher (metaphysärer) Frakturen', minimum: 40, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Osteosynthese komplexer Frakturen (intraartikulären Frakturen an den grossen Röhrenknochen und am Mittel- und Rückfuss sowie Becken-/Azetabulumfrakturen)', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Handchirurgie (exklusiv Wundversorgung)', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Kleine Amputationen', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Grosse Amputationen', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 }
+    ]
+  },
+  'kombination': {
+    title: 'Modul Kombination',
+    totalMinimum: 165,
+    totalCount: 0,
+    procedures: [
+      { name: 'Abdominalhernien (Narbenhernien, videoskopischer Repair)', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Mageneingriffe (Ulkusnaht, Gastroenterostomie, chir. Gastrostomie, Resektion)', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata)', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Kolorektal (Segment- und Teilresektion)', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Endokrine Chirurgie (Thyreoidektomie, Parathyreoidektomie, Adrenalektomie)', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie', minimum: 20, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Dickdarmstoma', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Metallentfernungen, Spickungen', minimum: 20, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Reposition Luxation/Frakturen, konservative Frakturbehandlung', minimum: 15, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Eingriffe Sehnen/Ligamente', minimum: 5, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Osteosynthese Schaftfrakturen', minimum: 10, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Osteosynthese gelenksnaher (metaphysärer) Frakturen', minimum: 20, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Handchirurgie (exklusiv Wundversorgung)', minimum: 10, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Laparoskopie, Laparotomie', minimum: 11, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Kleine Amputationen', minimum: 2, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 },
+      { name: 'Grosse Amputationen', minimum: 2, verantwortlich: 0, instruierend: 0, assistent: 0, total: 0 }
     ]
   }
 };
@@ -172,8 +219,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
               procedure_name: procedure.name,
               role_in_surgery: 'responsible',
               performed_date: new Date().toISOString().split('T')[0],
-              notes: `Manuelle Eingabe - ${moduleData.title}`,
-              weighted_score: 1.0 // Will be calculated by trigger
+              notes: `Manuelle Eingabe - ${moduleData.title}`
             });
           }
           
@@ -184,8 +230,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
               procedure_name: procedure.name,
               role_in_surgery: 'instructing',
               performed_date: new Date().toISOString().split('T')[0],
-              notes: `Manuelle Eingabe - ${moduleData.title}`,
-              weighted_score: 0.8 // Will be calculated by trigger
+              notes: `Manuelle Eingabe - ${moduleData.title}`
             });
           }
           
@@ -196,8 +241,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
               procedure_name: procedure.name,
               role_in_surgery: 'assistant',
               performed_date: new Date().toISOString().split('T')[0],
-              notes: `Manuelle Eingabe - ${moduleData.title}`,
-              weighted_score: 0.5 // Will be calculated by trigger
+              notes: `Manuelle Eingabe - ${moduleData.title}`
             });
           }
         }
@@ -284,10 +328,12 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
 
         <CardContent className="p-6 overflow-auto max-h-[60vh]">
           <Tabs defaultValue="basis_notfall" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="basis_notfall">Basis Notfallchirurgie</TabsTrigger>
               <TabsTrigger value="basis_allgemein">Basis Allgemeinchirurgie</TabsTrigger>
               <TabsTrigger value="viszeralchirurgie">Modul Viszeralchirurgie</TabsTrigger>
+              <TabsTrigger value="traumatologie">Modul Traumatologie</TabsTrigger>
+              <TabsTrigger value="kombination">Modul Kombination</TabsTrigger>
             </TabsList>
 
             {Object.entries(modules).map(([moduleKey, moduleData]) => (
