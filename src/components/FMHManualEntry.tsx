@@ -301,6 +301,18 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
             </Button>
           </div>
           
+          {/* Save Button at Top */}
+          <div className="mt-4 flex justify-end">
+            <Button 
+              onClick={handleSave}
+              disabled={isSaving || Object.values(modules).every(mod => mod.totalCount === 0)}
+              className="gap-2"
+            >
+              <Save className="w-4 h-4" />
+              {isSaving ? 'Speichere...' : 'Prozeduren speichern'}
+            </Button>
+          </div>
+          
           {/* Header Information */}
           <div className="mt-6 bg-primary/5 border-2 border-primary/20 rounded-medical p-4 shadow-md">
             <div className="flex items-center justify-between mb-4">
