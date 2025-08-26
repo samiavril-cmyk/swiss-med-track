@@ -99,15 +99,15 @@ function parseModuleTotals(line: string): ModuleData | null {
 }
 
 function parseProcedureLine(line: string, currentModule: string): ProcedureData | null {
-  // Extract numbers from end of line
-  const numbersPattern = /(\s+\d+){1,5}$/;
-  const match = line.match(numbersPattern);
+  // Extract numbers from end of line using simple regex
+  const numberRegex = /(\s+\d+)+$/;
+  const match = line.match(numberRegex);
   
   if (!match) return null;
   
-  const tail = match[0];
-  const name = line.slice(0, -tail.length).trim();
-  const numbers = tail.trim().split(/\s+/).map(n => parseInt(n));
+  const numberText = match[0];
+  const name = line.slice(0, -numberText.length).trim();
+  const numbers = numberText.trim().split(/\s+/).map(n => parseInt(n));
   
   // Map numbers based on count (as per masterplan)
   let minimum = 0, responsible = 0, instructing = 0, assistant = 0, total = 0;
