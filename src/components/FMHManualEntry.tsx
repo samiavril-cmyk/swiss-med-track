@@ -20,6 +20,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
+interface Procedure {
+  id: string;
+  title_de: string;
+  code: string;
+}
+
 interface ProcedureEntry {
   name: string;
   minimum: number;
@@ -153,6 +159,36 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
     institution: 'USZ'
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [procedures, setProcedures] = useState<Procedure[]>([]);
+
+  // Load procedures from database
+  useEffect(() => {
+    const loadProcedures = async () => {
+      const { data, error } = await supabase
+        .from('procedures')
+        .select('id, title_de, code')
+        .eq('active', true);
+      
+      if (error) {
+        console.error('Error loading procedures:', error);
+        return;
+      }
+      
+      setProcedures(data || []);
+    };
+    
+    loadProcedures();
+  }, []);
+
+  // Prevent background scrolling when modal is open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = 'unset';
+      };
+    }
+  }, [open]);
 
   useEffect(() => {
     if (user) {
@@ -199,6 +235,47 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
     });
   };
 
+  // Find or create procedure by name
+  const findOrCreateProcedure = async (procedureName: string): Promise<string | null> => {
+    // First try exact match
+    let procedure = procedures.find(p => 
+      p.title_de.toLowerCase() === procedureName.toLowerCase()
+    );
+    
+    if (procedure) {
+      return procedure.id;
+    }
+    
+    // Try fuzzy matching
+    procedure = procedures.find(p => 
+      p.title_de.toLowerCase().includes(procedureName.toLowerCase()) ||
+      procedureName.toLowerCase().includes(p.title_de.toLowerCase())
+    );
+    
+    if (procedure) {
+      return procedure.id;
+    }
+    
+    // Create new procedure if not found
+    try {
+      const { data, error } = await supabase
+        .from('procedures')
+        .insert({
+          title_de: procedureName,
+          code: `MANUAL_${Date.now()}`,
+          active: true
+        })
+        .select('id')
+        .single();
+        
+      if (error) throw error;
+      return data.id;
+    } catch (error) {
+      console.error('Error creating procedure:', error);
+      return null;
+    }
+  };
+
   const handleSave = async () => {
     if (!user) {
       toast.error('Sie müssen angemeldet sein um Daten zu speichern');
@@ -212,11 +289,20 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
       
       for (const [moduleKey, moduleData] of Object.entries(modules)) {
         for (const procedure of moduleData.procedures) {
+          if (procedure.total === 0) continue; // Skip empty procedures
+          
+          // Find or create procedure ID
+          const procedureId = await findOrCreateProcedure(procedure.name);
+          if (!procedureId) {
+            console.warn(`Could not find or create procedure: ${procedure.name}`);
+            continue;
+          }
+          
           // Add responsible entries
           for (let i = 0; i < procedure.verantwortlich; i++) {
             procedureLogs.push({
               user_id: user.id,
-              procedure_name: procedure.name,
+              procedure_id: procedureId,
               role_in_surgery: 'responsible',
               performed_date: new Date().toISOString().split('T')[0],
               notes: `Manuelle Eingabe - ${moduleData.title}`
@@ -227,7 +313,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
           for (let i = 0; i < procedure.instruierend; i++) {
             procedureLogs.push({
               user_id: user.id,
-              procedure_name: procedure.name,
+              procedure_id: procedureId,
               role_in_surgery: 'instructing',
               performed_date: new Date().toISOString().split('T')[0],
               notes: `Manuelle Eingabe - ${moduleData.title}`
@@ -238,7 +324,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
           for (let i = 0; i < procedure.assistent; i++) {
             procedureLogs.push({
               user_id: user.id,
-              procedure_name: procedure.name,
+              procedure_id: procedureId,
               role_in_surgery: 'assistant',
               performed_date: new Date().toISOString().split('T')[0],
               notes: `Manuelle Eingabe - ${moduleData.title}`
@@ -255,17 +341,19 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
         if (error) throw error;
 
         toast.success(`${procedureLogs.length} Prozeduren erfolgreich gespeichert`);
-        onSuccess?.();
-        onOpenChange(false);
         
         // Reset form
         setModules(initialModules);
+        
+        // Call onSuccess callback to refresh FMH progress
+        onSuccess?.();
+        onOpenChange(false);
       } else {
         toast.warning('Keine Prozeduren zum Speichern gefunden');
       }
     } catch (error) {
       console.error('Error saving procedures:', error);
-      toast.error('Fehler beim Speichern der Prozeduren');
+      toast.error(`Fehler beim Speichern der Prozeduren: ${error.message || error}`);
     } finally {
       setIsSaving(false);
     }
@@ -275,7 +363,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-md flex items-center justify-center p-4">
-      <Card className="medical-card-elegant w-full max-w-6xl max-h-[90vh] overflow-hidden">
+      <Card className="medical-card-elegant w-full max-w-6xl max-h-[90vh] overflow-hidden" style={{ overscrollBehavior: 'contain' }}>
         <CardHeader className="border-b border-card-border bg-gradient-subtle">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -338,7 +426,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
           </div>
         </CardHeader>
 
-        <CardContent className="p-6 overflow-auto max-h-[60vh]">
+        <CardContent className="p-6 overflow-auto max-h-[60vh]" style={{ overscrollBehavior: 'contain' }}>
           <Tabs defaultValue="basis_notfall" className="w-full">
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="basis_notfall">Basis Notfallchirurgie</TabsTrigger>
