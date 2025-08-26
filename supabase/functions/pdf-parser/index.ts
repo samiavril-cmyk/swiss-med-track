@@ -100,7 +100,7 @@ function parseModuleTotals(line: string): ModuleData | null {
 
 function parseProcedureLine(line: string, currentModule: string): ProcedureData | null {
   // Extract numbers from end of line
-  const numbersPattern = /(?P<tail>(\s+\d+){1,5})$/;
+  const numbersPattern = /(\s+\d+){1,5}$/;
   const match = line.match(numbersPattern);
   
   if (!match) return null;
