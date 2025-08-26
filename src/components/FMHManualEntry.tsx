@@ -218,7 +218,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
     try {
       console.log('🔍 FMHManualEntry - Loading data for user ID:', user.id);
       
-      // Load existing procedure logs for the user
+      // Load existing procedure logs for the user grouped by procedure and role
       const { data: logs, error } = await supabase
         .from('procedure_logs')
         .select(`
@@ -237,7 +237,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
           )
         `)
         .eq('user_id', user.id)
-        .gte('performed_date', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]); // Last year
+        .gte('performed_date', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
 
       if (error) {
         console.error('Error loading existing data:', error);
@@ -246,7 +246,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
 
       console.log('📊 FMHManualEntry - Loaded', logs?.length || 0, 'procedure logs for user', user.id);
 
-      // Group logs by module and procedure, count by role
+      // Group logs by module and procedure name, count by role
       const moduleData: Record<string, Record<string, { verantwortlich: number; instruierend: number; assistent: number }>> = {};
       
       logs?.forEach(log => {
@@ -269,15 +269,47 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
         }
       });
 
-      // Update saved modules state with loaded data
+      // Match procedure data to our form structure
       const newSavedModules = { ...initialModules };
       const newCurrentModules = { ...initialModules };
       
       Object.keys(moduleData).forEach(moduleKey => {
         if (newSavedModules[moduleKey]) {
           newSavedModules[moduleKey].procedures.forEach((procedure, index) => {
-            if (moduleData[moduleKey][procedure.name]) {
-              const counts = moduleData[moduleKey][procedure.name];
+            // Try to find matching procedure in database logs
+            const matchingProcedure = Object.keys(moduleData[moduleKey]).find(dbProcName => {
+              const normalizedForm = procedure.name.toLowerCase().trim();
+              const normalizedDb = dbProcName.toLowerCase().trim();
+              
+              // Exact match
+              if (normalizedForm === normalizedDb) return true;
+              
+              // Partial match - check if either contains the other
+              if (normalizedForm.includes(normalizedDb) || normalizedDb.includes(normalizedForm)) return true;
+              
+              // Check for common abbreviations/variations
+              const commonMappings = {
+                'appendektomie': ['appendix', 'appendek'],
+                'cholezystektomie': ['cholezystek', 'galle'],
+                'wundversorgung': ['wund', 'naht'],
+                'thoraxdrainage': ['thorax', 'drainage'],
+                'laparoskopie': ['lap', 'minimalinvasiv']
+              };
+              
+              for (const [key, variants] of Object.entries(commonMappings)) {
+                if (normalizedForm.includes(key)) {
+                  return variants.some(variant => normalizedDb.includes(variant));
+                }
+                if (normalizedDb.includes(key)) {
+                  return variants.some(variant => normalizedForm.includes(variant));
+                }
+              }
+              
+              return false;
+            });
+            
+            if (matchingProcedure && moduleData[moduleKey][matchingProcedure]) {
+              const counts = moduleData[moduleKey][matchingProcedure];
               newSavedModules[moduleKey].procedures[index] = {
                 ...procedure,
                 verantwortlich: counts.verantwortlich,
@@ -285,7 +317,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                 assistent: counts.assistent,
                 total: counts.verantwortlich + counts.instruierend + counts.assistent
               };
-              // Initialize current modules with same values
+              // Initialize current modules with same values (so form shows saved data)
               newCurrentModules[moduleKey].procedures[index] = {
                 ...procedure,
                 verantwortlich: counts.verantwortlich,
@@ -293,6 +325,8 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                 assistent: counts.assistent,
                 total: counts.verantwortlich + counts.instruierend + counts.assistent
               };
+              
+              console.log(`✅ Matched "${procedure.name}" to "${matchingProcedure}" - V:${counts.verantwortlich} I:${counts.instruierend} A:${counts.assistent}`);
             }
           });
           
@@ -308,6 +342,8 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
       
       setSavedModules(newSavedModules);
       setModules(newCurrentModules);
+      
+      console.log('✅ Form initialized with existing data');
     } catch (error) {
       console.error('Error loading existing procedure data:', error);
     }
@@ -564,8 +600,18 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
         
         toast.success(message);
         
-        // Update saved modules to current state
+        // Update saved modules to current state (to track what's been saved)
         setSavedModules({ ...modules });
+        
+        // Reset form to show saved state (clear any additional unsaved entries)
+        const resetModules = { ...modules };
+        Object.keys(resetModules).forEach(moduleKey => {
+          resetModules[moduleKey].procedures.forEach((proc, index) => {
+            // Keep the saved values, reset any additional unsaved input
+            resetModules[moduleKey].procedures[index] = { ...proc };
+          });
+        });
+        setModules(resetModules);
         
         // Call onSuccess callback to refresh FMH progress
         console.log('🔄 Refreshing FMH progress...');
@@ -695,9 +741,14 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                         <tbody>
                           {moduleData.procedures.map((procedure, index) => (
                             <tr key={index} className="border-b border-card-border hover:bg-primary/5 transition-colors">
-                              <td className="p-4">
+                               <td className="p-4">
                                 <div className="font-medium">{procedure.name}</div>
-                              </td>
+                                {savedModules[moduleKey].procedures[index].total > 0 && (
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    Gespeichert: V:{savedModules[moduleKey].procedures[index].verantwortlich} I:{savedModules[moduleKey].procedures[index].instruierend} A:{savedModules[moduleKey].procedures[index].assistent}
+                                  </div>
+                                )}
+                               </td>
                               <td className="text-center p-4">
                                 <Badge variant="outline">{procedure.minimum}</Badge>
                               </td>
