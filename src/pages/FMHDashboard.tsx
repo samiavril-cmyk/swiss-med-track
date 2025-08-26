@@ -27,6 +27,7 @@ import { ProcedureQuickAdd } from '@/components/ProcedureQuickAdd';
 import { GapAnalysis } from '@/components/GapAnalysis';
 import { PDFUploadModal } from '@/components/PDFUploadModal';
 import { FMHManualEntry } from '@/components/FMHManualEntry';
+import { FMHCorrections } from '@/components/FMHCorrections';
 
 interface ModuleProgress {
   module_name: string;
@@ -56,6 +57,7 @@ export const FMHDashboard: React.FC = () => {
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [showPDFUpload, setShowPDFUpload] = useState(false);
   const [showManualEntry, setShowManualEntry] = useState(false);
+  const [showCorrections, setShowCorrections] = useState(false);
   const [userPgyLevel, setUserPgyLevel] = useState<number>(4);
 
   useEffect(() => {
@@ -108,6 +110,12 @@ export const FMHDashboard: React.FC = () => {
             });
 
           console.log('📈 Progress data for', module.key, ':', progressData);
+          console.log('🔍 Module data:', { 
+            key: module.key, 
+            title: module.title_de, 
+            minimum_required: module.minimum_required,
+            progress_raw: progressData 
+          });
 
           // Parse RPC tuple return to object format
           let progress = null;
@@ -243,9 +251,9 @@ export const FMHDashboard: React.FC = () => {
               <Download className="w-4 h-4" />
               Export
             </Button>
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowCorrections(true)}>
               <Settings className="w-4 h-4" />
-              Einstellungen
+              Korrekturen
             </Button>
           </div>
         </div>
@@ -281,11 +289,11 @@ export const FMHDashboard: React.FC = () => {
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <Activity className="w-4 h-4 text-muted-foreground" />
                       <Badge variant="outline" className="text-xs">
-                        {Math.round(module.progress?.total_weighted_score || 0)}/{module.minimum_required || '?'}
+                        {parseInt((module.progress?.total_weighted_score || 0).toString())}/{module.minimum_required || '?'}
                       </Badge>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      V:{Math.round(module.progress?.responsible_count || 0)} I:{Math.round(module.progress?.instructing_count || 0)} A:{Math.round(module.progress?.assistant_count || 0)}
+                      V:{parseInt((module.progress?.responsible_count || 0).toString())} I:{parseInt((module.progress?.instructing_count || 0).toString())} A:{parseInt((module.progress?.assistant_count || 0).toString())}
                     </div>
                   </div>
                 </div>
@@ -313,7 +321,7 @@ export const FMHDashboard: React.FC = () => {
                 <p className="text-sm text-muted-foreground">Gesamtfortschritt</p>
                 <p className="text-2xl font-bold text-card-foreground">
                   {modules.length > 0 
-                    ? Math.round(modules.reduce((sum, m) => sum + (m.progress?.progress_percentage || 0), 0) / modules.length)
+                    ? parseInt((modules.reduce((sum, m) => sum + (m.progress?.progress_percentage || 0), 0) / modules.length).toString())
                     : 0}%
                 </p>
               </div>
@@ -342,10 +350,10 @@ export const FMHDashboard: React.FC = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Eingriffe Total</p>
                 <p className="text-2xl font-bold text-card-foreground">
-                  {Math.round(modules.reduce((sum, m) => 
+                  {parseInt(modules.reduce((sum, m) => 
                     sum + (m.progress?.responsible_count || 0) + 
                     (m.progress?.instructing_count || 0) + 
-                    (m.progress?.assistant_count || 0), 0))}
+                    (m.progress?.assistant_count || 0), 0).toString())}
                 </p>
               </div>
             </div>
@@ -389,6 +397,13 @@ export const FMHDashboard: React.FC = () => {
         <PDFUploadModal
           open={showPDFUpload}
           onOpenChange={setShowPDFUpload}
+          onSuccess={loadModulesAndProgress}
+        />
+
+        {/* Corrections Modal */}
+        <FMHCorrections
+          open={showCorrections}
+          onOpenChange={setShowCorrections}
           onSuccess={loadModulesAndProgress}
         />
       </main>
