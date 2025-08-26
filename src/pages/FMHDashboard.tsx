@@ -18,13 +18,15 @@ import {
   Users,
   Plus,
   Download,
-  Upload
+  Upload,
+  FileText
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { FMHModuleDetail } from '@/components/FMHModuleDetail';
 import { ProcedureQuickAdd } from '@/components/ProcedureQuickAdd';
 import { GapAnalysis } from '@/components/GapAnalysis';
 import { PDFUploadModal } from '@/components/PDFUploadModal';
+import { FMHManualEntry } from '@/components/FMHManualEntry';
 
 interface ModuleProgress {
   module_name: string;
@@ -53,6 +55,7 @@ export const FMHDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [showPDFUpload, setShowPDFUpload] = useState(false);
+  const [showManualEntry, setShowManualEntry] = useState(false);
   const [userPgyLevel, setUserPgyLevel] = useState<number>(4);
 
   useEffect(() => {
@@ -187,6 +190,15 @@ export const FMHDashboard: React.FC = () => {
             >
               <Plus className="w-4 h-4" />
               Prozedur erfassen
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2"
+              onClick={() => setShowManualEntry(true)}
+            >
+              <FileText className="w-4 h-4" />
+              Manual eingabe
             </Button>
             <Button 
               variant="outline" 
@@ -335,6 +347,13 @@ export const FMHDashboard: React.FC = () => {
             }}
           />
         )}
+
+        {/* Manual Entry Modal */}
+        <FMHManualEntry
+          open={showManualEntry}
+          onOpenChange={setShowManualEntry}
+          onSuccess={loadModulesAndProgress}
+        />
 
         {/* PDF Upload Modal */}
         <PDFUploadModal
