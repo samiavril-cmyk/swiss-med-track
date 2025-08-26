@@ -348,6 +348,7 @@ export type Database = {
           currency: string | null
           description: string | null
           difficulty_level: string | null
+          end_date: string | null
           has_certificate: boolean | null
           id: string
           is_featured: boolean | null
@@ -357,8 +358,10 @@ export type Database = {
           points: number | null
           price: number | null
           provider_id: string
+          registration_deadline: string | null
           requirements: string | null
           specialty: string | null
+          start_date: string | null
           status: string | null
           tags: string[] | null
           title: string
@@ -378,6 +381,7 @@ export type Database = {
           currency?: string | null
           description?: string | null
           difficulty_level?: string | null
+          end_date?: string | null
           has_certificate?: boolean | null
           id?: string
           is_featured?: boolean | null
@@ -387,8 +391,10 @@ export type Database = {
           points?: number | null
           price?: number | null
           provider_id: string
+          registration_deadline?: string | null
           requirements?: string | null
           specialty?: string | null
+          start_date?: string | null
           status?: string | null
           tags?: string[] | null
           title: string
@@ -408,6 +414,7 @@ export type Database = {
           currency?: string | null
           description?: string | null
           difficulty_level?: string | null
+          end_date?: string | null
           has_certificate?: boolean | null
           id?: string
           is_featured?: boolean | null
@@ -417,8 +424,10 @@ export type Database = {
           points?: number | null
           price?: number | null
           provider_id?: string
+          registration_deadline?: string | null
           requirements?: string | null
           specialty?: string | null
+          start_date?: string | null
           status?: string | null
           tags?: string[] | null
           title?: string

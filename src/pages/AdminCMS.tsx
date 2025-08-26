@@ -2,16 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/hooks/useAuth';
+import { ImageUpload } from '@/components/ImageUpload';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { de } from 'date-fns/locale';
 import { 
   Plus, 
   Edit, 
@@ -21,7 +27,7 @@ import {
   Settings,
   BookOpen,
   Users,
-  Calendar
+  Calendar as CalendarIcon
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -36,11 +42,15 @@ interface Course {
   specialty: string;
   language: string;
   modality: string;
-  price: number;
+  price: number | null;
   currency: string;
   difficulty_level: string;
   tags: string[];
   status: string;
+  cover_image_url: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  registration_deadline: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -136,7 +146,11 @@ export const AdminCMS: React.FC = () => {
       currency: 'CHF', // Default currency
       difficulty_level: 'beginner',
       tags: [],
-      status: 'draft'
+      status: 'draft',
+      cover_image_url: null,
+      start_date: null,
+      end_date: null,
+      registration_deadline: null
     });
     setShowEditDialog(true);
   };
@@ -158,10 +172,14 @@ export const AdminCMS: React.FC = () => {
         specialty: formData.specialty || null,
         language: formData.language || 'Deutsch',
         modality: formData.modality || 'onsite',
-        price: formData.price || null,
-        currency: formData.currency || 'EUR',
+        price: formData.price,
+        currency: formData.currency || 'CHF',
         difficulty_level: formData.difficulty_level || 'beginner',
         status: formData.status || 'draft',
+        cover_image_url: formData.cover_image_url || null,
+        start_date: formData.start_date || null,
+        end_date: formData.end_date || null,
+        registration_deadline: formData.registration_deadline || null,
         tags: Array.isArray(formData.tags) 
           ? formData.tags 
           : (formData.tags as string)?.split(',').map(tag => tag.trim()) || []
@@ -370,207 +388,340 @@ export const AdminCMS: React.FC = () => {
               </DialogTitle>
             </DialogHeader>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Titel *</Label>
-                <Input
-                  id="title"
-                  value={formData.title || ''}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
-                  placeholder="Kurstitel eingeben"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="venue">Veranstalter *</Label>
-                <Input
-                  id="venue"
-                  value={formData.venue || ''}
-                  onChange={(e) => handleInputChange('venue', e.target.value)}
-                  placeholder="Veranstalter eingeben"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="city">Stadt *</Label>
-                <Input
-                  id="city"
-                  value={formData.city || ''}
-                  onChange={(e) => handleInputChange('city', e.target.value)}
-                  placeholder="Stadt eingeben"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="country">Land *</Label>
-                <Input
-                  id="country"
-                  value={formData.country || ''}
-                  onChange={(e) => handleInputChange('country', e.target.value)}
-                  placeholder="Land eingeben"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="specialty">Fachgebiet</Label>
-                <Input
-                  id="specialty"
-                  value={formData.specialty || ''}
-                  onChange={(e) => handleInputChange('specialty', e.target.value)}
-                  placeholder="Fachgebiet eingeben"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="language">Sprache</Label>
-                <Select
-                  value={formData.language || 'Deutsch'}
-                  onValueChange={(value) => handleInputChange('language', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Deutsch">Deutsch</SelectItem>
-                    <SelectItem value="English">English</SelectItem>
-                    <SelectItem value="Français">Français</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="modality">Modalität</Label>
-                <Select
-                  value={formData.modality || 'onsite'}
-                  onValueChange={(value) => handleInputChange('modality', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="onsite">Vor Ort</SelectItem>
-                    <SelectItem value="online">Online</SelectItem>
-                    <SelectItem value="hybrid">Hybrid</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="difficulty_level">Schwierigkeitsgrad</Label>
-                <Select
-                  value={formData.difficulty_level || 'beginner'}
-                  onValueChange={(value) => handleInputChange('difficulty_level', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="beginner">Anfänger</SelectItem>
-                    <SelectItem value="intermediate">Fortgeschritten</SelectItem>
-                    <SelectItem value="advanced">Experte</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="price" className="text-foreground">Preis</Label>
-                <div className="grid grid-cols-3 gap-2 mb-3">
-                  <Button
-                    type="button"
-                    variant={formData.price === 0 ? "default" : "outline"}
-                    onClick={() => handleInputChange('price', 0)}
-                    className="text-xs"
-                  >
-                    Kostenlos
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={formData.price === null ? "default" : "outline"}
-                    onClick={() => handleInputChange('price', null)}
-                    className="text-xs"
-                  >
-                    k.A.
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={formData.price && formData.price > 0 ? "default" : "outline"}
-                    onClick={() => handleInputChange('price', 1)}
-                    className="text-xs"
-                  >
-                    Kostenpflichtig
-                  </Button>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+              {/* Basic Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-foreground">Grundinformationen</h3>
                 
-                {formData.price && formData.price > 0 && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Input
-                        type="number"
-                        placeholder="Preis eingeben"
-                        value={formData.price || ''}
-                        onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 1)}
-                        className="bg-background text-foreground border-input"
-                      />
-                    </div>
-                    <div>
-                      <Select
-                        value={formData.currency || 'CHF'}
-                        onValueChange={(value) => handleInputChange('currency', value)}
+                <div className="space-y-2">
+                  <Label htmlFor="title" className="text-foreground">Titel *</Label>
+                  <Input
+                    id="title"
+                    value={formData.title || ''}
+                    onChange={(e) => handleInputChange('title', e.target.value)}
+                    placeholder="Kurstitel eingeben"
+                    className="bg-background text-foreground border-input"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="venue" className="text-foreground">Veranstalter *</Label>
+                  <Input
+                    id="venue"
+                    value={formData.venue || ''}
+                    onChange={(e) => handleInputChange('venue', e.target.value)}
+                    placeholder="Veranstalter eingeben"
+                    className="bg-background text-foreground border-input"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="city" className="text-foreground">Stadt</Label>
+                    <Input
+                      id="city"
+                      value={formData.city || ''}
+                      onChange={(e) => handleInputChange('city', e.target.value)}
+                      placeholder="Stadt eingeben"
+                      className="bg-background text-foreground border-input"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="country" className="text-foreground">Land</Label>
+                    <Input
+                      id="country"
+                      value={formData.country || ''}
+                      onChange={(e) => handleInputChange('country', e.target.value)}
+                      placeholder="Land eingeben"
+                      className="bg-background text-foreground border-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="description" className="text-foreground">Beschreibung</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description || ''}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    placeholder="Kursbeschreibung eingeben"
+                    rows={4}
+                    className="bg-background text-foreground border-input"
+                  />
+                </div>
+              </div>
+
+              {/* Course Details & Dates */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-foreground">Kursdetails & Termine</h3>
+                
+                {/* Course Dates */}
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-foreground">Startdatum</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal bg-background text-foreground border-input",
+                            !formData.start_date && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {formData.start_date ? (
+                            format(new Date(formData.start_date), "PPP", { locale: de })
+                          ) : (
+                            <span>Startdatum wählen</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 bg-background border-border" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={formData.start_date ? new Date(formData.start_date) : undefined}
+                          onSelect={(date) => handleInputChange('start_date', date?.toISOString())}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-foreground">Enddatum</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal bg-background text-foreground border-input",
+                            !formData.end_date && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {formData.end_date ? (
+                            format(new Date(formData.end_date), "PPP", { locale: de })
+                          ) : (
+                            <span>Enddatum wählen</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 bg-background border-border" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={formData.end_date ? new Date(formData.end_date) : undefined}
+                          onSelect={(date) => handleInputChange('end_date', date?.toISOString())}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-foreground">Anmeldeschluss</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal bg-background text-foreground border-input",
+                            !formData.registration_deadline && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {formData.registration_deadline ? (
+                            format(new Date(formData.registration_deadline), "PPP", { locale: de })
+                          ) : (
+                            <span>Anmeldeschluss wählen</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 bg-background border-border" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={formData.registration_deadline ? new Date(formData.registration_deadline) : undefined}
+                          onSelect={(date) => handleInputChange('registration_deadline', date?.toISOString())}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+
+                {/* Course Settings */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="specialty" className="text-foreground">Fachgebiet</Label>
+                    <Input
+                      id="specialty"
+                      value={formData.specialty || ''}
+                      onChange={(e) => handleInputChange('specialty', e.target.value)}
+                      placeholder="Fachgebiet eingeben"
+                      className="bg-background text-foreground border-input"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="language" className="text-foreground">Sprache</Label>
+                    <Select
+                      value={formData.language || 'Deutsch'}
+                      onValueChange={(value) => handleInputChange('language', value)}
+                    >
+                      <SelectTrigger className="bg-background text-foreground border-input">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background text-foreground border-border">
+                        <SelectItem value="Deutsch">Deutsch</SelectItem>
+                        <SelectItem value="English">English</SelectItem>
+                        <SelectItem value="Français">Français</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="modality" className="text-foreground">Modalität</Label>
+                    <Select
+                      value={formData.modality || 'onsite'}
+                      onValueChange={(value) => handleInputChange('modality', value)}
+                    >
+                      <SelectTrigger className="bg-background text-foreground border-input">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background text-foreground border-border">
+                        <SelectItem value="onsite">Vor Ort</SelectItem>
+                        <SelectItem value="online">Online</SelectItem>
+                        <SelectItem value="hybrid">Hybrid</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="difficulty_level" className="text-foreground">Schwierigkeitsgrad</Label>
+                    <Select
+                      value={formData.difficulty_level || 'beginner'}
+                      onValueChange={(value) => handleInputChange('difficulty_level', value)}
+                    >
+                      <SelectTrigger className="bg-background text-foreground border-input">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background text-foreground border-border">
+                        <SelectItem value="beginner">Anfänger</SelectItem>
+                        <SelectItem value="intermediate">Fortgeschritten</SelectItem>
+                        <SelectItem value="advanced">Experte</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Status and Tags */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="status" className="text-foreground">Status</Label>
+                    <Select
+                      value={formData.status || 'draft'}
+                      onValueChange={(value) => handleInputChange('status', value)}
+                    >
+                      <SelectTrigger className="bg-background text-foreground border-input">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background text-foreground border-border">
+                        <SelectItem value="draft">Entwurf</SelectItem>
+                        <SelectItem value="published">Veröffentlicht</SelectItem>
+                        <SelectItem value="archived">Archiviert</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="tags" className="text-foreground">Tags (kommagetrennt)</Label>
+                    <Input
+                      id="tags"
+                      value={Array.isArray(formData.tags) ? formData.tags.join(', ') : formData.tags || ''}
+                      onChange={(e) => handleInputChange('tags', e.target.value)}
+                      placeholder="Tag1, Tag2, Tag3"
+                      className="bg-background text-foreground border-input"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Image Upload & Price */}
+              <div className="md:col-span-2 space-y-6 border-t border-border pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Image Upload */}
+                  <ImageUpload
+                    currentImageUrl={formData.cover_image_url || undefined}
+                    onImageUploaded={(url) => handleInputChange('cover_image_url', url)}
+                    onImageRemoved={() => handleInputChange('cover_image_url', null)}
+                  />
+
+                  {/* Price Section */}
+                  <div className="space-y-2">
+                    <Label htmlFor="price" className="text-foreground">Preis</Label>
+                    <div className="grid grid-cols-3 gap-2 mb-3">
+                      <Button
+                        type="button"
+                        variant={formData.price === 0 ? "default" : "outline"}
+                        onClick={() => handleInputChange('price', 0)}
+                        className="text-xs"
                       >
-                        <SelectTrigger className="bg-background text-foreground border-input">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-background text-foreground border-border">
-                          <SelectItem value="CHF">CHF</SelectItem>
-                          <SelectItem value="EUR">EUR</SelectItem>
-                          <SelectItem value="USD">USD</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        Kostenlos
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={formData.price === null ? "default" : "outline"}
+                        onClick={() => handleInputChange('price', null)}
+                        className="text-xs"
+                      >
+                        k.A.
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={formData.price && formData.price > 0 ? "default" : "outline"}
+                        onClick={() => handleInputChange('price', 1)}
+                        className="text-xs"
+                      >
+                        Kostenpflichtig
+                      </Button>
+                    </div>
+                    
+                    {formData.price && formData.price > 0 && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Input
+                            type="number"
+                            placeholder="Preis eingeben"
+                            value={formData.price || ''}
+                            onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 1)}
+                            className="bg-background text-foreground border-input"
+                          />
+                        </div>
+                        <div>
+                          <Select
+                            value={formData.currency || 'CHF'}
+                            onValueChange={(value) => handleInputChange('currency', value)}
+                          >
+                            <SelectTrigger className="bg-background text-foreground border-input">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-background text-foreground border-border">
+                              <SelectItem value="CHF">CHF</SelectItem>
+                              <SelectItem value="EUR">EUR</SelectItem>
+                              <SelectItem value="USD">USD</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="text-sm text-muted-foreground mt-2">
+                      Aktuelle Anzeige: <span className="font-medium">{formatPrice(formData.price, formData.currency)}</span>
                     </div>
                   </div>
-                )}
-                
-                <div className="text-sm text-muted-foreground mt-2">
-                  Aktuelle Anzeige: <span className="font-medium">{formatPrice(formData.price, formData.currency)}</span>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select
-                  value={formData.status || 'draft'}
-                  onValueChange={(value) => handleInputChange('status', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="draft">Entwurf</SelectItem>
-                    <SelectItem value="published">Veröffentlicht</SelectItem>
-                    <SelectItem value="archived">Archiviert</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="tags">Tags (kommagetrennt)</Label>
-                <Input
-                  id="tags"
-                  value={Array.isArray(formData.tags) ? formData.tags.join(', ') : formData.tags || ''}
-                  onChange={(e) => handleInputChange('tags', e.target.value)}
-                  placeholder="Tag1, Tag2, Tag3"
-                />
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="description">Beschreibung</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description || ''}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                  placeholder="Kursbeschreibung eingeben"
-                  rows={4}
-                />
               </div>
             </div>
 
