@@ -539,44 +539,44 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-background border rounded-lg shadow-lg w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-lg w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
           <div className="flex items-center gap-3">
-            <FileText className="h-6 w-6 text-primary" />
+            <FileText className="h-6 w-6 text-blue-600" />
             <div>
-              <h1 className="text-xl font-semibold">FMH Operationsstatistik</h1>
-              <p className="text-sm text-muted-foreground">Manuelle Eingabe der Operationen</p>
+              <h1 className="text-xl font-semibold text-gray-900">FMH Operationsstatistik</h1>
+              <p className="text-sm text-gray-600">Manuelle Eingabe der Operationen</p>
             </div>
           </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => onOpenChange(false)}
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
           >
             <X className="h-4 w-4" />
           </Button>
         </div>
 
         {isLoading ? (
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center bg-white">
             <div className="flex items-center gap-2">
-              <Loader2 className="h-5 w-5 animate-spin" />
-              <span>Module und Prozeduren werden geladen...</span>
+              <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+              <span className="text-gray-700">Module und Prozeduren werden geladen...</span>
             </div>
           </div>
         ) : Object.keys(modules).length === 0 ? (
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-muted-foreground">Keine Module gefunden</p>
+          <div className="flex-1 flex items-center justify-center bg-white">
+            <p className="text-gray-600">Keine Module gefunden</p>
           </div>
         ) : (
-        <div className="flex-1 overflow-hidden">
-          <div className="p-6 h-full overflow-auto">
+        <div className="flex-1 overflow-hidden bg-white">
+          <div className="p-6 h-full overflow-auto bg-white">
             <Tabs defaultValue={Object.keys(modules)[0]} className="w-full h-full flex flex-col">
-              <TabsList className="grid w-full grid-cols-5 mb-6">
+              <TabsList className="grid w-full grid-cols-5 mb-6 bg-gray-100 p-1 rounded-lg">
                 {Object.entries(modules).map(([key, module]) => (
-                  <TabsTrigger key={key} value={key}>
+                  <TabsTrigger key={key} value={key} className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-gray-600 hover:text-gray-900">
                     {module.title}
                   </TabsTrigger>
                 ))}
@@ -584,54 +584,54 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
 
               {Object.entries(modules).map(([moduleKey, moduleData]) => (
                 <TabsContent key={moduleKey} value={moduleKey} className="flex-1 mt-0">
-                  <Card>
-                    <CardHeader>
+                  <Card className="bg-white border border-gray-200 shadow-sm">
+                    <CardHeader className="bg-gray-50 border-b border-gray-200">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">{moduleData.title}</CardTitle>
+                        <CardTitle className="text-lg text-gray-900">{moduleData.title}</CardTitle>
                         <div className="flex items-center gap-4">
-                          <Badge variant="secondary">
+                          <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
                             Minimum: {moduleData.totalMinimum}
                           </Badge>
-                          <Badge variant={moduleData.totalCount >= moduleData.totalMinimum ? "default" : "outline"}>
+                          <Badge variant={moduleData.totalCount >= moduleData.totalMinimum ? "default" : "outline"} className="bg-green-100 text-green-800 border-green-200">
                             Total: {moduleData.totalCount}
                           </Badge>
                         </div>
                       </div>
                     </CardHeader>
                     
-                    <CardContent className="p-0">
+                    <CardContent className="p-0 bg-white">
                       <div className="overflow-x-auto">
                         <table className="w-full">
-                          <thead className="border-b bg-muted/50">
+                          <thead className="border-b border-gray-200 bg-gray-50">
                             <tr>
-                              <th className="text-left p-4 font-medium">Prozedur</th>
-                              <th className="text-center p-4 font-medium w-24">Minimum</th>
-                              <th className="text-center p-4 font-medium w-32">Verantwortlich</th>
-                              <th className="text-center p-4 font-medium w-32">Instruierend</th>
-                              <th className="text-center p-4 font-medium w-32">Assistent</th>
-                              <th className="text-center p-4 font-medium w-24">Total</th>
+                              <th className="text-left p-4 font-medium text-gray-700">Prozedur</th>
+                              <th className="text-center p-4 font-medium w-24 text-gray-700">Minimum</th>
+                              <th className="text-center p-4 font-medium w-32 text-gray-700">Verantwortlich</th>
+                              <th className="text-center p-4 font-medium w-32 text-gray-700">Instruierend</th>
+                              <th className="text-center p-4 font-medium w-32 text-gray-700">Assistent</th>
+                              <th className="text-center p-4 font-medium w-24 text-gray-700">Total</th>
                             </tr>
                           </thead>
-                          <tbody>
+                          <tbody className="bg-white">
                             {moduleData.procedures.map((procedure, index) => (
-                              <tr key={procedure.id} className="border-b hover:bg-muted/50 transition-colors">
+                              <tr key={procedure.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                                 <td className="p-4">
-                                  <div className="font-medium">{procedure.name}</div>
+                                  <div className="font-medium text-gray-900">{procedure.name}</div>
                                   {savedModules[moduleKey]?.procedures[index]?.total > 0 && (
-                                    <div className="text-xs text-muted-foreground mt-1">
+                                    <div className="text-xs text-gray-500 mt-1">
                                       Gespeichert: V:{savedModules[moduleKey].procedures[index].verantwortlich} I:{savedModules[moduleKey].procedures[index].instruierend} A:{savedModules[moduleKey].procedures[index].assistent}
                                     </div>
                                   )}
                                 </td>
                                 <td className="text-center p-4">
-                                  <Badge variant="outline">{procedure.minimum}</Badge>
+                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">{procedure.minimum}</Badge>
                                 </td>
                                 <td className="text-center p-4">
                                   <div className="flex items-center justify-center gap-1">
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="h-6 w-6 p-0"
+                                      className="h-6 w-6 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                                       onClick={() => updateProcedureValue(moduleKey, index, 'verantwortlich', procedure.verantwortlich - 1)}
                                     >
                                       <Minus className="w-3 h-3" />
@@ -646,7 +646,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="h-6 w-6 p-0"
+                                      className="h-6 w-6 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                                       onClick={() => updateProcedureValue(moduleKey, index, 'verantwortlich', procedure.verantwortlich + 1)}
                                     >
                                       <Plus className="w-3 h-3" />
@@ -658,7 +658,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="h-6 w-6 p-0"
+                                      className="h-6 w-6 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                                       onClick={() => updateProcedureValue(moduleKey, index, 'instruierend', procedure.instruierend - 1)}
                                     >
                                       <Minus className="w-3 h-3" />
@@ -673,7 +673,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="h-6 w-6 p-0"
+                                      className="h-6 w-6 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                                       onClick={() => updateProcedureValue(moduleKey, index, 'instruierend', procedure.instruierend + 1)}
                                     >
                                       <Plus className="w-3 h-3" />
@@ -685,7 +685,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="h-6 w-6 p-0"
+                                      className="h-6 w-6 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                                       onClick={() => updateProcedureValue(moduleKey, index, 'assistent', procedure.assistent - 1)}
                                     >
                                       <Minus className="w-3 h-3" />
@@ -700,7 +700,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="h-6 w-6 p-0"
+                                      className="h-6 w-6 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                                       onClick={() => updateProcedureValue(moduleKey, index, 'assistent', procedure.assistent + 1)}
                                     >
                                       <Plus className="w-3 h-3" />
@@ -710,7 +710,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                                 <td className="text-center p-4">
                                   <Badge 
                                     variant={procedure.total >= procedure.minimum ? "default" : "secondary"}
-                                    className="font-medium"
+                                    className="font-medium bg-green-100 text-green-800 border-green-200"
                                   >
                                     {procedure.total}
                                   </Badge>
@@ -728,9 +728,9 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
           </div>
           
           {/* Footer */}
-          <div className="border-t p-6 bg-muted/20">
+          <div className="border-t border-gray-200 p-6 bg-gray-50">
             <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-gray-600">
                 Gesamtanzahl Eingriffe: {Object.values(modules).reduce((sum, mod) => sum + mod.totalCount, 0)}
               </div>
               <div className="flex gap-3">
@@ -738,13 +738,14 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                   variant="outline" 
                   onClick={() => onOpenChange(false)}
                   disabled={isSaving}
+                  className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
                 >
                   Abbrechen
                 </Button>
                 <Button 
                   onClick={handleSave}
                   disabled={isSaving || Object.values(modules).every(mod => mod.totalCount === 0)}
-                  className="gap-2"
+                  className="gap-2 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400"
                 >
                   <Save className="w-4 h-4" />
                   {isSaving ? 'Speichere...' : 'Prozeduren speichern'}
