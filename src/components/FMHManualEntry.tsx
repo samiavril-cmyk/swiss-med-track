@@ -131,7 +131,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
           procedures: categoryProcedures.map(procedure => ({
             id: procedure.id,
             name: procedure.title_de,
-            minimum: (procedure.min_required_by_pgy as any)?.PGY5 || 0, // Default to PGY5 requirement
+            minimum: (procedure.min_required_by_pgy as any)?.[`pgy${userPgyLevel}`] || 0, // Use user's PGY level
             verantwortlich: 0,
             instruierend: 0,
             assistent: 0,
