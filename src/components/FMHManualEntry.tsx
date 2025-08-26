@@ -235,43 +235,116 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
     });
   };
 
-  // Find or create procedure by name
+  // Synonym mapping for common procedure name variations
+  const procedureSynonyms: Record<string, string[]> = {
+    'Wundversorgung': ['Wundversorgungen', 'Wundbehandlung', 'Wundrevision'],
+    'Thoraxdrainage': ['Thoraxdrainagen', 'Pleuradrainage', 'Thorakale Drainage'],
+    'Appendektomie': ['Appendektomie', 'Appendix-Entfernung'],
+    'Cholezystektomie': ['Cholezystektomie', 'Gallenblasen-Entfernung'],
+    'Hernienoperation': ['Hernienoperationen', 'Hernie-Repair'],
+    'Dünndarmeingriff': ['Dünndarmeingriffe', 'Dünndarm-Operation'],
+    'Proktologischer Eingriff': ['Proktologische Eingriffe', 'Proktologie'],
+    'Veneneingriff': ['Veneneingriffe', 'Venenchirurgie'],
+    'Laparoskopie': ['Laparoskopie, Laparotomie', 'Laparoskopische Operation'],
+    'Metallentfernung': ['Metallentfernungen, Spickungen', 'ME', 'Implantat-Entfernung'],
+    'Osteosynthese': ['Osteosynthese', 'Fraktur-Osteosynthese'],
+    'Handchirurgie': ['Handchirurgie (exklusiv Wundversorgung)', 'Hand-Operation'],
+    'Amputation': ['Kleine Amputationen', 'Grosse Amputationen', 'Amputation']
+  };
+
+  // Find or create procedure by name with improved matching
   const findOrCreateProcedure = async (procedureName: string): Promise<string | null> => {
-    // First try exact match
+    console.log(`🔍 Searching for procedure: "${procedureName}"`);
+    
+    // 1. Exact match (case insensitive)
     let procedure = procedures.find(p => 
       p.title_de.toLowerCase() === procedureName.toLowerCase()
     );
     
     if (procedure) {
+      console.log(`✅ Exact match found: ${procedure.title_de} (ID: ${procedure.id})`);
       return procedure.id;
     }
+
+    // 2. Synonym matching
+    for (const [baseName, synonyms] of Object.entries(procedureSynonyms)) {
+      if (synonyms.some(synonym => 
+        synonym.toLowerCase() === procedureName.toLowerCase() ||
+        procedureName.toLowerCase().includes(synonym.toLowerCase()) ||
+        synonym.toLowerCase().includes(procedureName.toLowerCase())
+      )) {
+        procedure = procedures.find(p => 
+          p.title_de.toLowerCase().includes(baseName.toLowerCase()) ||
+          baseName.toLowerCase().includes(p.title_de.toLowerCase())
+        );
+        
+        if (procedure) {
+          console.log(`✅ Synonym match found: "${procedureName}" → ${procedure.title_de} (ID: ${procedure.id})`);
+          return procedure.id;
+        }
+      }
+    }
     
-    // Try fuzzy matching
-    procedure = procedures.find(p => 
-      p.title_de.toLowerCase().includes(procedureName.toLowerCase()) ||
-      procedureName.toLowerCase().includes(p.title_de.toLowerCase())
-    );
+    // 3. Partial match (contains)
+    procedure = procedures.find(p => {
+      const pName = p.title_de.toLowerCase();
+      const searchName = procedureName.toLowerCase();
+      
+      // Remove common suffixes/prefixes for better matching
+      const cleanSearchName = searchName
+        .replace(/eingriffe?$/i, '')
+        .replace(/operationen?$/i, '')
+        .replace(/^(laparoskopische|offene)\s+/i, '')
+        .trim();
+      
+      const cleanPName = pName
+        .replace(/eingriffe?$/i, '')
+        .replace(/operationen?$/i, '')
+        .replace(/^(laparoskopische|offene)\s+/i, '')
+        .trim();
+      
+      return (
+        pName.includes(searchName) ||
+        searchName.includes(pName) ||
+        cleanPName.includes(cleanSearchName) ||
+        cleanSearchName.includes(cleanPName)
+      );
+    });
     
     if (procedure) {
+      console.log(`✅ Partial match found: "${procedureName}" → ${procedure.title_de} (ID: ${procedure.id})`);
       return procedure.id;
     }
+
+    // 4. Try to find procedure category and create with appropriate category_id
+    console.log(`⚠️ No match found for "${procedureName}", creating new procedure...`);
     
-    // Create new procedure if not found
     try {
+      // Get the appropriate category based on context (we'll use a default for now)
+      const { data: categories } = await supabase
+        .from('procedure_categories')
+        .select('id, key')
+        .limit(1);
+
+      const categoryId = categories?.[0]?.id || null;
+
       const { data, error } = await supabase
         .from('procedures')
         .insert({
           title_de: procedureName,
           code: `MANUAL_${Date.now()}`,
-          active: true
+          active: true,
+          category_id: categoryId
         })
         .select('id')
         .single();
         
       if (error) throw error;
+      
+      console.log(`✅ Created new procedure: "${procedureName}" (ID: ${data.id})`);
       return data.id;
     } catch (error) {
-      console.error('Error creating procedure:', error);
+      console.error(`❌ Error creating procedure "${procedureName}":`, error);
       return null;
     }
   };
@@ -283,20 +356,31 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
     }
 
     setIsSaving(true);
+    console.log('🚀 Starting procedure save process...');
+    
     try {
       // Prepare procedure logs for database insertion
       const procedureLogs = [];
+      const failedProcedures: string[] = [];
+      const successfulProcedures: string[] = [];
       
       for (const [moduleKey, moduleData] of Object.entries(modules)) {
+        console.log(`📋 Processing module: ${moduleData.title}`);
+        
         for (const procedure of moduleData.procedures) {
           if (procedure.total === 0) continue; // Skip empty procedures
+          
+          console.log(`📝 Processing procedure: "${procedure.name}" (Total: ${procedure.total})`);
           
           // Find or create procedure ID
           const procedureId = await findOrCreateProcedure(procedure.name);
           if (!procedureId) {
-            console.warn(`Could not find or create procedure: ${procedure.name}`);
+            console.warn(`❌ Could not find or create procedure: ${procedure.name}`);
+            failedProcedures.push(procedure.name);
             continue;
           }
+          
+          successfulProcedures.push(procedure.name);
           
           // Add responsible entries
           for (let i = 0; i < procedure.verantwortlich; i++) {
@@ -333,29 +417,51 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
         }
       }
 
+      console.log(`📊 Summary: ${procedureLogs.length} procedure logs prepared`);
+      console.log(`✅ Successful procedures: ${successfulProcedures.length}`, successfulProcedures);
+      if (failedProcedures.length > 0) {
+        console.log(`❌ Failed procedures: ${failedProcedures.length}`, failedProcedures);
+      }
+
       if (procedureLogs.length > 0) {
+        console.log('💾 Inserting procedure logs into database...');
+        
         const { error } = await supabase
           .from('procedure_logs')
           .insert(procedureLogs);
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Database insertion error:', error);
+          throw error;
+        }
 
-        toast.success(`${procedureLogs.length} Prozeduren erfolgreich gespeichert`);
+        console.log('✅ Successfully inserted procedure logs');
+
+        let message = `${procedureLogs.length} Prozeduren erfolgreich gespeichert`;
+        if (failedProcedures.length > 0) {
+          message += `. ${failedProcedures.length} Prozeduren konnten nicht verarbeitet werden.`;
+        }
+        
+        toast.success(message);
         
         // Reset form
         setModules(initialModules);
         
         // Call onSuccess callback to refresh FMH progress
+        console.log('🔄 Refreshing FMH progress...');
         onSuccess?.();
         onOpenChange(false);
       } else {
+        console.log('⚠️ No procedure logs to save');
         toast.warning('Keine Prozeduren zum Speichern gefunden');
       }
     } catch (error) {
-      console.error('Error saving procedures:', error);
-      toast.error(`Fehler beim Speichern der Prozeduren: ${error.message || error}`);
+      console.error('❌ Error saving procedures:', error);
+      const errorMessage = error?.message || error?.toString() || 'Unbekannter Fehler';
+      toast.error(`Fehler beim Speichern der Prozeduren: ${errorMessage}`);
     } finally {
       setIsSaving(false);
+      console.log('🏁 Save process completed');
     }
   };
 
