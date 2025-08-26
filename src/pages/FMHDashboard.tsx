@@ -74,6 +74,7 @@ export const FMHDashboard: React.FC = () => {
       
       // Get user profile for PGY level
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('🔍 FMHDashboard - Loading data for user ID:', user?.id);
       if (user) {
         const { data: profile } = await supabase
           .from('profiles')
@@ -99,11 +100,14 @@ export const FMHDashboard: React.FC = () => {
 
       for (const module of moduleData || []) {
         if (user) {
+          console.log('📊 FMHDashboard - Getting progress for module:', module.key, 'user:', user.id);
           const { data: progressData } = await supabase
             .rpc('get_module_progress', {
               user_id_param: user.id,
               module_key: module.key
             });
+
+          console.log('📈 Progress data for', module.key, ':', progressData);
 
           // Parse RPC tuple return to object format
           let progress = null;
@@ -200,6 +204,11 @@ export const FMHDashboard: React.FC = () => {
             <p className="text-medical-subtitle">
               Überwachung Ihres FMH-konformen Ausbildungsfortschritts - PGY {userPgyLevel}
             </p>
+            {user && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Debug: User ID: {user.id} | Email: {user.email}
+              </p>
+            )}
           </div>
           
           <div className="flex gap-3 mt-4 md:mt-0">

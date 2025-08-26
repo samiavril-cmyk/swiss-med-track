@@ -215,6 +215,8 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
     if (!user) return;
 
     try {
+      console.log('🔍 FMHManualEntry - Loading data for user ID:', user.id);
+      
       // Load existing procedure logs for the user
       const { data: logs, error } = await supabase
         .from('procedure_logs')
@@ -240,6 +242,8 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
         console.error('Error loading existing data:', error);
         return;
       }
+
+      console.log('📊 FMHManualEntry - Loaded', logs?.length || 0, 'procedure logs for user', user.id);
 
       // Group logs by module and procedure, count by role
       const moduleData: Record<string, Record<string, { verantwortlich: number; instruierend: number; assistent: number }>> = {};
@@ -450,6 +454,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
 
     setIsSaving(true);
     console.log('🚀 Starting procedure save process...');
+    console.log('💾 FMHManualEntry - Saving data for user ID:', user.id);
     
     try {
       // Prepare procedure logs for database insertion
