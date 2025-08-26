@@ -6,6 +6,7 @@ import { Upload, FileText, CheckCircle, AlertCircle, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PDFImportPreview } from "./PDFImportPreview";
+import { useClientPDFProcessor } from "./ClientPDFProcessor";
 
 interface PDFUploadModalProps {
   open: boolean;
@@ -37,6 +38,7 @@ export const PDFUploadModal = ({ open, onOpenChange, onSuccess }: PDFUploadModal
   const [dragActive, setDragActive] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const { toast } = useToast();
+  const { processFile, isProcessing } = useClientPDFProcessor();
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -79,49 +81,22 @@ export const PDFUploadModal = ({ open, onOpenChange, onSuccess }: PDFUploadModal
     setUploadResult(null);
 
     try {
-      // Simulate upload progress
+      // Simulate progress while processing
       const progressInterval = setInterval(() => {
-        setUploadProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 100);
+        setUploadProgress(prev => prev < 90 ? prev + 15 : 90);
+      }, 200);
 
-      const formData = new FormData();
-      formData.append('pdf', file);
-
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        throw new Error('No valid session found. Please log in again.');
-      }
-
-      console.log('Uploading with session token');
-
-      const response = await supabase.functions.invoke('pdf-parser', {
-        body: formData,
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
-
+      const result = await processFile(file);
+      
       clearInterval(progressInterval);
       setUploadProgress(100);
-
-      if (response.error) {
-        throw new Error(response.error.message || 'Upload failed');
-      }
-
-      const result = response.data as UploadResult;
       setUploadResult(result);
 
       if (result.success && result.summary) {
         setShowPreview(true);
         toast({
-          title: "PDF erfolgreich analysiert",
-          description: `${result.summary.totalProcedures} Prozeduren erkannt. ${result.summary.matched} automatisch zugeordnet.`,
+          title: "PDF erfolgreich analysiert (AI)",
+          description: `${result.summary.totalProcedures} Prozeduren erkannt.`,
         });
       } else {
         toast({
@@ -131,16 +106,10 @@ export const PDFUploadModal = ({ open, onOpenChange, onSuccess }: PDFUploadModal
         });
       }
     } catch (error) {
-      console.error('Upload error:', error);
       toast({
-        title: "Upload fehlgeschlagen",
+        title: "Verarbeitung fehlgeschlagen",
         description: error instanceof Error ? error.message : "Unbekannter Fehler",
         variant: "destructive",
-      });
-      setUploadResult({
-        success: false,
-        message: "Upload fehlgeschlagen",
-        error: error instanceof Error ? error.message : "Unbekannter Fehler"
       });
     } finally {
       setIsUploading(false);
