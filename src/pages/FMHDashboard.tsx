@@ -105,9 +105,30 @@ export const FMHDashboard: React.FC = () => {
               module_key: module.key
             });
 
+          // Parse RPC tuple return to object format
+          let progress = null;
+          if (progressData && progressData.length > 0) {
+            const row = progressData[0];
+            if (Array.isArray(row) && row.length >= 7) {
+              // RPC returns: [module_name, total_weighted_score, total_minimum, progress_percentage, responsible_count, instructing_count, assistant_count]
+              progress = {
+                module_name: row[0],
+                total_weighted_score: row[1],
+                total_minimum: row[2], 
+                progress_percentage: row[3],
+                responsible_count: row[4],
+                instructing_count: row[5],
+                assistant_count: row[6]
+              };
+            } else if (typeof row === 'object' && row !== null) {
+              // If already an object, use as is
+              progress = row;
+            }
+          }
+
           modulesWithProgress.push({
             ...module,
-            progress: progressData?.[0] || null
+            progress
           });
         } else {
           modulesWithProgress.push({

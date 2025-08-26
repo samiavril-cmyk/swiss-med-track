@@ -180,6 +180,13 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
     loadProcedures();
   }, []);
 
+  // Load existing procedure logs when modal opens
+  useEffect(() => {
+    if (open && user) {
+      loadExistingData();
+    }
+  }, [open, user]);
+
   // Prevent background scrolling when modal is open
   useEffect(() => {
     if (open) {
@@ -203,6 +210,92 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
       }
     }
   }, [user]);
+
+  const loadExistingData = async () => {
+    if (!user) return;
+
+    try {
+      // Load existing procedure logs for the user
+      const { data: logs, error } = await supabase
+        .from('procedure_logs')
+        .select(`
+          id,
+          procedure_id,
+          role_in_surgery,
+          performed_date,
+          procedures!inner(
+            id,
+            title_de,
+            category_id,
+            procedure_categories!inner(
+              key,
+              title_de
+            )
+          )
+        `)
+        .eq('user_id', user.id)
+        .gte('performed_date', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]); // Last year
+
+      if (error) {
+        console.error('Error loading existing data:', error);
+        return;
+      }
+
+      // Group logs by module and procedure, count by role
+      const moduleData: Record<string, Record<string, { verantwortlich: number; instruierend: number; assistent: number }>> = {};
+      
+      logs?.forEach(log => {
+        const moduleKey = log.procedures.procedure_categories.key;
+        const procedureName = log.procedures.title_de;
+        
+        if (!moduleData[moduleKey]) {
+          moduleData[moduleKey] = {};
+        }
+        if (!moduleData[moduleKey][procedureName]) {
+          moduleData[moduleKey][procedureName] = { verantwortlich: 0, instruierend: 0, assistent: 0 };
+        }
+        
+        if (log.role_in_surgery === 'responsible') {
+          moduleData[moduleKey][procedureName].verantwortlich++;
+        } else if (log.role_in_surgery === 'instructing') {
+          moduleData[moduleKey][procedureName].instruierend++;
+        } else if (log.role_in_surgery === 'assistant') {
+          moduleData[moduleKey][procedureName].assistent++;
+        }
+      });
+
+      // Update modules state with loaded data
+      setModules(prev => {
+        const newModules = { ...prev };
+        
+        Object.keys(moduleData).forEach(moduleKey => {
+          if (newModules[moduleKey]) {
+            newModules[moduleKey].procedures.forEach((procedure, index) => {
+              if (moduleData[moduleKey][procedure.name]) {
+                const counts = moduleData[moduleKey][procedure.name];
+                newModules[moduleKey].procedures[index] = {
+                  ...procedure,
+                  verantwortlich: counts.verantwortlich,
+                  instruierend: counts.instruierend,
+                  assistent: counts.assistent,
+                  total: counts.verantwortlich + counts.instruierend + counts.assistent
+                };
+              }
+            });
+            
+            // Update module total
+            newModules[moduleKey].totalCount = newModules[moduleKey].procedures.reduce(
+              (sum, proc) => sum + proc.total, 0
+            );
+          }
+        });
+        
+        return newModules;
+      });
+    } catch (error) {
+      console.error('Error loading existing procedure data:', error);
+    }
+  };
 
   const updateProcedureValue = (
     moduleKey: string,
