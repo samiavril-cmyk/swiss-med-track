@@ -1,0 +1,140 @@
+-- First, let's create a dummy admin user in profiles table for the courses
+-- This will be replaced when actual admin users are created
+INSERT INTO public.profiles (user_id, email, full_name, role) 
+VALUES (
+  gen_random_uuid(), 
+  'admin@system.local', 
+  'System Admin', 
+  'admin'
+) 
+ON CONFLICT (user_id) DO NOTHING;
+
+-- Now insert the course data using the admin user we just created
+INSERT INTO public.courses (
+  title, 
+  provider_id, 
+  description,
+  venue,
+  city,
+  country,
+  specialty,
+  language,
+  modality,
+  price,
+  currency,
+  difficulty_level,
+  tags,
+  status
+) VALUES 
+(
+  'Praktischer Kurs für Viszeralchirurgie',
+  (SELECT user_id FROM profiles WHERE role = 'admin' AND email = 'admin@system.local' LIMIT 1),
+  'Praxisorientierte Weiterbildung, 25 Jahre Erfahrung. Hands-on Kurs.',
+  'Warnemünde OP-Kurs',
+  'Rostock-Warnemünde',
+  'Deutschland',
+  'Viszeralchirurgie',
+  'Deutsch',
+  'Präsenz',
+  NULL,
+  'EUR',
+  'intermediate',
+  ARRAY['Viszeralchirurgie', 'Hands-on', 'Praxis'],
+  'published'
+),
+(
+  'Update Viszeralchirurgie (Online Postgraduiertenkurs)',
+  (SELECT user_id FROM profiles WHERE role = 'admin' AND email = 'admin@system.local' LIMIT 1),
+  'Update mit klinischen Tipps und Leitlinien. 2 Tage, 3 Std. pro Tag.',
+  'DGAV',
+  'Online',
+  'Deutschland',
+  'Viszeralchirurgie',
+  'Deutsch',
+  'Online',
+  80.00,
+  'EUR',
+  'intermediate',
+  ARRAY['Viszeralchirurgie', 'Update', 'Online', 'Leitlinien'],
+  'published'
+),
+(
+  'ÖÄK Facharztprüfung Allgemeinchirurgie und Viszeralchirurgie',
+  (SELECT user_id FROM profiles WHERE role = 'admin' AND email = 'admin@system.local' LIMIT 1),
+  'MC-Teil als ePrüfung, für Fachärzte. Facharztprüfung.',
+  'ÖÄK Wien',
+  'Wien',
+  'Österreich',
+  'Allgemeinchirurgie',
+  'Deutsch',
+  'Hybrid',
+  NULL,
+  'EUR',
+  'advanced',
+  ARRAY['Facharztprüfung', 'MC-Prüfung', 'ePrüfung'],
+  'published'
+),
+(
+  'Facharztseminar Allgemein- und Viszeralchirurgie',
+  (SELECT user_id FROM profiles WHERE role = 'admin' AND email = 'admin@system.local' LIMIT 1),
+  'Vorbereitung auf Facharztprüfung, Refresher. 44 CME-Punkte. Kontakt: Prof. Dr. med. Gero Puhl',
+  'BDC Akademie',
+  'Berlin',
+  'Deutschland',
+  'Allgemeinchirurgie',
+  'Deutsch',
+  'Hybrid',
+  450.00,
+  'EUR',
+  'intermediate',
+  ARRAY['Facharztprüfung', 'CME', 'Vorbereitung'],
+  'published'
+),
+(
+  'Weiterbildungskonzept Schwerpunkt Viszeralchirurgie',
+  (SELECT user_id FROM profiles WHERE role = 'admin' AND email = 'admin@system.local' LIMIT 1),
+  'Weiterbildungsplanung für Assistenzärzte. Strukturierte Weiterbildung. Kontakt: PD Dr. med. T. Steffen',
+  'Kantonsspital St. Gallen',
+  'St. Gallen',
+  'Schweiz',
+  'Viszeralchirurgie',
+  'Deutsch',
+  'Präsenz',
+  NULL,
+  'CHF',
+  'beginner',
+  ARRAY['Weiterbildung', 'Assistenzärzte', 'Struktur'],
+  'published'
+),
+(
+  'Facharztseminar Thorax- und Viszeralchirurgie',
+  (SELECT user_id FROM profiles WHERE role = 'admin' AND email = 'admin@system.local' LIMIT 1),
+  'Teil des Seminarkalenders 2025. Facharztseminar.',
+  'BDC Akademie',
+  'Magdeburg',
+  'Deutschland',
+  'Thoraxchirurgie',
+  'Deutsch',
+  'Präsenz',
+  NULL,
+  'EUR',
+  'intermediate',
+  ARRAY['Facharztprüfung', 'Thoraxchirurgie', 'BDC'],
+  'published'
+),
+(
+  'Chirurgie Update Seminar',
+  (SELECT user_id FROM profiles WHERE role = 'admin' AND email = 'admin@system.local' LIMIT 1),
+  'Jahresaktuelles Update der Viszeralchirurgie.',
+  'DGAV',
+  'Berlin',
+  'Deutschland',
+  'Viszeralchirurgie',
+  'Deutsch',
+  'Präsenz',
+  NULL,
+  'EUR',
+  'intermediate',
+  ARRAY['Update', 'Jahresaktuell', 'DGAV'],
+  'published'
+);
