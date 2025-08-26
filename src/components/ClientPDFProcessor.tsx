@@ -3,7 +3,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { supabase } from '@/integrations/supabase/client';
 
 // Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.js';
 
 interface ProcedureData {
   proc_name: string;
@@ -51,17 +51,15 @@ export const useClientPDFProcessor = () => {
   };
 
   const parseWithAI = async (text: string, filename: string): Promise<ProcedureData[]> => {
-    const response = await fetch('/api/parse-procedures', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, filename })
+    const response = await supabase.functions.invoke('parse-procedures', {
+      body: { text, filename }
     });
 
-    if (!response.ok) {
-      throw new Error('AI parsing failed');
+    if (response.error) {
+      throw new Error('AI parsing failed: ' + response.error.message);
     }
 
-    return response.json();
+    return response.data;
   };
 
   const createImportRun = async (filename: string) => {
