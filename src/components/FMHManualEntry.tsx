@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Save, 
   X, 
@@ -613,7 +614,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                     </CardHeader>
                     
                     <CardContent className="flex-1 p-0 bg-white overflow-hidden">
-                      <div className="h-full overflow-auto">
+                      <ScrollArea className="h-[400px]">
                         <table className="w-full min-w-[800px]">
                           <thead className="sticky top-0 border-b border-gray-200 bg-gray-50">
                             <tr>
@@ -732,7 +733,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
                             ))}
                           </tbody>
                         </table>
-                      </div>
+                      </ScrollArea>
                     </CardContent>
                   </Card>
                 </TabsContent>
