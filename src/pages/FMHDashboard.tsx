@@ -281,11 +281,11 @@ export const FMHDashboard: React.FC = () => {
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <Activity className="w-4 h-4 text-muted-foreground" />
                       <Badge variant="outline" className="text-xs">
-                        {module.progress?.total_weighted_score.toFixed(1) || '0'}/{module.minimum_required || '?'}
+                        {Math.round(module.progress?.total_weighted_score || 0)}/{module.minimum_required || '?'}
                       </Badge>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      V:{module.progress?.responsible_count || 0} I:{module.progress?.instructing_count || 0} A:{module.progress?.assistant_count || 0}
+                      V:{Math.round(module.progress?.responsible_count || 0)} I:{Math.round(module.progress?.instructing_count || 0)} A:{Math.round(module.progress?.assistant_count || 0)}
                     </div>
                   </div>
                 </div>
@@ -342,10 +342,10 @@ export const FMHDashboard: React.FC = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Eingriffe Total</p>
                 <p className="text-2xl font-bold text-card-foreground">
-                  {modules.reduce((sum, m) => 
+                  {Math.round(modules.reduce((sum, m) => 
                     sum + (m.progress?.responsible_count || 0) + 
                     (m.progress?.instructing_count || 0) + 
-                    (m.progress?.assistant_count || 0), 0)}
+                    (m.progress?.assistant_count || 0), 0))}
                 </p>
               </div>
             </div>

@@ -152,6 +152,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
 }) => {
   const { user } = useAuth();
   const [modules, setModules] = useState<Record<string, ModuleData>>(initialModules);
+  const [savedModules, setSavedModules] = useState<Record<string, ModuleData>>(initialModules);
   const [currentDate, setCurrentDate] = useState(new Date().toLocaleDateString('de-CH'));
   const [patientInfo, setPatientInfo] = useState({
     name: 'Sami Zacharia Hosari',
@@ -268,34 +269,45 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
         }
       });
 
-      // Update modules state with loaded data
-      setModules(prev => {
-        const newModules = { ...prev };
-        
-        Object.keys(moduleData).forEach(moduleKey => {
-          if (newModules[moduleKey]) {
-            newModules[moduleKey].procedures.forEach((procedure, index) => {
-              if (moduleData[moduleKey][procedure.name]) {
-                const counts = moduleData[moduleKey][procedure.name];
-                newModules[moduleKey].procedures[index] = {
-                  ...procedure,
-                  verantwortlich: counts.verantwortlich,
-                  instruierend: counts.instruierend,
-                  assistent: counts.assistent,
-                  total: counts.verantwortlich + counts.instruierend + counts.assistent
-                };
-              }
-            });
-            
-            // Update module total
-            newModules[moduleKey].totalCount = newModules[moduleKey].procedures.reduce(
-              (sum, proc) => sum + proc.total, 0
-            );
-          }
-        });
-        
-        return newModules;
+      // Update saved modules state with loaded data
+      const newSavedModules = { ...initialModules };
+      const newCurrentModules = { ...initialModules };
+      
+      Object.keys(moduleData).forEach(moduleKey => {
+        if (newSavedModules[moduleKey]) {
+          newSavedModules[moduleKey].procedures.forEach((procedure, index) => {
+            if (moduleData[moduleKey][procedure.name]) {
+              const counts = moduleData[moduleKey][procedure.name];
+              newSavedModules[moduleKey].procedures[index] = {
+                ...procedure,
+                verantwortlich: counts.verantwortlich,
+                instruierend: counts.instruierend,
+                assistent: counts.assistent,
+                total: counts.verantwortlich + counts.instruierend + counts.assistent
+              };
+              // Initialize current modules with same values
+              newCurrentModules[moduleKey].procedures[index] = {
+                ...procedure,
+                verantwortlich: counts.verantwortlich,
+                instruierend: counts.instruierend,
+                assistent: counts.assistent,
+                total: counts.verantwortlich + counts.instruierend + counts.assistent
+              };
+            }
+          });
+          
+          // Update module totals
+          newSavedModules[moduleKey].totalCount = newSavedModules[moduleKey].procedures.reduce(
+            (sum, proc) => sum + proc.total, 0
+          );
+          newCurrentModules[moduleKey].totalCount = newCurrentModules[moduleKey].procedures.reduce(
+            (sum, proc) => sum + proc.total, 0
+          );
+        }
       });
+      
+      setSavedModules(newSavedModules);
+      setModules(newCurrentModules);
     } catch (error) {
       console.error('Error loading existing procedure data:', error);
     }
@@ -457,7 +469,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
     console.log('💾 FMHManualEntry - Saving data for user ID:', user.id);
     
     try {
-      // Prepare procedure logs for database insertion
+      // Calculate differences and prepare procedure logs for database insertion
       const procedureLogs = [];
       const failedProcedures: string[] = [];
       const successfulProcedures: string[] = [];
@@ -465,23 +477,33 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
       for (const [moduleKey, moduleData] of Object.entries(modules)) {
         console.log(`📋 Processing module: ${moduleData.title}`);
         
-        for (const procedure of moduleData.procedures) {
-          if (procedure.total === 0) continue; // Skip empty procedures
+        for (let i = 0; i < moduleData.procedures.length; i++) {
+          const currentProcedure = moduleData.procedures[i];
+          const savedProcedure = savedModules[moduleKey].procedures[i];
           
-          console.log(`📝 Processing procedure: "${procedure.name}" (Total: ${procedure.total})`);
+          // Calculate differences (new entries only)
+          const diffVerantwortlich = Math.max(0, currentProcedure.verantwortlich - savedProcedure.verantwortlich);
+          const diffInstruierend = Math.max(0, currentProcedure.instruierend - savedProcedure.instruierend);
+          const diffAssistent = Math.max(0, currentProcedure.assistent - savedProcedure.assistent);
+          
+          const totalDiff = diffVerantwortlich + diffInstruierend + diffAssistent;
+          
+          if (totalDiff === 0) continue; // Skip if no new entries
+          
+          console.log(`📝 Processing procedure: "${currentProcedure.name}" (New entries: V:${diffVerantwortlich} I:${diffInstruierend} A:${diffAssistent})`);
           
           // Find or create procedure ID
-          const procedureId = await findOrCreateProcedure(procedure.name);
+          const procedureId = await findOrCreateProcedure(currentProcedure.name);
           if (!procedureId) {
-            console.warn(`❌ Could not find or create procedure: ${procedure.name}`);
-            failedProcedures.push(procedure.name);
+            console.warn(`❌ Could not find or create procedure: ${currentProcedure.name}`);
+            failedProcedures.push(currentProcedure.name);
             continue;
           }
           
-          successfulProcedures.push(procedure.name);
+          successfulProcedures.push(currentProcedure.name);
           
-          // Add responsible entries
-          for (let i = 0; i < procedure.verantwortlich; i++) {
+          // Add NEW responsible entries only
+          for (let j = 0; j < diffVerantwortlich; j++) {
             procedureLogs.push({
               user_id: user.id,
               procedure_id: procedureId,
@@ -491,8 +513,8 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
             });
           }
           
-          // Add instructing entries
-          for (let i = 0; i < procedure.instruierend; i++) {
+          // Add NEW instructing entries only
+          for (let j = 0; j < diffInstruierend; j++) {
             procedureLogs.push({
               user_id: user.id,
               procedure_id: procedureId,
@@ -502,8 +524,8 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
             });
           }
           
-          // Add assistant entries
-          for (let i = 0; i < procedure.assistent; i++) {
+          // Add NEW assistant entries only
+          for (let j = 0; j < diffAssistent; j++) {
             procedureLogs.push({
               user_id: user.id,
               procedure_id: procedureId,
@@ -542,8 +564,8 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
         
         toast.success(message);
         
-        // Reset form
-        setModules(initialModules);
+        // Update saved modules to current state
+        setSavedModules({ ...modules });
         
         // Call onSuccess callback to refresh FMH progress
         console.log('🔄 Refreshing FMH progress...');
