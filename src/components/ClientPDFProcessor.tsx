@@ -2,8 +2,8 @@ import { useState } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { supabase } from '@/integrations/supabase/client';
 
-// Configure PDF.js worker to use legacy build
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/legacy/build/pdf.worker.min.js`;
+// Disable worker to avoid loading issues
+pdfjsLib.GlobalWorkerOptions.workerSrc = '';
 
 interface ProcedureData {
   proc_name: string;
