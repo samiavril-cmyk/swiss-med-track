@@ -505,8 +505,9 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
     console.log('💾 FMHManualEntry - Saving data for user ID:', user.id);
     
     try {
-      // Calculate differences and prepare procedure logs for database insertion
-      const procedureLogs = [];
+      // Calculate differences and prepare procedure logs for database insertion/deletion
+      const procedureLogsToInsert = [];
+      const procedureLogsToDelete = [];
       const failedProcedures: string[] = [];
       const successfulProcedures: string[] = [];
       
@@ -517,16 +518,16 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
           const currentProcedure = moduleData.procedures[i];
           const savedProcedure = savedModules[moduleKey].procedures[i];
           
-          // Calculate differences (new entries only)
-          const diffVerantwortlich = Math.max(0, currentProcedure.verantwortlich - savedProcedure.verantwortlich);
-          const diffInstruierend = Math.max(0, currentProcedure.instruierend - savedProcedure.instruierend);
-          const diffAssistent = Math.max(0, currentProcedure.assistent - savedProcedure.assistent);
+          // Calculate differences (positive = add, negative = remove)
+          const diffVerantwortlich = currentProcedure.verantwortlich - savedProcedure.verantwortlich;
+          const diffInstruierend = currentProcedure.instruierend - savedProcedure.instruierend;
+          const diffAssistent = currentProcedure.assistent - savedProcedure.assistent;
           
-          const totalDiff = diffVerantwortlich + diffInstruierend + diffAssistent;
+          if (diffVerantwortlich === 0 && diffInstruierend === 0 && diffAssistent === 0) {
+            continue; // Skip if no changes
+          }
           
-          if (totalDiff === 0) continue; // Skip if no new entries
-          
-          console.log(`📝 Processing procedure: "${currentProcedure.name}" (New entries: V:${diffVerantwortlich} I:${diffInstruierend} A:${diffAssistent})`);
+          console.log(`📝 Processing procedure: "${currentProcedure.name}" (Changes: V:${diffVerantwortlich} I:${diffInstruierend} A:${diffAssistent})`);
           
           // Find or create procedure ID
           const procedureId = await findOrCreateProcedure(currentProcedure.name);
@@ -538,88 +539,154 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
           
           successfulProcedures.push(currentProcedure.name);
           
-          // Add NEW responsible entries only
-          for (let j = 0; j < diffVerantwortlich; j++) {
-            procedureLogs.push({
-              user_id: user.id,
-              procedure_id: procedureId,
-              role_in_surgery: 'responsible',
-              performed_date: new Date().toISOString().split('T')[0],
-              notes: `Manuelle Eingabe - ${moduleData.title}`
-            });
+          // Handle additions (positive differences)
+          if (diffVerantwortlich > 0) {
+            for (let j = 0; j < diffVerantwortlich; j++) {
+              procedureLogsToInsert.push({
+                user_id: user.id,
+                procedure_id: procedureId,
+                role_in_surgery: 'responsible',
+                performed_date: new Date().toISOString().split('T')[0],
+                notes: `Manuelle Eingabe - ${moduleData.title}`
+              });
+            }
           }
           
-          // Add NEW instructing entries only
-          for (let j = 0; j < diffInstruierend; j++) {
-            procedureLogs.push({
-              user_id: user.id,
-              procedure_id: procedureId,
-              role_in_surgery: 'instructing',
-              performed_date: new Date().toISOString().split('T')[0],
-              notes: `Manuelle Eingabe - ${moduleData.title}`
-            });
+          if (diffInstruierend > 0) {
+            for (let j = 0; j < diffInstruierend; j++) {
+              procedureLogsToInsert.push({
+                user_id: user.id,
+                procedure_id: procedureId,
+                role_in_surgery: 'instructing',
+                performed_date: new Date().toISOString().split('T')[0],
+                notes: `Manuelle Eingabe - ${moduleData.title}`
+              });
+            }
           }
           
-          // Add NEW assistant entries only
-          for (let j = 0; j < diffAssistent; j++) {
-            procedureLogs.push({
-              user_id: user.id,
-              procedure_id: procedureId,
-              role_in_surgery: 'assistant',
-              performed_date: new Date().toISOString().split('T')[0],
-              notes: `Manuelle Eingabe - ${moduleData.title}`
-            });
+          if (diffAssistent > 0) {
+            for (let j = 0; j < diffAssistent; j++) {
+              procedureLogsToInsert.push({
+                user_id: user.id,
+                procedure_id: procedureId,
+                role_in_surgery: 'assistant',
+                performed_date: new Date().toISOString().split('T')[0],
+                notes: `Manuelle Eingabe - ${moduleData.title}`
+              });
+            }
+          }
+          
+          // Handle removals (negative differences)
+          if (diffVerantwortlich < 0) {
+            // Get the most recent logs to delete
+            const { data: logsToRemove } = await supabase
+              .from('procedure_logs')
+              .select('id')
+              .eq('user_id', user.id)
+              .eq('procedure_id', procedureId)
+              .eq('role_in_surgery', 'responsible')
+              .order('created_at', { ascending: false })
+              .limit(Math.abs(diffVerantwortlich));
+            
+            if (logsToRemove) {
+              procedureLogsToDelete.push(...logsToRemove.map(log => log.id));
+            }
+          }
+          
+          // Handle removals for instructing role
+          if (diffInstruierend < 0) {
+            const { data: logsToRemove } = await supabase
+              .from('procedure_logs')
+              .select('id')
+              .eq('user_id', user.id)
+              .eq('procedure_id', procedureId)
+              .eq('role_in_surgery', 'instructing')
+              .order('created_at', { ascending: false })
+              .limit(Math.abs(diffInstruierend));
+            
+            if (logsToRemove) {
+              procedureLogsToDelete.push(...logsToRemove.map(log => log.id));
+            }
+          }
+          
+          // Handle removals for assistant role
+          if (diffAssistent < 0) {
+            const { data: logsToRemove } = await supabase
+              .from('procedure_logs')
+              .select('id')
+              .eq('user_id', user.id)
+              .eq('procedure_id', procedureId)
+              .eq('role_in_surgery', 'assistant')
+              .order('created_at', { ascending: false })
+              .limit(Math.abs(diffAssistent));
+            
+            if (logsToRemove) {
+              procedureLogsToDelete.push(...logsToRemove.map(log => log.id));
+            }
           }
         }
       }
 
-      console.log(`📊 Summary: ${procedureLogs.length} procedure logs prepared`);
+      console.log(`📊 Summary: ${procedureLogsToInsert.length} logs to insert, ${procedureLogsToDelete.length} logs to delete`);
       console.log(`✅ Successful procedures: ${successfulProcedures.length}`, successfulProcedures);
       if (failedProcedures.length > 0) {
         console.log(`❌ Failed procedures: ${failedProcedures.length}`, failedProcedures);
       }
 
-      if (procedureLogs.length > 0) {
+      // Execute database operations
+      let operationsCount = 0;
+      
+      if (procedureLogsToInsert.length > 0) {
         console.log('💾 Inserting procedure logs into database...');
         
-        const { error } = await supabase
+        const { error: insertError } = await supabase
           .from('procedure_logs')
-          .insert(procedureLogs);
+          .insert(procedureLogsToInsert);
 
-        if (error) {
-          console.error('❌ Database insertion error:', error);
-          throw error;
+        if (insertError) {
+          console.error('❌ Database insertion error:', insertError);
+          throw insertError;
         }
+        
+        operationsCount += procedureLogsToInsert.length;
+        console.log(`✅ Successfully inserted ${procedureLogsToInsert.length} procedure logs`);
+      }
+      
+      if (procedureLogsToDelete.length > 0) {
+        console.log('🗑️ Deleting procedure logs from database...');
+        
+        const { error: deleteError } = await supabase
+          .from('procedure_logs')
+          .delete()
+          .in('id', procedureLogsToDelete);
 
-        console.log('✅ Successfully inserted procedure logs');
+        if (deleteError) {
+          console.error('❌ Database deletion error:', deleteError);
+          throw deleteError;
+        }
+        
+        operationsCount += procedureLogsToDelete.length;
+        console.log(`✅ Successfully deleted ${procedureLogsToDelete.length} procedure logs`);
+      }
 
-        let message = `${procedureLogs.length} Prozeduren erfolgreich gespeichert`;
+      if (operationsCount > 0) {
+        let message = `${operationsCount} Änderungen erfolgreich gespeichert`;
         if (failedProcedures.length > 0) {
           message += `. ${failedProcedures.length} Prozeduren konnten nicht verarbeitet werden.`;
         }
         
         toast.success(message);
         
-        // Update saved modules to current state (to track what's been saved)
+        // Update saved modules to current state
         setSavedModules({ ...modules });
-        
-        // Reset form to show saved state (clear any additional unsaved entries)
-        const resetModules = { ...modules };
-        Object.keys(resetModules).forEach(moduleKey => {
-          resetModules[moduleKey].procedures.forEach((proc, index) => {
-            // Keep the saved values, reset any additional unsaved input
-            resetModules[moduleKey].procedures[index] = { ...proc };
-          });
-        });
-        setModules(resetModules);
         
         // Call onSuccess callback to refresh FMH progress
         console.log('🔄 Refreshing FMH progress...');
         onSuccess?.();
         onOpenChange(false);
       } else {
-        console.log('⚠️ No procedure logs to save');
-        toast.warning('Keine Prozeduren zum Speichern gefunden');
+        console.log('⚠️ No changes to save');
+        toast.warning('Keine Änderungen zum Speichern gefunden');
       }
     } catch (error) {
       console.error('❌ Error saving procedures:', error);
