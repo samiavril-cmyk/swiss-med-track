@@ -21,12 +21,12 @@ interface UploadResult {
     filename: string;
     standDate?: string;
     totalProcedures: number;
-    modules: any[];
+    modules: unknown[];
     matched: number;
     needsReview: number;
   };
-  stagingData?: any[];
-  parsedModules?: any[];
+  stagingData?: unknown[];
+  parsedModules?: unknown[];
   message?: string;
   error?: string;
 }
