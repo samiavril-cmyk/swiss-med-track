@@ -22,11 +22,11 @@ interface ProcessResult {
     filename: string;
     standDate?: string;
     totalProcedures: number;
-    modules: any[];
+    modules: unknown[];
     matched: number;
     needsReview: number;
   };
-  stagingData?: any[];
+  stagingData?: unknown[];
   error?: string;
 }
 
@@ -56,16 +56,64 @@ export const useClientPDFProcessor = () => {
     }
   };
 
-  const parseWithAI = async (text: string, filename: string): Promise<ProcedureData[]> => {
-    const response = await supabase.functions.invoke('parse-procedures', {
-      body: { text, filename }
-    });
+  const parseTextLocally = (text: string): ProcedureData[] => {
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    const procedures: ProcedureData[] = [];
+    let currentModule = '';
 
-    if (response.error) {
-      throw new Error('AI parsing failed: ' + response.error.message);
+    const isModuleHeader = (line: string) => /^(Basis|Modul)\s+.+$/i.test(line);
+    const isNumeric = (line: string) => /^\d+$/.test(line);
+
+    let i = 0;
+    while (i < lines.length) {
+      const line = lines[i];
+
+      if (line.startsWith('Stand:') || /SIWF|Seite\s+\d+|Erfasste Prozeduren/i.test(line)) {
+        i++; continue;
+      }
+
+      if (isModuleHeader(line)) {
+        currentModule = line;
+        // Skip typical 5 header labels if present
+        i++;
+        continue;
+      }
+
+      // A procedure line usually: name then following lines are numbers
+      if (currentModule && !isNumeric(line)) {
+        const name = line;
+        const nums: number[] = [];
+        let j = i + 1;
+        while (j < lines.length && j < i + 10) {
+          const nxt = lines[j];
+          if (isNumeric(nxt)) { nums.push(parseInt(nxt)); j++; continue; }
+          if (isModuleHeader(nxt)) break;
+          if (!isNumeric(nxt)) break;
+          j++;
+        }
+        if (nums.length > 0) {
+          const minimum = nums[0] || 0;
+          const responsible = nums[1] || 0;
+          const instructing = nums[2] || 0;
+          const assistant = nums[3] || 0;
+          const total = nums[4] || (responsible + instructing + assistant);
+          procedures.push({
+            proc_name: name,
+            module_name: currentModule,
+            minimum,
+            responsible,
+            instructing,
+            assistant,
+            total,
+          });
+          i = j; continue;
+        }
+      }
+
+      i++;
     }
 
-    return response.data;
+    return procedures;
   };
 
   const createImportRun = async (filename: string) => {
@@ -94,8 +142,8 @@ export const useClientPDFProcessor = () => {
       // Extract text from PDF
       const text = await extractTextFromPDF(file);
       
-      // Parse with AI
-      const procedures = await parseWithAI(text, file.name);
+      // Parse locally (rules-based)
+      const procedures = parseTextLocally(text);
       
       // Create import run
       const importRun = await createImportRun(file.name);
