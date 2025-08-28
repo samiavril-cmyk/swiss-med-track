@@ -9,7 +9,7 @@ import { X, Calendar, TrendingUp, BookOpen, Award, FileText, Stethoscope } from 
 
 interface ActivityDrillDownProps {
   activityId: string;
-  data: any;
+  data: Record<string, unknown>;
   onClose: () => void;
 }
 
@@ -190,7 +190,7 @@ export const ActivityDrillDown: React.FC<ActivityDrillDownProps> = ({
       <div className="space-y-4">
         <h4 className="font-semibold text-card-foreground">Alle Publikationen</h4>
         <div className="space-y-3">
-          {data.articles.map((article: any, index: number) => (
+          {data.articles.map((article: { title: string; journal: string; date: string; doi?: string }, index: number) => (
             <div key={index} className="p-4 border border-card-border rounded-medical">
               <h5 className="font-medium text-card-foreground mb-2">{article.title}</h5>
               <div className="flex items-center justify-between">
@@ -237,7 +237,7 @@ export const ActivityDrillDown: React.FC<ActivityDrillDownProps> = ({
       <div className="space-y-4">
         <h4 className="font-semibold text-card-foreground">Alle Auszeichnungen</h4>
         <div className="space-y-3">
-          {data.items.map((award: any, index: number) => (
+          {data.items.map((award: { icon: React.ReactNode; title: string; organization: string; date: string }, index: number) => (
             <div key={index} className="p-4 border border-card-border rounded-medical">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{award.icon}</span>

@@ -1,0 +1,68 @@
+---
+alwaysApply: true
+---
+
+# FMH Data Sync & Migration Fixes
+
+## Overview
+This document covers the processes and procedures for cleaning, syncing, and migrating data within the FMH system to maintain consistency, integrity, and smooth operation across modules.
+
+## Core Issues Addressed
+- Duplicate procedure categories causing confusion and display errors.
+- Legacy or temporary procedures (e.g., codes prefixed with `TEMP_`) interfering with data accuracy.
+- Inconsistent or outdated minimum procedure requirements across modules.
+- Missing or incomplete procedures in some FMH modules.
+- Dashboard and form failures due to missing or improperly configured module metadata.
+
+## Data Cleanup Procedures
+- Remove all deprecated or legacy procedures:
+  - Example SQL: `DELETE FROM public.procedures WHERE code LIKE 'TEMP_%';`
+- Delete duplicate or obsolete procedure categories from `procedure_categories`:
+  - Remove categories such as `basis_notfall`, `basis_allgemein`, `general`, `trauma`, `laparoscopy`, `vascular`.
+- Clean up procedure logs referencing deleted procedures before removal to avoid foreign key issues.
+
+## Migration Strategy
+- Plan schema migrations to update:
+  - `module_type` values on categories, especially to correctly mark basis modules.
+  - `minimum_required` field for all procedure categories to match current FMH standards.
+  - Ensure all procedures have valid `category_id` references and the correct `min_required_by_pgy` JSON structure.
+- Use transactional scripts where possible to ensure atomic data updates.
+
+## Sync & Verification
+- After migrations, verify the presence of all FMH modules and expected procedures.
+- Confirm minimum requirement values tally to official FMH specifications.
+- Conduct spot checks on user profiles and procedure logs for correctness.
+
+## Rollback & Backup
+- Always backup current production databases before applying migration scripts.
+- Provide rollback scripts or procedures in case of failures.
+- Test all migration scripts in staging environments prior to production deployment.
+
+## Integration & Deployment
+- Coordinate migration deployments with frontend PRM updates to ensure UI compatibility.
+- Notify stakeholders of migration schedules and expected system impact.
+- Validate post-migration application behavior on dashboards and forms.
+
+## Example Migration Scripts
+- Setting `module_type` on basis modules:
+
+UPDATE procedure_categories
+SET module_type = 'basis',
+minimum_required = 20,
+sort_index = CASE
+WHEN key = 'basis_notfallchirurgie' THEN 1
+WHEN key = 'basis_allgemeinchirurgie' THEN 2
+ELSE sort_index
+END
+WHERE key IN ('basis_notfallchirurgie', 'basis_allgemeinchirurgie');
+
+- Removing duplicates and legacy procedures:
+
+DELETE FROM public.procedure_logs WHERE procedure_id IN (
+SELECT id FROM public.procedures WHERE code LIKE 'TEMP_%'
+);
+
+DELETE FROM public.procedures WHERE code LIKE 'TEMP_%';
+
+DELETE FROM public.procedure_categories
+WHERE key IN ('basis_allgemein', 'basis_notfall', 'general', 'trauma', 'laparoscopy', 'vascular');

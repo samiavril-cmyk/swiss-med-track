@@ -1,0 +1,94 @@
+---
+alwaysApply: true
+---
+
+# FMH User Profile & PGY Level Handling
+
+## Overview
+This module manages the fetching, storage, and application of the user's postgraduate year (PGY) level information within the FMH app. The PGY level directly influences displayed minimum procedure requirements and form validation logic.
+
+## Core Responsibilities
+- Fetch user profile data from the backend or authentication system (e.g., Supabase).
+- Extract and store the current user's PGY level as an integer between 1 and 5.
+- Provide PGY level context dynamically to UI components like procedure forms and dashboards.
+- Update PGY level in real-time if user profile changes during app usage.
+- Ensure fallback behaviors when PGY level is unavailable or invalid.
+
+## Data Structure
+- User profile contains a `pgy_level` field stored as an integer (1 to 5).
+- PGY level used as key suffix in procedure minimums: e.g. `pgy1, pgy2, ..., pgy5`.
+- PGY level state kept in React context or global state for easy consumption.
+
+## Integration Points
+- On user login or session start, trigger PGY level fetch.
+- Components subscribe to PGY level state to adapt displayed minimum requirements.
+- Data validation in forms references PGY level to enforce correct minimums.
+- Dashboard progress computations use PGY level for personalized display.
+
+## Error Handling & Edge Cases
+- If PGY level is missing or outside 1-5, fallback to maximum level (5) or show warning.
+- Handle asynchronous fetch errors gracefully with retry or user notification.
+- Provide default PGY level in the absence of explicit user data for testing.
+
+## UX Considerations
+- Optionally allow user to update PGY level in profile settings.
+- Reflect PGY level in UI (e.g., "Current PGY Level: 3") for clarity.
+- Prevent form submission if PGY level data is inconsistent or missing.
+
+## Component Structure (Example)
+- `UserProfileProvider` (context provider for PGY and user info)
+- `useUserProfile` hook for accessing profile and PGY data
+- PGY-aware validation utilities for forms and dashboards
+
+## PRM Maintenance
+- Document PGY level logic and schema in PRM for ongoing reference.
+- Update PGY handling in PRMs when expanding the trainee progression system.
+- Coordinate PGY-related changes with backend migrations and UI updates.
+
+---
+
+Would you like to continue next with Step 8: Data Sync & Migration Fixes in MDC format?
+# FMH User Profile & PGY Level Handling
+
+## Overview
+This module manages the fetching, storage, and application of the user's postgraduate year (PGY) level information within the FMH app. The PGY level directly influences displayed minimum procedure requirements and form validation logic.
+
+## Core Responsibilities
+- Fetch user profile data from the backend or authentication system (e.g., Supabase).
+- Extract and store the current user's PGY level as an integer between 1 and 5.
+- Provide PGY level context dynamically to UI components like procedure forms and dashboards.
+- Update PGY level in real-time if user profile changes during app usage.
+- Ensure fallback behaviors when PGY level is unavailable or invalid.
+
+## Data Structure
+- User profile contains a `pgy_level` field stored as an integer (1 to 5).
+- PGY level used as key suffix in procedure minimums: e.g. `pgy1, pgy2, ..., pgy5`.
+- PGY level state kept in React context or global state for easy consumption.
+
+## Integration Points
+- On user login or session start, trigger PGY level fetch.
+- Components subscribe to PGY level state to adapt displayed minimum requirements.
+- Data validation in forms references PGY level to enforce correct minimums.
+- Dashboard progress computations use PGY level for personalized display.
+
+## Error Handling & Edge Cases
+- If PGY level is missing or outside 1-5, fallback to maximum level (5) or show warning.
+- Handle asynchronous fetch errors gracefully with retry or user notification.
+- Provide default PGY level in the absence of explicit user data for testing.
+
+## UX Considerations
+- Optionally allow user to update PGY level in profile settings.
+- Reflect PGY level in UI (e.g., "Current PGY Level: 3") for clarity.
+- Prevent form submission if PGY level data is inconsistent or missing.
+
+## Component Structure (Example)
+- `UserProfileProvider` (context provider for PGY and user info)
+- `useUserProfile` hook for accessing profile and PGY data
+- PGY-aware validation utilities for forms and dashboards
+
+## PRM Maintenance
+- Document PGY level logic and schema in PRM for ongoing reference.
+- Update PGY handling in PRMs when expanding the trainee progression system.
+- Coordinate PGY-related changes with backend migrations and UI updates.
+
+---

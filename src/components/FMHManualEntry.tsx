@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,7 +26,7 @@ interface DbProcedure {
   id: string;
   title_de: string;
   code: string;
-  min_required_by_pgy: any;
+  min_required_by_pgy: Record<string, number>;
   category_id: string;
 }
 
@@ -82,13 +82,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
   const [userPgyLevel, setUserPgyLevel] = useState<number>(5); // Default to PGY5
 
   // Load modules and procedures from database
-  useEffect(() => {
-    if (open) {
-      loadModulesAndProcedures();
-    }
-  }, [open]);
-
-  const loadModulesAndProcedures = async () => {
+  const loadModulesAndProcedures = useCallback(async () => {
     setIsLoading(true);
     try {
       // Load user's PGY level first
@@ -141,7 +135,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
           procedures: categoryProcedures.map(procedure => ({
             id: procedure.id,
             name: procedure.title_de,
-            minimum: (procedure.min_required_by_pgy as any)?.[`pgy${userPgyLevel}`] || 0, // Use user's PGY level
+            minimum: (procedure.min_required_by_pgy)?.[`pgy${userPgyLevel}`] || 0, // Use user's PGY level
             verantwortlich: 0,
             instruierend: 0,
             assistent: 0,
@@ -163,7 +157,13 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, userPgyLevel, open]);
+
+  useEffect(() => {
+    if (open) {
+      loadModulesAndProcedures();
+    }
+  }, [open, loadModulesAndProcedures]);
 
   // Prevent background scrolling when modal is open
   useEffect(() => {

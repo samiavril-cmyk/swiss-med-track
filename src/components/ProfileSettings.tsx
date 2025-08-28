@@ -7,19 +7,34 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Share2, Copy, Eye, EyeOff } from 'lucide-react';
+import { Share2, Copy } from 'lucide-react';
 
 interface ProfileSettingsProps {
   userId: string;
 }
 
+type PublicFields = {
+  courses: boolean;
+  awards: boolean;
+  publications: boolean;
+  procedures: boolean;
+};
+
+type ProfileRow = {
+  user_id: string;
+  full_name?: string | null;
+  handle?: string | null;
+  is_public?: boolean | null;
+  public_fields?: PublicFields | null;
+};
+
 export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ userId }) => {
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [handle, setHandle] = useState('');
   const [isPublic, setIsPublic] = useState(false);
-  const [publicFields, setPublicFields] = useState({
+  const [publicFields, setPublicFields] = useState<PublicFields>({
     courses: true,
     awards: true,
     publications: true,
@@ -37,10 +52,11 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ userId }) => {
 
         if (error) throw error;
 
-        setProfile(data);
-        setHandle(data.handle || '');
-        setIsPublic(data.is_public || false);
-        setPublicFields((data.public_fields as any) || publicFields);
+        const p = data as unknown as ProfileRow;
+        setProfile(p);
+        setHandle(p.handle || '');
+        setIsPublic(Boolean(p.is_public));
+        setPublicFields((p.public_fields as PublicFields | null) || publicFields);
       } catch (error) {
         console.error('Error fetching profile:', error);
         toast({
@@ -88,10 +104,10 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ userId }) => {
         title: "Gespeichert",
         description: "Deine Profil-Einstellungen wurden aktualisiert."
       });
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { code?: string };
       console.error('Error saving profile settings:', error);
-      
-      if (error.code === '23505') {
+      if (err.code === '23505') {
         toast({
           title: "Handle bereits vergeben",
           description: "Dieser Handle ist bereits von einem anderen Nutzer vergeben.",

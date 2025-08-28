@@ -1,0 +1,87 @@
+---
+alwaysApply: true
+---
+## Step 2: FMH Module Category Definitions
+
+### Modules Overview
+Five major surgical modules/categories with distinct PGY minimum requirements:
+
+| Key                     | Name                      | Minimum Required Procedures | Module Type | Sort Index | Active |
+|-------------------------|---------------------------|-----------------------------|-------------|------------|--------|
+| basis_notfallchirurgie   | Basis Notfallchirurgie    | 85                          | basis       | 1          | true   |
+| basis_allgemeinchirurgie | Basis Allgemeinchirurgie  | 260                         | basis       | 2          | true   |
+| viszeralchirurgie       | Viszeralchirurgie         | 165                         | viszeral    | 3          | true   |
+| traumatologie           | Traumatologie             | 165                         | trauma      | 4          | true   |
+| kombination             | Kombination               | 165                         | kombi       | 5          | true   |
+
+### Descriptions
+- **basis_notfallchirurgie:** Emergency surgery basics, 85 minimum total, treated as "basis"
+- **basis_allgemeinchirurgie:** General surgery basics, 260 minimum total, treated as "basis"
+- **viszeralchirurgie:** Visceral surgery, 165 minimum total
+- **traumatologie:** Traumatology surgery, 165 minimum total
+- **kombination:** Mixed surgical skills, 165 minimum total
+
+### Database Synchronization
+- Module categories linked to `procedure_categories` table by key
+- `module_type` differentiates basis modules for dashboard
+- `sort_index` controls UI ordering
+- `active` toggles UI visibility
+- No duplicate categories allowed
+- Procedures must link to valid categories
+
+### UI Considerations
+- Modules ordered by `sort_index`
+- Basis modules have distinct styles on dashboard
+- Only active modules shown in forms and reports
+
+---
+
+## Step 3: Procedure Data Structure & Database Schema
+
+### Core Procedure Model
+
+| Field              | Type         | Description                                                  |
+|--------------------|--------------|--------------------------------------------------------------|
+| code               | string       | Unique procedure identifier (e.g. "BN001")                    |
+| title_de           | string       | German procedure title                                       |
+| category_id        | UUID (FK)    | Foreign key to procedure category                            |
+| min_required_by_pgy | JSONB        | Min requirements by PGY (keys: pgy1...pgy5)                 |
+| active             | boolean      | Is the procedure active and included in UI                   |
+
+### Relationships & Constraints
+- Each procedure belongs to exactly one procedure category (module)
+- Unique codes enforced
+- `min_required_by_pgy` must have numeric entries for all PGYs
+- Only active procedures shown in forms and dashboard
+
+### Legacy & Duplicate Data Handling
+- Remove legacy procedures with codes like `TEMP_%`
+- Clean duplicate categories and inactive procedures regularly
+- Procedures must always have valid, active categories
+
+### Table Mapping: `public.procedures`
+
+| Column Name        | Data Type    | Description                 |
+|--------------------|--------------|-----------------------------|
+| id                 | UUID         | Primary Key                 |
+| code               | text         | Unique procedure code       |
+| title_de           | text         | German title                |
+| category_id        | UUID         | Foreign key to categories   |
+| min_required_by_pgy | jsonb        | Minimum PGY requirements    |
+| active             | boolean      | Active flag                 |
+| created_at         | timestamp    | Creation timestamp          |
+| updated_at         | timestamp    | Last updated timestamp      |
+
+### Example SQL Query
+SELECT code, title_de, min_required_by_pgy->>'pgy5' AS pgy5_min
+FROM public.procedures
+WHERE category_id = (SELECT id FROM public.procedure_categories WHERE key = 'basis_notfallchirurgie')
+AND active = true;
+
+
+### Integration Notes
+- Frontend dynamically filters procedures by `category_id` and user PGY level
+- Validations ensure compliance with minimum requirements
+- Schema changes coordinated via migrations and PRM documentation
+
+---

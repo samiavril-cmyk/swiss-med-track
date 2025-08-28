@@ -1,0 +1,112 @@
+---
+alwaysApply: true
+---
+
+# FMH Module Category Definitions
+
+## Overview
+This document defines the five major FMH surgical modules (categories) used throughout the project. Each module has specific minimum procedure requirements and metadata used both in the database and UI layers.
+
+## Modules
+
+| Key                     | Name                      | Minimum Required Procedures | Module Type | Sort Index | Active |
+|-------------------------|---------------------------|-----------------------------|-------------|------------|--------|
+| basis_notfallchirurgie   | Basis Notfallchirurgie    | 85                          | basis       | 1          | true   |
+| basis_allgemeinchirurgie | Basis Allgemeinchirurgie  | 260                         | basis       | 2          | true   |
+| viszeralchirurgie       | Viszeralchirurgie         | 165                         | viszeral    | 3          | true   |
+| traumatologie           | Traumatologie             | 165                         | trauma      | 4          | true   |
+| kombination             | Kombination               | 165                         | kombi       | 5          | true   |
+
+## Descriptions
+
+### basis_notfallchirurgie
+- Emergency surgery basics module
+- Requires 85 minimum procedures total
+- Treated as a "basis" module for UI and dashboard
+
+### basis_allgemeinchirurgie
+- General surgery basics module
+- Requires 260 minimum procedures total
+- Treated as a "basis" module for UI and dashboard
+
+### viszeralchirurgie
+- Visceral surgery module
+- Requires 165 minimum procedures total
+
+### traumatologie
+- Traumatology surgery module
+- Requires 165 minimum procedures total
+
+### kombination
+- Combination module covering mixed surgical skills
+- Requires 165 minimum procedures total
+
+## Database Notes
+- These module entries correspond to `procedure_categories` table entries with matching `key`.
+- The `module_type` field differentiates basis modules and affects dashboard filtering.
+- `sort_index` controls UI ordering in tabs and module lists.
+- The `active` boolean toggles module visibility in UI elements.
+
+## Sync & Validation
+- Ensure no duplicate categories exist with similar keys.
+- Validate all procedures assigned to modules have valid `category_id`.
+- Periodically audit `minimum_required` consistency with real trainee requirements.
+
+## Usage in Project
+- Modules are loaded and rendered in the order according to `sort_index`.
+- The dashboard uses module_type to assign special visual treatments to basis modules.
+- Forms and reports filter modules by `active` status for user views.
+# FMH Module Category Definitions
+
+## Overview
+This document defines the five major FMH surgical modules (categories) used throughout the project. Each module has specific minimum procedure requirements and metadata used both in the database and UI layers.
+
+## Modules
+
+| Key                     | Name                      | Minimum Required Procedures | Module Type | Sort Index | Active |
+|-------------------------|---------------------------|-----------------------------|-------------|------------|--------|
+| basis_notfallchirurgie   | Basis Notfallchirurgie    | 85                          | basis       | 1          | true   |
+| basis_allgemeinchirurgie | Basis Allgemeinchirurgie  | 260                         | basis       | 2          | true   |
+| viszeralchirurgie       | Viszeralchirurgie         | 165                         | viszeral    | 3          | true   |
+| traumatologie           | Traumatologie             | 165                         | trauma      | 4          | true   |
+| kombination             | Kombination               | 165                         | kombi       | 5          | true   |
+
+## Descriptions
+
+### basis_notfallchirurgie
+- Emergency surgery basics module
+- Requires 85 minimum procedures total
+- Treated as a "basis" module for UI and dashboard
+
+### basis_allgemeinchirurgie
+- General surgery basics module
+- Requires 260 minimum procedures total
+- Treated as a "basis" module for UI and dashboard
+
+### viszeralchirurgie
+- Visceral surgery module
+- Requires 165 minimum procedures total
+
+### traumatologie
+- Traumatology surgery module
+- Requires 165 minimum procedures total
+
+### kombination
+- Combination module covering mixed surgical skills
+- Requires 165 minimum procedures total
+
+## Database Notes
+- These module entries correspond to `procedure_categories` table entries with matching `key`.
+- The `module_type` field differentiates basis modules and affects dashboard filtering.
+- `sort_index` controls UI ordering in tabs and module lists.
+- The `active` boolean toggles module visibility in UI elements.
+
+## Sync & Validation
+- Ensure no duplicate categories exist with similar keys.
+- Validate all procedures assigned to modules have valid `category_id`.
+- Periodically audit `minimum_required` consistency with real trainee requirements.
+
+## Usage in Project
+- Modules are loaded and rendered in the order according to `sort_index`.
+- The dashboard uses module_type to assign special visual treatments to basis modules.
+- Forms and reports filter modules by `active` status for user views.

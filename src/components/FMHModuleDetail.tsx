@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ interface ProcedureDetail {
   id: string;
   code: string;
   title_de: string;
-  min_required_by_pgy: any;
+  min_required_by_pgy: Record<string, number> | null;
   responsible_count: number;
   instructing_count: number;
   assistant_count: number;
@@ -33,16 +33,12 @@ interface ModuleDetailProps {
 }
 
 export const FMHModuleDetail: React.FC<ModuleDetailProps> = ({ moduleKey, onClose }) => {
-  const [moduleData, setModuleData] = useState<any>(null);
+  const [moduleData, setModuleData] = useState<{ id: string; title_de: string; minimum_required: number } | null>(null);
   const [procedures, setProcedures] = useState<ProcedureDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [userPgyLevel, setUserPgyLevel] = useState<number>(4);
 
-  useEffect(() => {
-    loadModuleDetails();
-  }, [moduleKey]);
-
-  const loadModuleDetails = async () => {
+  const loadModuleDetails = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -67,7 +63,9 @@ export const FMHModuleDetail: React.FC<ModuleDetailProps> = ({ moduleKey, onClos
         .eq('key', moduleKey)
         .single();
 
-      setModuleData(module);
+      if (module) {
+        setModuleData({ id: module.id, title_de: module.title_de, minimum_required: module.minimum_required });
+      }
 
       // Get module progress
       const { data: progressData } = await supabase
@@ -123,7 +121,11 @@ export const FMHModuleDetail: React.FC<ModuleDetailProps> = ({ moduleKey, onClos
     } finally {
       setLoading(false);
     }
-  };
+  }, [moduleKey]);
+
+  useEffect(() => {
+    loadModuleDetails();
+  }, [loadModuleDetails]);
 
   const getModuleVariant = (moduleKey: string) => {
     const variants = {
@@ -137,7 +139,7 @@ export const FMHModuleDetail: React.FC<ModuleDetailProps> = ({ moduleKey, onClos
   };
 
   const getRequiredForPgy = (procedure: ProcedureDetail): number => {
-    return procedure.min_required_by_pgy?.[userPgyLevel.toString()] || 0;
+    return procedure.min_required_by_pgy?.[`pgy${userPgyLevel}`] ?? 0;
   };
 
   const calculateProgress = (procedure: ProcedureDetail): number => {

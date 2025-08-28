@@ -1,0 +1,126 @@
+---
+alwaysApply: true
+---
+
+# FMH Testing & Validation Strategy
+
+## Overview
+This document outlines the comprehensive testing and validation approach for the FMH surgical module management system. It ensures data integrity, UI reliability, and functional correctness to maintain high quality and user trust.
+
+## Testing Objectives
+- Verify data integrity for procedures, categories, and user profiles.
+- Ensure UI components correctly display data and handle user input.
+- Confirm backend APIs and database interactions work as expected.
+- Validate role-based access and permission enforcement.
+- Detect and handle error conditions gracefully.
+
+## Types of Tests
+
+### 1. Unit Tests
+- Validate individual functions and hooks used in the frontend.
+- Test logic for PGY level data handling, minimum requirement calculations, and form validation.
+- Use mocking for API calls and database data.
+
+### 2. Integration Tests
+- Test interaction between components: e.g., dashboard loading of modules and progress bars.
+- Verify form entry updates persist and reflect accurately in the UI.
+- Ensure synchronization between frontend and backend data states.
+
+### 3. End-to-End (E2E) Tests
+- Simulate real user scenarios for both trainees and admins.
+- Test login, profile PGY selection, navigating dashboard, entering procedure counts, and saving.
+- Validate that minimum requirements enforcement and error messages appear correctly.
+
+### 4. Data Validation Tests
+- Confirm database integrity: unique procedure codes, valid category references.
+- Ensure migration scripts produce consistent and complete data.
+- Test removal of duplicates and legacy procedures.
+
+## Test Case Examples
+
+| Test Case ID | Description                                     | Expected Outcome                                  |
+|--------------|------------------------------------------------|--------------------------------------------------|
+| TC-U-001     | PGY minimum requirements calculation by procedure | Correct minimum reflected for each PGY level     |
+| TC-I-002     | Dashboard module loading and progress display   | Modules load in correct order with accurate progress bars |
+| TC-E2E-003   | Trainee manual entry form submission             | Data saves successfully; UI updates accordingly  |
+| TC-D-004     | Duplicate procedure category removal             | No duplicates remain in category table            |
+
+## Error Handling & Reporting
+- Tests should verify error feedback to users for invalid input or backend failures.
+- Logs collected during failures to facilitate debugging.
+- Automatic alerts or notifications for critical errors in production.
+
+## Continuous Testing & CI/CD
+- Integrate tests with CI/CD pipelines for automated runs on every commit.
+- Enforce test coverage thresholds before merging PRs.
+- Schedule periodic regression testing and performance tests.
+
+## Documentation & Maintenance
+- Keep test cases and scripts updated with evolving features and schema changes.
+- Document testing best practices and troubleshooting guides in PRMs.
+- Encourage developer adherence to testing before deployment.
+
+---
+
+Would you like to proceed to Step 10: Deployment & Continuous Development in MDC format?
+# FMH Testing & Validation Strategy
+
+## Overview
+This document outlines the comprehensive testing and validation approach for the FMH surgical module management system. It ensures data integrity, UI reliability, and functional correctness to maintain high quality and user trust.
+
+## Testing Objectives
+- Verify data integrity for procedures, categories, and user profiles.
+- Ensure UI components correctly display data and handle user input.
+- Confirm backend APIs and database interactions work as expected.
+- Validate role-based access and permission enforcement.
+- Detect and handle error conditions gracefully.
+
+## Types of Tests
+
+### 1. Unit Tests
+- Validate individual functions and hooks used in the frontend.
+- Test logic for PGY level data handling, minimum requirement calculations, and form validation.
+- Use mocking for API calls and database data.
+
+### 2. Integration Tests
+- Test interaction between components: e.g., dashboard loading of modules and progress bars.
+- Verify form entry updates persist and reflect accurately in the UI.
+- Ensure synchronization between frontend and backend data states.
+
+### 3. End-to-End (E2E) Tests
+- Simulate real user scenarios for both trainees and admins.
+- Test login, profile PGY selection, navigating dashboard, entering procedure counts, and saving.
+- Validate that minimum requirements enforcement and error messages appear correctly.
+
+### 4. Data Validation Tests
+- Confirm database integrity: unique procedure codes, valid category references.
+- Ensure migration scripts produce consistent and complete data.
+- Test removal of duplicates and legacy procedures.
+
+## Test Case Examples
+
+| Test Case ID | Description                                     | Expected Outcome                                  |
+|--------------|------------------------------------------------|--------------------------------------------------|
+| TC-U-001     | PGY minimum requirements calculation by procedure | Correct minimum reflected for each PGY level     |
+| TC-I-002     | Dashboard module loading and progress display   | Modules load in correct order with accurate progress bars |
+| TC-E2E-003   | Trainee manual entry form submission             | Data saves successfully; UI updates accordingly  |
+| TC-D-004     | Duplicate procedure category removal             | No duplicates remain in category table            |
+
+## Error Handling & Reporting
+- Tests should verify error feedback to users for invalid input or backend failures.
+- Logs collected during failures to facilitate debugging.
+- Automatic alerts or notifications for critical errors in production.
+
+## Continuous Testing & CI/CD
+- Integrate tests with CI/CD pipelines for automated runs on every commit.
+- Enforce test coverage thresholds before merging PRs.
+- Schedule periodic regression testing and performance tests.
+
+## Documentation & Maintenance
+- Keep test cases and scripts updated with evolving features and schema changes.
+- Document testing best practices and troubleshooting guides in PRMs.
+- Encourage developer adherence to testing before deployment.
+
+---
+
+Would you like to proceed to Step 10: Deployment & Continuous Development in MDC format?

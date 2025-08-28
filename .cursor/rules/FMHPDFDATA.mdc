@@ -1,0 +1,210 @@
+---
+alwaysApply: true
+---
+
+# FMH Procedure Data from PDF Extraction
+
+## Overview
+This document captures the surgical procedure details extracted from the provided PDF ("ProzedurenKatalog_Sami_Zacharia_Hosari"). It includes recorded procedure minimums, responsible roles, and totals per FMH module to support data validation and integration into the existing FMH app.
+
+## Procedure Coverage by FMH Modules (as per PDF)
+
+### Basis Notfallchirurgie
+| Procedure                                           | Minimum Required | Verantwortlich | Instruierend | Assistent | Total  |
+|----------------------------------------------------|------------------|----------------|--------------|-----------|--------|
+| Chirurgisches Schockraummanagement                  | 10               | 8              | 8            |           | 80     |
+| Reposition Luxation/Frakturen, konservative Frakturbehandlung | 15          | 20             | 20           |           | 80     |
+| Wundversorgungen                                    | 30               | 44             | 44           |           | 80     |
+| Anlage Fixateur externe                             | 5                |                |              |           |        |
+| Thoraxdrainagen                                    | 15               | 6              | 2            | 6         |        |
+| Zervikotomien (Tracheafreilegung)                  | 5                | 2              | 2            |           |        |
+| Cystofixeinlage                                    | 5                |                |              |           |        |
+
+### Basis Allgemeinchirurgie
+| Procedure                                           | Minimum Required | Verantwortlich | Instruierend | Assistent | Total  |
+|----------------------------------------------------|------------------|----------------|--------------|-----------|--------|
+| Kleinchirurgische Eingriffe (Atherom/Lipom, Kocher, Thiersch, LK Excisionen etc.) | 40 | 46     | 5            | 46        | 261    |
+| Appendektomie                                      | 30               | 20             | 7            | 20        |        |
+| Cholezystektomie                                  | 30               | 22             | 4            | 22        |        |
+| Hernienoperationen (inguinal/umbilical)          | 40               | 17             | 17           |           |        |
+| Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata) | 20               | 13             | 21           | 13        |        |
+| Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie | 20 | 65 | 5 | 65 | |
+| Veneneingriffe (Varizenchirurgie, Port/Pacemaker) | 30               | 21             | 8            | 21        |        |
+| Laparoskopie, Laparotomie                         | 30               | 52             | 0            | 68        | 52     |
+| Laparoskopie                                      | 15               | 29             | 25           | 29        |        |
+| Laparotomie                                      | 15               | 23             | 43           | 23        |        |
+| Weitere zählbare Eingriffe                        | 20               | 5              | 0            | 3         | 5      |
+| Thoraxchirurgische Eingriffe                      | 0                | 1              | 1            | 1         |        |
+| Urologische Eingriffe                             | 0                |                |              |           |        |
+| Gefässchirurgische Eingriffe                      | 0                | 2              |              |           |        |
+| Kompartimentelle Spaltungen                       | 0                |                |              |           |        |
+
+### Modul Viszeralchirurgie
+| Procedure                                         | Minimum Required | Verantwortlich | Instruierend | Assistent | Total  |
+|--------------------------------------------------|------------------|----------------|--------------|-----------|--------|
+| Abdominalhernien (Narbenhernien, videoskopischer Repair) | 25               | 2              | 21           | 2         | 142    |
+| Mageneingriffe (Ulkusnaht, Gastroenterostomie, chir. Gastrostomie, Resektion) | 7 | 3 | 5 | 3 |      |
+| Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata) | 25 | 13 | 21 | 13 |      |
+| Kolorektal (Segment- und Teilresektion)          | 10               |                |              |           |        |
+| Hepatobiliär (exkl. Cholezystektomie), Leberteilresektion, Pankreasteilresektion, Bariatrische Chirurgie | 5 | 4 | 2 | 4 |      |
+| Endokrine Chirurgie (Thyreoidektomie, Parathyreoidektomie, Adrenalektomie) | 10 | 3 |              |           |        |
+| Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie | 35 | 65 | 5 | 65 |      |
+| Splenektomie                                    | 3                |                |              |           |        |
+| Dickdarmstoma                                  | 5                | 3              | 3            |           |        |
+| Laparoskopie, Laparotomie                       | 40               | 52             | 0            | 68        | 52     |
+| Laparoskopie                                   | 29               | 25             | 29           |           |        |
+| Laparotomie                                   | 23               | 43             | 23           |           |        |
+
+### Modul Traumatologie des Bewegungsapparates
+| Procedure                                       | Minimum Required | Verantwortlich | Instruierend | Assistent | Total  |
+|------------------------------------------------|------------------|----------------|--------------|-----------|--------|
+| Metallentfernungen, Spickungen                   | 30               |                |              |           | 20     |
+| Reposition Luxation/Frakturen, konservative Frakturbehandlung | 25 | 20 | 20 |           |        |
+| Eingriffe Sehnen/Ligamente                      | 15               |                |              |           |        |
+| Arthroskopie                                   | 10               |                |              |           |        |
+| Osteosynthese Schaftfrakturen                  | 15               |                |              |           |        |
+| Osteosynthese gelenksnaher (metaphysärer) Frakturen | 40            |                |              |           |        |
+| Osteosynthese komplexer Frakturen (intraartikulären Frakturen an den grossen Röhrenknochen und am Mittel- und Rückfuss sowie Becken-/Azetabulumfrakturen) | 5 |  |  | |       |
+| Handchirurgie (exklusiv Wundversorgung)        | 15               |                |              |           |        |
+| Amputationen                                  | 10               | 0              | 0            | 0         | 0      |
+| Kleine Amputationen                            | 5                |                |              |           |        |
+| Grosse Amputationen                           | 5                |                |              |           |        |
+
+### Modul Kombination
+| Procedure                                       | Minimum Required | Verantwortlich | Instruierend | Assistent | Total  |
+|------------------------------------------------|------------------|----------------|--------------|-----------|--------|
+| Abdominalhernien (Narbenhernien, videoskopischer Repair) | 15 | 2 | 21 | 2 | 158  |
+| Mageneingriffe (Ulkusnaht, Gastroenterostomie, chir. Gastrostomie, Resektion) | 5 | 3 | 5 | 3 |      |
+| Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata) | 15 | 13 | 21 | 13 |       |
+| Kolorektal (Segment- und Teilresektion)         | 5                |                |              |           |        |
+| Endokrine Chirurgie (Thyreoidektomie, Parathyreoidektomie, Adrenalektomie) | 5 | 3 |              |           |        |
+| Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie | 20 | 65 | 5 | 65 |       |
+| Dickdarmstoma                                   | 5                | 3              | 3            |           |        |
+| Metallentfernungen, Spickungen                   | 20               |                |              |           |        |
+| Reposition Luxation/Frakturen, konservative Frakturbehandlung | 15 | 20 | 20 |           |        |
+| Eingriffe Sehnen/Ligamente                      | 5                |                |              |           |        |
+| Osteosynthese Schaftfrakturen                    | 10               |                |              |           |        |
+| Osteosynthese gelenksnaher (metaphysärer) Frakturen | 20             |                |              |           |        |
+| Handchirurgie (exklusiv Wundversorgung)        | 10               |                |              |           |        |
+| Laparoskopie, Laparotomie                        | 11               | 52             | 0            | 68        | 52     |
+| Laparoskopie                                   | 29               | 25             | 29           |           |        |
+| Laparotomie                                   | 23               | 43             | 23           |           |        |
+| Amputationen                                  | 4                | 0              | 0            | 0         | 0      |
+| Kleine Amputationen                            | 2                |                |              |           |        |
+| Grosse Amputationen                           | 2                |                |              |           |        |
+
+## Notes
+- "Verantwortlich" = Responsible (main operator)
+- "Instruierend" = Instructing role
+- "Assistent" = Assistant role
+- "Total" sums activity counts or minimums
+- Data is current as of 23.08.2025
+
+---
+
+This MDC document can be used to cross-reference and validate the FMH procedure data in your system against the official logged counts extracted from the PDF.
+
+Would you like to proceed with assistance in parsing this PDF into your database or application?
+# FMH Procedure Data from PDF Extraction
+
+## Overview
+This document captures the surgical procedure details extracted from the provided PDF ("ProzedurenKatalog_Sami_Zacharia_Hosari"). It includes recorded procedure minimums, responsible roles, and totals per FMH module to support data validation and integration into the existing FMH app.
+
+## Procedure Coverage by FMH Modules (as per PDF)
+
+### Basis Notfallchirurgie
+| Procedure                                           | Minimum Required | Verantwortlich | Instruierend | Assistent | Total  |
+|----------------------------------------------------|------------------|----------------|--------------|-----------|--------|
+| Chirurgisches Schockraummanagement                  | 10               | 8              | 8            |           | 80     |
+| Reposition Luxation/Frakturen, konservative Frakturbehandlung | 15          | 20             | 20           |           | 80     |
+| Wundversorgungen                                    | 30               | 44             | 44           |           | 80     |
+| Anlage Fixateur externe                             | 5                |                |              |           |        |
+| Thoraxdrainagen                                    | 15               | 6              | 2            | 6         |        |
+| Zervikotomien (Tracheafreilegung)                  | 5                | 2              | 2            |           |        |
+| Cystofixeinlage                                    | 5                |                |              |           |        |
+
+### Basis Allgemeinchirurgie
+| Procedure                                           | Minimum Required | Verantwortlich | Instruierend | Assistent | Total  |
+|----------------------------------------------------|------------------|----------------|--------------|-----------|--------|
+| Kleinchirurgische Eingriffe (Atherom/Lipom, Kocher, Thiersch, LK Excisionen etc.) | 40 | 46     | 5            | 46        | 261    |
+| Appendektomie                                      | 30               | 20             | 7            | 20        |        |
+| Cholezystektomie                                  | 30               | 22             | 4            | 22        |        |
+| Hernienoperationen (inguinal/umbilical)          | 40               | 17             | 17           |           |        |
+| Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata) | 20               | 13             | 21           | 13        |        |
+| Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie | 20 | 65 | 5 | 65 | |
+| Veneneingriffe (Varizenchirurgie, Port/Pacemaker) | 30               | 21             | 8            | 21        |        |
+| Laparoskopie, Laparotomie                         | 30               | 52             | 0            | 68        | 52     |
+| Laparoskopie                                      | 15               | 29             | 25           | 29        |        |
+| Laparotomie                                      | 15               | 23             | 43           | 23        |        |
+| Weitere zählbare Eingriffe                        | 20               | 5              | 0            | 3         | 5      |
+| Thoraxchirurgische Eingriffe                      | 0                | 1              | 1            | 1         |        |
+| Urologische Eingriffe                             | 0                |                |              |           |        |
+| Gefässchirurgische Eingriffe                      | 0                | 2              |              |           |        |
+| Kompartimentelle Spaltungen                       | 0                |                |              |           |        |
+
+### Modul Viszeralchirurgie
+| Procedure                                         | Minimum Required | Verantwortlich | Instruierend | Assistent | Total  |
+|--------------------------------------------------|------------------|----------------|--------------|-----------|--------|
+| Abdominalhernien (Narbenhernien, videoskopischer Repair) | 25               | 2              | 21           | 2         | 142    |
+| Mageneingriffe (Ulkusnaht, Gastroenterostomie, chir. Gastrostomie, Resektion) | 7 | 3 | 5 | 3 |      |
+| Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata) | 25 | 13 | 21 | 13 |      |
+| Kolorektal (Segment- und Teilresektion)          | 10               |                |              |           |        |
+| Hepatobiliär (exkl. Cholezystektomie), Leberteilresektion, Pankreasteilresektion, Bariatrische Chirurgie | 5 | 4 | 2 | 4 |      |
+| Endokrine Chirurgie (Thyreoidektomie, Parathyreoidektomie, Adrenalektomie) | 10 | 3 |              |           |        |
+| Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie | 35 | 65 | 5 | 65 |      |
+| Splenektomie                                    | 3                |                |              |           |        |
+| Dickdarmstoma                                  | 5                | 3              | 3            |           |        |
+| Laparoskopie, Laparotomie                       | 40               | 52             | 0            | 68        | 52     |
+| Laparoskopie                                   | 29               | 25             | 29           |           |        |
+| Laparotomie                                   | 23               | 43             | 23           |           |        |
+
+### Modul Traumatologie des Bewegungsapparates
+| Procedure                                       | Minimum Required | Verantwortlich | Instruierend | Assistent | Total  |
+|------------------------------------------------|------------------|----------------|--------------|-----------|--------|
+| Metallentfernungen, Spickungen                   | 30               |                |              |           | 20     |
+| Reposition Luxation/Frakturen, konservative Frakturbehandlung | 25 | 20 | 20 |           |        |
+| Eingriffe Sehnen/Ligamente                      | 15               |                |              |           |        |
+| Arthroskopie                                   | 10               |                |              |           |        |
+| Osteosynthese Schaftfrakturen                  | 15               |                |              |           |        |
+| Osteosynthese gelenksnaher (metaphysärer) Frakturen | 40            |                |              |           |        |
+| Osteosynthese komplexer Frakturen (intraartikulären Frakturen an den grossen Röhrenknochen und am Mittel- und Rückfuss sowie Becken-/Azetabulumfrakturen) | 5 |  |  | |       |
+| Handchirurgie (exklusiv Wundversorgung)        | 15               |                |              |           |        |
+| Amputationen                                  | 10               | 0              | 0            | 0         | 0      |
+| Kleine Amputationen                            | 5                |                |              |           |        |
+| Grosse Amputationen                           | 5                |                |              |           |        |
+
+### Modul Kombination
+| Procedure                                       | Minimum Required | Verantwortlich | Instruierend | Assistent | Total  |
+|------------------------------------------------|------------------|----------------|--------------|-----------|--------|
+| Abdominalhernien (Narbenhernien, videoskopischer Repair) | 15 | 2 | 21 | 2 | 158  |
+| Mageneingriffe (Ulkusnaht, Gastroenterostomie, chir. Gastrostomie, Resektion) | 5 | 3 | 5 | 3 |      |
+| Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata) | 15 | 13 | 21 | 13 |       |
+| Kolorektal (Segment- und Teilresektion)         | 5                |                |              |           |        |
+| Endokrine Chirurgie (Thyreoidektomie, Parathyreoidektomie, Adrenalektomie) | 5 | 3 |              |           |        |
+| Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie | 20 | 65 | 5 | 65 |       |
+| Dickdarmstoma                                   | 5                | 3              | 3            |           |        |
+| Metallentfernungen, Spickungen                   | 20               |                |              |           |        |
+| Reposition Luxation/Frakturen, konservative Frakturbehandlung | 15 | 20 | 20 |           |        |
+| Eingriffe Sehnen/Ligamente                      | 5                |                |              |           |        |
+| Osteosynthese Schaftfrakturen                    | 10               |                |              |           |        |
+| Osteosynthese gelenksnaher (metaphysärer) Frakturen | 20             |                |              |           |        |
+| Handchirurgie (exklusiv Wundversorgung)        | 10               |                |              |           |        |
+| Laparoskopie, Laparotomie                        | 11               | 52             | 0            | 68        | 52     |
+| Laparoskopie                                   | 29               | 25             | 29           |           |        |
+| Laparotomie                                   | 23               | 43             | 23           |           |        |
+| Amputationen                                  | 4                | 0              | 0            | 0         | 0      |
+| Kleine Amputationen                            | 2                |                |              |           |        |
+| Grosse Amputationen                           | 2                |                |              |           |        |
+
+## Notes
+- "Verantwortlich" = Responsible (main operator)
+- "Instruierend" = Instructing role
+- "Assistent" = Assistant role
+- "Total" sums activity counts or minimums
+- Data is current as of 23.08.2025
+
+---
+
+This MDC document can be used to cross-reference and validate the FMH procedure data in your system against the official logged counts extracted from the PDF.
+
+Would you like to proceed with assistance in parsing this PDF into your database or application?

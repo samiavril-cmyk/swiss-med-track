@@ -1,0 +1,136 @@
+---
+alwaysApply: true
+---
+
+
+# FMH Deployment & Continuous Development
+
+## Overview
+This document outlines the deployment processes and continuous development practices for the FMH surgical module management system. It ensures stable releases, environment consistency, and smooth feature integration.
+
+## Deployment Pipeline
+
+### 1. Version Control & Repository
+- Use GitHub for source control with branches for development, staging, and production.
+- Follow GitFlow or similar branching strategy for feature, release, and hotfix branches.
+
+### 2. Build & Test Automation
+- Automated build triggered on PR and commit merges.
+- Run full suite of unit, integration, and E2E tests.
+- Perform static code analysis and linting.
+
+### 3. Environment Configuration
+- Use environment variables (.env files) for API keys, database URLs, and secrets.
+- Differentiate between development, staging, and production environments.
+- Document required variables clearly in PRM or README.
+
+### 4. Hosting & Deployment
+- Frontend deployed on Vercel or similar cloud platform with automatic CI/CD integration.
+- Backend database hosted on Supabase with managed backups.
+- Use GitHub Pages for project documentation hosting with `.nojekyll` enabled.
+
+### 5. Release Management
+- Tag production releases with semantic versioning.
+- Maintain release notes including features, bug fixes, and migration steps.
+- Schedule rollouts during low-usage periods when possible.
+
+## Continuous Development
+
+### 1. Incremental Feature Development
+- Use modular PRM files to plan and manage incremental features.
+- Develop components or modules in isolation for easier testing and integration.
+- Use Cursor AI to generate code based on PRMs, followed by manual review.
+
+### 2. Collaboration & Code Review
+- Perform code reviews for all changes before merging.
+- Use PRM documents to guide reviewers on feature scope and design rationale.
+
+### 3. Monitoring & Feedback
+- Implement monitoring for performance, error rates, and user usage.
+- Gather user feedback regularly to inform backlog prioritization.
+- Quickly address critical bugs with hotfixes.
+
+### 4. Documentation & Knowledge Sharing
+- Keep PRM documents and user-facing docs up to date with each release.
+- Use automated tools to generate changelogs from commit history.
+- Host knowledge sharing sessions and record for onboarding new developers.
+
+## Security & Compliance
+- Manage API keys and secrets securely using environment variables and vaults.
+- Regularly update dependencies to patch known vulnerabilities.
+- Ensure compliance with relevant data privacy and medical regulations.
+
+## Example Deployment Workflow
+1. Developer pushes feature branch PR on GitHub.
+2. CI runs tests, code quality checks.
+3. PR reviewed and merged into develop branch.
+4. Staging environment updates; manual testing performed.
+5. Upon approval, release branch created and merged to main.
+6. Production environment deploys via CI/CD.
+7. Monitoring and user feedback collected post-release.
+
+# FMH Deployment & Continuous Development
+
+## Overview
+This document outlines the deployment processes and continuous development practices for the FMH surgical module management system. It ensures stable releases, environment consistency, and smooth feature integration.
+
+## Deployment Pipeline
+
+### 1. Version Control & Repository
+- Use GitHub for source control with branches for development, staging, and production.
+- Follow GitFlow or similar branching strategy for feature, release, and hotfix branches.
+
+### 2. Build & Test Automation
+- Automated build triggered on PR and commit merges.
+- Run full suite of unit, integration, and E2E tests.
+- Perform static code analysis and linting.
+
+### 3. Environment Configuration
+- Use environment variables (.env files) for API keys, database URLs, and secrets.
+- Differentiate between development, staging, and production environments.
+- Document required variables clearly in PRM or README.
+
+### 4. Hosting & Deployment
+- Frontend deployed on Vercel or similar cloud platform with automatic CI/CD integration.
+- Backend database hosted on Supabase with managed backups.
+- Use GitHub Pages for project documentation hosting with `.nojekyll` enabled.
+
+### 5. Release Management
+- Tag production releases with semantic versioning.
+- Maintain release notes including features, bug fixes, and migration steps.
+- Schedule rollouts during low-usage periods when possible.
+
+## Continuous Development
+
+### 1. Incremental Feature Development
+- Use modular PRM files to plan and manage incremental features.
+- Develop components or modules in isolation for easier testing and integration.
+- Use Cursor AI to generate code based on PRMs, followed by manual review.
+
+### 2. Collaboration & Code Review
+- Perform code reviews for all changes before merging.
+- Use PRM documents to guide reviewers on feature scope and design rationale.
+
+### 3. Monitoring & Feedback
+- Implement monitoring for performance, error rates, and user usage.
+- Gather user feedback regularly to inform backlog prioritization.
+- Quickly address critical bugs with hotfixes.
+
+### 4. Documentation & Knowledge Sharing
+- Keep PRM documents and user-facing docs up to date with each release.
+- Use automated tools to generate changelogs from commit history.
+- Host knowledge sharing sessions and record for onboarding new developers.
+
+## Security & Compliance
+- Manage API keys and secrets securely using environment variables and vaults.
+- Regularly update dependencies to patch known vulnerabilities.
+- Ensure compliance with relevant data privacy and medical regulations.
+
+## Example Deployment Workflow
+1. Developer pushes feature branch PR on GitHub.
+2. CI runs tests, code quality checks.
+3. PR reviewed and merged into develop branch.
+4. Staging environment updates; manual testing performed.
+5. Upon approval, release branch created and merged to main.
+6. Production environment deploys via CI/CD.
+7. Monitoring and user feedback collected post-release.

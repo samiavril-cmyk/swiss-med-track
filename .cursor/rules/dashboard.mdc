@@ -1,0 +1,120 @@
+---
+alwaysApply: true
+---
+
+
+# FMH Dashboard Component
+
+## Overview
+The FMH Dashboard provides an overview of trainee progress across the FMH surgical modules. It displays module completion statuses, highlights areas below minimum procedure requirements, and provides navigation to detailed procedure lists and manual entry forms.
+
+## Core Responsibilities
+- Load FMH modules with correct variants, filtering only active modules.
+- Aggregate procedure completion data per module and PGY level.
+- Display progress bars or visual indicators reflecting completion percentage vs minimum requirements.
+- Support role-based views: trainees see their data, admins see overview and management options.
+
+## Module Loading Logic
+- Modules are loaded based on their `module_type` and `active` status.
+- The dashboard expects the following module keys with specific mapping:
+  - `basis_notfallchirurgie` (module_type `basis`)
+  - `basis_allgemeinchirurgie` (module_type `basis`)
+  - `viszeralchirurgie`
+  - `traumatologie`
+  - `kombination`
+- Module variants (color schemes, icons) are assigned based on the module key to differentiate visually.
+
+## UI Elements
+- Top-level tabbed navigation listing modules ordered by `sort_index`.
+- Each module tab shows:
+  - Module name and minimum procedure total required.
+  - Completion percentage progress bar.
+  - Number of completed procedures vs required.
+  - Alerts or highlights for modules below completion.
+- Links or buttons to navigate to detailed procedure forms or history logs.
+
+## Data Fetching & API Integration
+- Fetch module metadata from `procedure_categories` table.
+- Fetch trainee’s completed procedures from procedure logs.
+- Aggregate data client-side or backend to compute progress metrics.
+- Handle asynchronous data loading with loading states and error handling.
+
+## Error & Edge Case Handling
+- Display meaningful messages when modules or procedures fail to load.
+- Gracefully handle no data situations or when user PGY level is undefined.
+- Refresh and re-fetch data on user action or periodic intervals.
+
+## Component Structure (Example)
+- `FMHDashboard`
+  - `ModuleTabs` (renders module tabs)
+  - `ModuleProgress` (shows progress bar and numbers)
+  - `ModuleDetailsLink` (button to detailed forms)
+  - `ErrorBoundary` (handles UI errors)
+
+## Styling & Responsiveness
+- Responsive horizontal scroll or wrap for tabs on smaller screens.
+- Clear, color-coded progress bars linked to module variants.
+- Consistent spacing and padding matching the overall app style.
+
+## Integration with Cursor & PRMs
+- Module loading logic should be documented in PRM for Cursor to maintain.
+- Any changes to module keys or variants must reflect in PRMs.
+- UI behavior rules included in PRM to guide incremental development using AI.
+
+# FMH Dashboard Component
+
+## Overview
+The FMH Dashboard provides an overview of trainee progress across the FMH surgical modules. It displays module completion statuses, highlights areas below minimum procedure requirements, and provides navigation to detailed procedure lists and manual entry forms.
+
+## Core Responsibilities
+- Load FMH modules with correct variants, filtering only active modules.
+- Aggregate procedure completion data per module and PGY level.
+- Display progress bars or visual indicators reflecting completion percentage vs minimum requirements.
+- Support role-based views: trainees see their data, admins see overview and management options.
+
+## Module Loading Logic
+- Modules are loaded based on their `module_type` and `active` status.
+- The dashboard expects the following module keys with specific mapping:
+  - `basis_notfallchirurgie` (module_type `basis`)
+  - `basis_allgemeinchirurgie` (module_type `basis`)
+  - `viszeralchirurgie`
+  - `traumatologie`
+  - `kombination`
+- Module variants (color schemes, icons) are assigned based on the module key to differentiate visually.
+
+## UI Elements
+- Top-level tabbed navigation listing modules ordered by `sort_index`.
+- Each module tab shows:
+  - Module name and minimum procedure total required.
+  - Completion percentage progress bar.
+  - Number of completed procedures vs required.
+  - Alerts or highlights for modules below completion.
+- Links or buttons to navigate to detailed procedure forms or history logs.
+
+## Data Fetching & API Integration
+- Fetch module metadata from `procedure_categories` table.
+- Fetch trainee’s completed procedures from procedure logs.
+- Aggregate data client-side or backend to compute progress metrics.
+- Handle asynchronous data loading with loading states and error handling.
+
+## Error & Edge Case Handling
+- Display meaningful messages when modules or procedures fail to load.
+- Gracefully handle no data situations or when user PGY level is undefined.
+- Refresh and re-fetch data on user action or periodic intervals.
+
+## Component Structure (Example)
+- `FMHDashboard`
+  - `ModuleTabs` (renders module tabs)
+  - `ModuleProgress` (shows progress bar and numbers)
+  - `ModuleDetailsLink` (button to detailed forms)
+  - `ErrorBoundary` (handles UI errors)
+
+## Styling & Responsiveness
+- Responsive horizontal scroll or wrap for tabs on smaller screens.
+- Clear, color-coded progress bars linked to module variants.
+- Consistent spacing and padding matching the overall app style.
+
+## Integration with Cursor & PRMs
+- Module loading logic should be documented in PRM for Cursor to maintain.
+- Any changes to module keys or variants must reflect in PRMs.
+- UI behavior rules included in PRM to guide incremental development using AI.

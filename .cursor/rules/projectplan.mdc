@@ -1,0 +1,77 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+PRM: Project Overview & Context for FMH Module Management App
+1. Project Purpose and Scope
+This project manages the FMH (Swiss Medical Association) surgical procedure modules which consist of 5 main categories:
+
+Basis Notfallchirurgie
+
+Basis Allgemeinchirurgie
+
+Viszeralchirurgie
+
+Traumatologie
+
+Kombination
+
+The system tracks required surgical procedures and minimum performance levels by postgraduate years (PGY).
+
+Users can view procedure requirements, enter manual progress, and track completion in an integrated dashboard.
+
+The app provides role-based access: trainees enter data; admins manage procedure catalogs and minimum requirements.
+
+2. Key Features
+Dynamic FMH procedure list loading from the database with filtering by module category.
+
+Manual entry form for trainee progress including validation and PGY-specific minimum requirements.
+
+Dashboard summarizing module completion status with visual indicators.
+
+Responsive UI with scrollable forms and tabbed navigation between modules.
+
+Integration with Supabase backend holding procedures, categories, user profiles, and logs.
+
+Robust error handling and data consistency checks.
+
+3. User Roles and Permissions
+Trainee: Can enter procedure completion data, view own progress, and see minimum requirements.
+
+Admin: Can manage procedure categories, procedures, minimum requirements, and user roles.
+
+Role-based UI views and access control implemented accordingly.
+
+4. Technical Stack
+Frontend: React with Typescript, Tailwind CSS for styling, modular component-based structure.
+
+Backend: Supabase as the database and authentication provider.
+
+State Management: React state hooks and context for user session and data caching.
+
+Deployment: GitHub Pages for docs; Vercel or similar for app deployment.
+
+Development Tools: Cursor AI for modular code generation and management using PRM files.
+
+5. Important Configurations & Conventions
+Procedure minimum requirements keyed by PGY1 to PGY5 in lowercase JSON keys (e.g. "pgy1": 10).
+
+Unique procedure codes and strict one-to-one mapping with categories.
+
+Module categories identified by keys like basis_notfallchirurgie, basis_allgemeinchirurgie, etc.
+
+Dashboard displays based on module_type property distinguishing basis modules from others.
+
+Consistent naming conventions and folder structure for components and PRM files.
+
+Cursor PRM files located under .cursor/rules with apply always settings for context.
+
+6. Project Constraints and Known Issues
+Duplicate categories must be periodically cleaned from the database.
+
+Form scroll behavior requires a ScrollArea component to function properly.
+
+PGY level must be correctly fetched and applied to display accurate minimums.
+
+Overlapping tabs and responsive layout bugs addressed in recent fixes.

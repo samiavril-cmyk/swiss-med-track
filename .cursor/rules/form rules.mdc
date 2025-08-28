@@ -1,0 +1,57 @@
+# FMH Manual Entry Form
+
+## Overview
+The FMH Manual Entry Form allows trainees to input and update their progress on surgical procedures required by the FMH modules. It dynamically adapts based on the user's PGY level and displays minimum procedure requirements accordingly.
+
+## Core Features
+- Tabbed interface for navigating between the 5 FMH modules.
+- Displays all procedures associated with the selected module, including procedure codes, titles, and minimum PGY requirements.
+- Input fields for users to enter the number of completed procedures per item.
+- Dynamic validation against minimum requirements and user PGY level.
+- Scrollable form area to accommodate long procedure lists.
+- Save function to persist user entries reliably.
+- Responsive layout for usability on various screen sizes.
+
+## Layout & UI Behavior
+- Uses a responsive tab control ordered by module `sort_index`.
+- Each tab content area includes a scrollable table or grid listing procedures.
+- Input fields sized appropriately for ease of data entry.
+- Proper spacing, padding, and font sizes for clarity and accessibility.
+- Visual indicators (e.g., color highlights) for procedures not meeting minimums.
+
+## Known Issues & Fixes Applied
+- Fixed tab overlapping by replacing rigid grid with flexible layouts.
+- ScrollArea component included to fix vertical scrolling issues.
+- Data access updated to use lowercase PGY keys (`pgy1` to `pgy5`) consistent with backend.
+- Duplicate categories cleaned up; form now loads only relevant FMH modules.
+- User PGY level fetched and applied dynamically to filter minimum requirements.
+- Save function verified to persist data correctly, with error handling on failure.
+
+## Data Loading & Integration
+- Loads procedure and module data from Supabase database.
+- Accesses user profile to retrieve PGY level.
+- Handles asynchronous loading with spinners and error messages.
+- Updates internal state reactively as users enter data.
+
+## Validation & User Feedback
+- Input fields accept only numeric values.
+- Invalid inputs trigger inline warnings.
+- Minimum requirement validation shown in real-time.
+- Form disables save button until validation passes.
+
+## Component Structure (Example)
+- `FMHManualEntry`
+  - `ModuleTabs`
+  - `ProcedureTable` (scrollable with inputs)
+  - `SaveButton` with validation state
+  - `FeedbackMessages` for errors and success
+
+## Styling & Accessibility
+- Tailwind CSS for consistent theming.
+- Keyboard navigable tabs and inputs.
+- Contrast and font size meet accessibility guidelines.
+
+## PRM Integration
+- Documented with notes on known issues and recent fixes.
+- Change management via PRM to track future form enhancements.
+- Modularized to handle new FMH categories or procedure additions easily.

@@ -1,0 +1,200 @@
+---
+alwaysApply: true
+---
+
+# FMH Procedure List & Coverage
+
+## Overview
+This document enumerates the full list of surgical procedures required in the FMH project, grouped by their respective FMH module categories. It defines the codes, procedure titles, and minimum requirements by postgraduate year (PGY), ensuring complete coverage for trainee progression tracking.
+
+## FMH Procedure List by Category
+
+### Basis Notfallchirurgie
+| Code  | Title                                                                 | Minimum PGY Requirement |
+|-------|-----------------------------------------------------------------------|------------------------|
+| BN001 | Chirurgisches Schockraummanagement                                   | 10                     |
+| BN002 | Reposition Luxation/Frakturen, konservative Frakturbehandlung        | 15                     |
+| BN003 | Wundversorgungen                                                     | 30                     |
+| BN004 | Anlage Fixateur externe                                               | 5                      |
+| BN005 | Thoraxdrainagen                                                      | 15                     |
+| BN006 | Zervikotomien (Tracheafreilegung)                                   | 5                      |
+| BN007 | Cystofixeinlage                                                     | 5                      |
+
+### Basis Allgemeinchirurgie
+| Code  | Title                                                                 | Minimum PGY Requirement |
+|-------|-----------------------------------------------------------------------|------------------------|
+| BA001 | Kleinchirurgische Eingriffe (Atherom/Lipom, Kocher, Thiersch, LK Excisionen etc.) | 40                     |
+| BA002 | Appendektomie                                                        | 30                     |
+| BA003 | Cholezystektomie                                                   | 30                     |
+| BA004 | Hernienoperationen (inguinal/umbilical)                            | 40                     |
+| BA005 | Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata)      | 20                     |
+| BA006 | Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie | 20  |
+| BA007 | Veneneingriffe (Varizenchirurgie, Port/Pacemaker)                   | 30                     |
+| BA008 | Laparoskopie, Laparotomie                                          | 30                     |
+| BA009 | Laparoskopie                                                       | 15                     |
+| BA010 | Laparotomie                                                       | 15                     |
+| BA011 | Weitere zählbare Eingriffe                                         | 20                     |
+| BA012 | Thoraxchirurgische Eingriffe                                      | 0                      |
+| BA013 | Urologische Eingriffe                                            | 0                      |
+| BA014 | Gefässchirurgische Eingriffe                                    | 0                      |
+| BA015 | Kompartimentelle Spaltungen                                    | 0                      |
+
+### Viszeralchirurgie
+| Code  | Title                                                                 | Minimum PGY Requirement |
+|-------|-----------------------------------------------------------------------|------------------------|
+| MV003 | Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata)         | 25                     |
+| MV004 | Kolorektal (Segment- und Teilresektion)                              | 10                     |
+| MV005 | Hepatobiliär (exkl. Cholezystektomie), Leberteilresektion, Pankreasteilresektion, Bariatrische Chirurgie | 5 |
+| MV007 | Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie | 35  |
+| MV008 | Splenektomie                                                        | 3                      |
+| MV010 | Laparoskopie, Laparotomie                                         | 40                     |
+| MV011 | Laparoskopie                                                      | 29                     |
+| MV012 | Laparotomie                                                      | 23                     |
+
+### Traumatologie
+| Code  | Title                                                                 | Minimum PGY Requirement |
+|-------|-----------------------------------------------------------------------|------------------------|
+| MT001 | Metallentfernungen, Spickungen                                     | 30                     |
+| MT003 | Eingriffe Sehnen/Ligamente                                         | 15                     |
+| MT004 | Arthroskopie                                                     | 10                     |
+| MT005 | Osteosynthese Schaftfrakturen                                    | 15                     |
+| MT006 | Osteosynthese gelenksnaher (metaphysärer) Frakturen              | 40                     |
+| MT007 | Osteosynthese komplexer Frakturen                                | 5                      |
+| MT008 | Handchirurgie (exklusiv Wundversorgung)                          | 15                     |
+| MT009 | Amputationen                                                    | 10                     |
+| MT010 | Kleine Amputationen                                            | 5                      |
+| MT011 | Grosse Amputationen                                           | 5                      |
+
+### Kombination
+| Code  | Title                                                                 | Minimum PGY Requirement |
+|-------|-----------------------------------------------------------------------|------------------------|
+| MK001 | Abdominalhernien (Narbenhernien, videoskopischer Repair)            | 15                     |
+| MK002 | Mageneingriffe (Ulkusnaht, Gastroenterostomie, chir. Gastrostomie, Resektion) | 5                      |
+| MK003 | Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata)        | 15                     |
+| MK004 | Kolorektal (Segment- und Teilresektion)                             | 5                      |
+| MK005 | Endokrine Chirurgie (Thyreoidektomie, Parathyreoidektomie, Adrenalektomie) | 5                      |
+| MK006 | Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie | 20  |
+| MK007 | Dickdarmstoma                                                     | 5                      |
+| MK008 | Metallentfernungen, Spickungen                                    | 20                     |
+| MK009 | Reposition Luxation/Frakturen, konservative Frakturbehandlung    | 15                     |
+| MK010 | Eingriffe Sehnen/Ligamente                                       | 5                      |
+| MK011 | Osteosynthese Schaftfrakturen                                    | 10                     |
+| MK012 | Osteosynthese gelenksnaher (metaphysärer) Frakturen              | 20                     |
+| MK013 | Handchirurgie (exklusiv Wundversorgung)                          | 10                     |
+| MK014 | Laparoskopie, Laparotomie                                        | 11                     |
+| MK015 | Laparoskopie                                                     | 29                     |
+| MK016 | Laparotomie                                                     | 23                     |
+| MK017 | Amputationen                                                    | 4                      |
+| MK018 | Kleine Amputationen                                            | 2                      |
+| MK019 | Grosse Amputationen                                           | 2                      |
+
+## Data Synchronization
+- Ensure all procedure entries exist in the database matching these codes and titles.
+- Minimum PGY requirements should be accurately reflected in the JSONB structure for each procedure.
+- Procedures must be linked with the correct category/module ID.
+
+## Notes
+- Procedures with zero minimum requirement (e.g., some in Basis Allgemeinchirurgie) are informational but not required to complete the module.
+- This full list supports backend validation, frontend display, and trainee progress tracking.
+
+---
+
+Would you like me now to proceed with Step 5: FMH Dashboard Component in MDC format?
+# FMH Procedure List & Coverage
+
+## Overview
+This document enumerates the full list of surgical procedures required in the FMH project, grouped by their respective FMH module categories. It defines the codes, procedure titles, and minimum requirements by postgraduate year (PGY), ensuring complete coverage for trainee progression tracking.
+
+## FMH Procedure List by Category
+
+### Basis Notfallchirurgie
+| Code  | Title                                                                 | Minimum PGY Requirement |
+|-------|-----------------------------------------------------------------------|------------------------|
+| BN001 | Chirurgisches Schockraummanagement                                   | 10                     |
+| BN002 | Reposition Luxation/Frakturen, konservative Frakturbehandlung        | 15                     |
+| BN003 | Wundversorgungen                                                     | 30                     |
+| BN004 | Anlage Fixateur externe                                               | 5                      |
+| BN005 | Thoraxdrainagen                                                      | 15                     |
+| BN006 | Zervikotomien (Tracheafreilegung)                                   | 5                      |
+| BN007 | Cystofixeinlage                                                     | 5                      |
+
+### Basis Allgemeinchirurgie
+| Code  | Title                                                                 | Minimum PGY Requirement |
+|-------|-----------------------------------------------------------------------|------------------------|
+| BA001 | Kleinchirurgische Eingriffe (Atherom/Lipom, Kocher, Thiersch, LK Excisionen etc.) | 40                     |
+| BA002 | Appendektomie                                                        | 30                     |
+| BA003 | Cholezystektomie                                                   | 30                     |
+| BA004 | Hernienoperationen (inguinal/umbilical)                            | 40                     |
+| BA005 | Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata)      | 20                     |
+| BA006 | Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie | 20  |
+| BA007 | Veneneingriffe (Varizenchirurgie, Port/Pacemaker)                   | 30                     |
+| BA008 | Laparoskopie, Laparotomie                                          | 30                     |
+| BA009 | Laparoskopie                                                       | 15                     |
+| BA010 | Laparotomie                                                       | 15                     |
+| BA011 | Weitere zählbare Eingriffe                                         | 20                     |
+| BA012 | Thoraxchirurgische Eingriffe                                      | 0                      |
+| BA013 | Urologische Eingriffe                                            | 0                      |
+| BA014 | Gefässchirurgische Eingriffe                                    | 0                      |
+| BA015 | Kompartimentelle Spaltungen                                    | 0                      |
+
+### Viszeralchirurgie
+| Code  | Title                                                                 | Minimum PGY Requirement |
+|-------|-----------------------------------------------------------------------|------------------------|
+| MV003 | Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata)         | 25                     |
+| MV004 | Kolorektal (Segment- und Teilresektion)                              | 10                     |
+| MV005 | Hepatobiliär (exkl. Cholezystektomie), Leberteilresektion, Pankreasteilresektion, Bariatrische Chirurgie | 5 |
+| MV007 | Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie | 35  |
+| MV008 | Splenektomie                                                        | 3                      |
+| MV010 | Laparoskopie, Laparotomie                                         | 40                     |
+| MV011 | Laparoskopie                                                      | 29                     |
+| MV012 | Laparotomie                                                      | 23                     |
+
+### Traumatologie
+| Code  | Title                                                                 | Minimum PGY Requirement |
+|-------|-----------------------------------------------------------------------|------------------------|
+| MT001 | Metallentfernungen, Spickungen                                     | 30                     |
+| MT003 | Eingriffe Sehnen/Ligamente                                         | 15                     |
+| MT004 | Arthroskopie                                                     | 10                     |
+| MT005 | Osteosynthese Schaftfrakturen                                    | 15                     |
+| MT006 | Osteosynthese gelenksnaher (metaphysärer) Frakturen              | 40                     |
+| MT007 | Osteosynthese komplexer Frakturen                                | 5                      |
+| MT008 | Handchirurgie (exklusiv Wundversorgung)                          | 15                     |
+| MT009 | Amputationen                                                    | 10                     |
+| MT010 | Kleine Amputationen                                            | 5                      |
+| MT011 | Grosse Amputationen                                           | 5                      |
+
+### Kombination
+| Code  | Title                                                                 | Minimum PGY Requirement |
+|-------|-----------------------------------------------------------------------|------------------------|
+| MK001 | Abdominalhernien (Narbenhernien, videoskopischer Repair)            | 15                     |
+| MK002 | Mageneingriffe (Ulkusnaht, Gastroenterostomie, chir. Gastrostomie, Resektion) | 5                      |
+| MK003 | Dünndarmeingriffe (Resektion, Adhäsiolyse, Dünndarm-Stomata)        | 15                     |
+| MK004 | Kolorektal (Segment- und Teilresektion)                             | 5                      |
+| MK005 | Endokrine Chirurgie (Thyreoidektomie, Parathyreoidektomie, Adrenalektomie) | 5                      |
+| MK006 | Proktologische Eingriffe (Hämorrhoiden, Fisteln etc.), Rektoskopie und erweiterte Proktologie | 20  |
+| MK007 | Dickdarmstoma                                                     | 5                      |
+| MK008 | Metallentfernungen, Spickungen                                    | 20                     |
+| MK009 | Reposition Luxation/Frakturen, konservative Frakturbehandlung    | 15                     |
+| MK010 | Eingriffe Sehnen/Ligamente                                       | 5                      |
+| MK011 | Osteosynthese Schaftfrakturen                                    | 10                     |
+| MK012 | Osteosynthese gelenksnaher (metaphysärer) Frakturen              | 20                     |
+| MK013 | Handchirurgie (exklusiv Wundversorgung)                          | 10                     |
+| MK014 | Laparoskopie, Laparotomie                                        | 11                     |
+| MK015 | Laparoskopie                                                     | 29                     |
+| MK016 | Laparotomie                                                     | 23                     |
+| MK017 | Amputationen                                                    | 4                      |
+| MK018 | Kleine Amputationen                                            | 2                      |
+| MK019 | Grosse Amputationen                                           | 2                      |
+
+## Data Synchronization
+- Ensure all procedure entries exist in the database matching these codes and titles.
+- Minimum PGY requirements should be accurately reflected in the JSONB structure for each procedure.
+- Procedures must be linked with the correct category/module ID.
+
+## Notes
+- Procedures with zero minimum requirement (e.g., some in Basis Allgemeinchirurgie) are informational but not required to complete the module.
+- This full list supports backend validation, frontend display, and trainee progress tracking.
+
+---
+
+Would you like me now to proceed with Step 5: FMH Dashboard Component in MDC format?

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -17,21 +17,27 @@ interface GapItem {
   priority_score: number;
 }
 
+type ModuleProgressLite = {
+  id: string;
+  title_de: string;
+  progress?: {
+    responsible_count?: number;
+    instructing_count?: number;
+    assistant_count?: number;
+  } | null;
+};
+
 interface GapAnalysisProps {
-  modules: any[];
+  modules: ModuleProgressLite[];
   userPgyLevel: number;
 }
 
 export const GapAnalysis: React.FC<GapAnalysisProps> = ({ modules, userPgyLevel }) => {
   const [gaps, setGaps] = useState<GapItem[]>([]);
-  const [quarterlyProgress, setQuarterlyProgress] = useState<any[]>([]);
+  const [quarterlyProgress, setQuarterlyProgress] = useState<Array<{ year: number; quarter: number; label: string; startDate: Date; endDate: Date; totalWeighted: number; procedureCount: number; intensity: number }>>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadGapAnalysis();
-  }, [modules, userPgyLevel]);
-
-  const loadGapAnalysis = async () => {
+  const loadGapAnalysis = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -54,7 +60,7 @@ export const GapAnalysis: React.FC<GapAnalysisProps> = ({ modules, userPgyLevel 
           .eq('active', true);
 
         for (const proc of procedures || []) {
-          const required = proc.min_required_by_pgy?.[userPgyLevel.toString()] || 0;
+          const required = (proc as { min_required_by_pgy?: Record<string, number> }).min_required_by_pgy?.[`pgy${userPgyLevel}`] || 0;
           
           if (required > 0) {
             // Get user's current performance for this procedure
@@ -99,7 +105,11 @@ export const GapAnalysis: React.FC<GapAnalysisProps> = ({ modules, userPgyLevel 
     } finally {
       setLoading(false);
     }
-  };
+  }, [modules, userPgyLevel]);
+
+  useEffect(() => {
+    loadGapAnalysis();
+  }, [loadGapAnalysis]);
 
   const loadQuarterlyProgress = async (userId: string) => {
     try {

@@ -1,0 +1,130 @@
+---
+alwaysApply: true
+---
+
+# Facharzt für Chirurgie Training Catalogue PRM
+
+## Overview
+This PRM captures the core content and structure of the official "Facharzt für Chirurgie" training catalogue as accredited by FMH and related Swiss medical bodies. It describes training goals, curriculum, procedural requirements, evaluation criteria, and institutional standards to enable nuanced understanding and automated assistance in surgical training management.
+
+## Sections
+
+### 1. Specialty Definition and Training Goals
+- Surgery encompasses conservative and operative treatment of diseases and injuries, considering comprehensive patient care.
+- Training goal: equip trainees with skills for independent, responsible surgical practice including multidisciplinary collaboration and leadership.
+
+### 2. Training Duration and Structure
+- Total duration: 6 years (4-6 years typical)
+- Breakdown:
+  - 2 years basic trunk (common core), ending with a basic exam
+  - 2-4 years advanced specialization in chosen module (Visceral, Trauma, Combination)
+- Clinical requirements:
+  - Min 2 years at category A centers
+  - Min 1 year at category B centers (with exemptions for research or alternative training)
+  - Max 4 years at the same institution
+
+### 3. Curriculum and Learning Objectives
+- General learning: anatomy, physiology, diagnostics, conservative vs operative management
+- Specific modules:
+  - Visceral surgery: GI emergencies, oncology, bariatric surgery, endoscopy, imaging
+  - Trauma: emergency care, fractures, infections, arthroscopy, heterogenous procedural skills
+  - Additional domains: pediatric surgery, urology, orthopedic basics, oncological procedures, intensive care principles
+- Ethical, medico-legal, and quality management competences emphasized
+
+### 4. Procedural Catalogue and Minimum Requirements
+- Defined procedure counts per module (e.g., basis surgery must complete at least 85 emergency surgeries)
+- Flexibility rules: certain categories can be omitted or substituted with compensations
+- Distinction between responsible surgeon and assisting roles; only primary roles count towards totals
+
+### 5. Examination Framework
+- Basic exam (written) after trunk phase
+- Final oral-practical exam covering core surgery modules
+- Passing both required for certification
+- Multilingual exam options
+- Unlimited retakes permitted with formal appeals process
+
+### 6. Training Institutions and Accreditation
+- Accredited centers categorized A (comprehensive), B3, B2, B1 (smaller scopes)
+- Institutional requirements for certification include minimum surgical volumes, on-site training resources, defined training programs
+- Institutions must provide structured theoretical and practical education, including rotations and inter-disciplinary coordination
+
+### 7. Additional Certifications and Courses
+- Mandatory courses include radiation safety and specialized surgical education recognized by SGC
+- Annual congress participation and external course credits required for continued education
+- Record-keeping via electronic logs with competency documentation
+
+### 8. Integration with Technical Systems
+- Data models must capture module structure, procedure counts, training site attributes, examination records, and course completions.
+- Support dynamic querying of trainee progress against requirements per PGY year and module.
+- Validation mechanisms to flag deficits or exceptional cases in training history.
+
+## Usage
+- Enables context-aware code generation and validation for surgical education systems.
+- Supports integration of updated FMH standards as they evolve.
+- Serves as master reference for developer and AI-driven content generation related to surgical training.
+
+---
+
+Would you like me to generate downstream PRMs or implementation guides based on this master training catalogue PRM?
+# Facharzt für Chirurgie Training Catalogue PRM
+
+## Overview
+This PRM captures the core content and structure of the official "Facharzt für Chirurgie" training catalogue as accredited by FMH and related Swiss medical bodies. It describes training goals, curriculum, procedural requirements, evaluation criteria, and institutional standards to enable nuanced understanding and automated assistance in surgical training management.
+
+## Sections
+
+### 1. Specialty Definition and Training Goals
+- Surgery encompasses conservative and operative treatment of diseases and injuries, considering comprehensive patient care.
+- Training goal: equip trainees with skills for independent, responsible surgical practice including multidisciplinary collaboration and leadership.
+
+### 2. Training Duration and Structure
+- Total duration: 6 years (4-6 years typical)
+- Breakdown:
+  - 2 years basic trunk (common core), ending with a basic exam
+  - 2-4 years advanced specialization in chosen module (Visceral, Trauma, Combination)
+- Clinical requirements:
+  - Min 2 years at category A centers
+  - Min 1 year at category B centers (with exemptions for research or alternative training)
+  - Max 4 years at the same institution
+
+### 3. Curriculum and Learning Objectives
+- General learning: anatomy, physiology, diagnostics, conservative vs operative management
+- Specific modules:
+  - Visceral surgery: GI emergencies, oncology, bariatric surgery, endoscopy, imaging
+  - Trauma: emergency care, fractures, infections, arthroscopy, heterogenous procedural skills
+  - Additional domains: pediatric surgery, urology, orthopedic basics, oncological procedures, intensive care principles
+- Ethical, medico-legal, and quality management competences emphasized
+
+### 4. Procedural Catalogue and Minimum Requirements
+- Defined procedure counts per module (e.g., basis surgery must complete at least 85 emergency surgeries)
+- Flexibility rules: certain categories can be omitted or substituted with compensations
+- Distinction between responsible surgeon and assisting roles; only primary roles count towards totals
+
+### 5. Examination Framework
+- Basic exam (written) after trunk phase
+- Final oral-practical exam covering core surgery modules
+- Passing both required for certification
+- Multilingual exam options
+- Unlimited retakes permitted with formal appeals process
+
+### 6. Training Institutions and Accreditation
+- Accredited centers categorized A (comprehensive), B3, B2, B1 (smaller scopes)
+- Institutional requirements for certification include minimum surgical volumes, on-site training resources, defined training programs
+- Institutions must provide structured theoretical and practical education, including rotations and inter-disciplinary coordination
+
+### 7. Additional Certifications and Courses
+- Mandatory courses include radiation safety and specialized surgical education recognized by SGC
+- Annual congress participation and external course credits required for continued education
+- Record-keeping via electronic logs with competency documentation
+
+### 8. Integration with Technical Systems
+- Data models must capture module structure, procedure counts, training site attributes, examination records, and course completions.
+- Support dynamic querying of trainee progress against requirements per PGY year and module.
+- Validation mechanisms to flag deficits or exceptional cases in training history.
+
+## Usage
+- Enables context-aware code generation and validation for surgical education systems.
+- Supports integration of updated FMH standards as they evolve.
+- Serves as master reference for developer and AI-driven content generation related to surgical training.
+
+---
