@@ -9,6 +9,13 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  // Use a relative base so assets resolve on GitHub Pages
+  base: './',
+  build: {
+    // Output to docs/ so GitHub Pages (Deploy from branch) can serve it
+    outDir: 'docs',
+    emptyOutDir: true,
+  },
   plugins: [
     react(),
     mode === 'development' &&

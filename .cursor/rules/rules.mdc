@@ -1,0 +1,54 @@
+---
+description: "Swiss-Med-Track Project Standards and Error Loop Prevention"
+globs:
+  - supabase/**/* 
+  - src/**/* 
+alwaysApply: true
+---
+
+# Cursor Rules for Swiss-Med-Track
+
+## Tutorial
+- Place this file in `.cursor/rules/` within your project root.
+- These rules guide the AI's coding and error handling for this project.
+
+## Best Practices
+- Explain actions before generating code and ask for user confirmation.
+- Avoid error loops (no infinite retries, always log caught errors).
+- Do the simplest thing first. Prefer modular code—avoid single, monolithic files.
+- Only make requested changes. Never duplicate code, always check for existing solutions.
+
+- Always write and optimize code with a mobile-first approach:
+  - Ensure UI components are fully functional and visually correct on small screen widths first.
+  - Styles and layouts must be responsive, progressively enhanced for larger screens.
+  - Mobile navigation (e.g., hamburger menus) must be implemented and tested as a priority.
+  - Touch targets and interactive elements must meet mobile usability standards.
+  - Performance must consider slower mobile networks and devices.
+
+## Supabase Auth & SSR
+- Use only `@supabase/ssr` for authentication.
+- Never use deprecated helpers (e.g., `@supabase/auth-helpers-nextjs`).
+- Use `getAll`/`setAll` for cookies in SSR, not individual operations.
+- Prevent session loss by always using provided SSR helpers for authentication.
+- Log and break on authentication errors—no silent retries!
+
+## Query & Effect Error Prevention
+- Forbid code patterns that can trigger looping fetches or effects.
+  - Always clean up React effect hooks and verify dependencies.
+  - Use timeouts, logging, and max retries for any async loop.
+
+## Database & API
+- Follow schema and migration conventions.
+- Optimize queries, filter results, and paginate when needed.
+- Prefer secure, typed queries. Always validate user input.
+
+## General Coding Conventions
+- Modularize code, group by feature where possible.
+- Use type-safe patterns (prefer TypeScript, strong typing).
+- Document code for future maintainers.
+
+## Performance & Security
+- Always monitor for N+1 queries and optimize connections.
+- Handle sensitive data securely. Implement proper backups and encryption.
+
+---

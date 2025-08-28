@@ -9,7 +9,6 @@ max_rows = 1000
 
 [auth]
 enabled = true
-port = 54324
 site_url = "http://localhost:3000"
 additional_redirect_urls = ["https://azthgtmchlqhtzlgwolw.lovableproject.com"]
 jwt_expiry = 3600
