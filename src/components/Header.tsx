@@ -3,38 +3,9 @@ import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { User, BookOpen, GraduationCap, LogOut, Settings } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
 
+// Simplified Header for Index page - no auth dependencies
 export const Header: React.FC = () => {
-  const { user, signOut } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      checkAdminRole();
-    }
-  }, [user, checkAdminRole]);
-
-  const checkAdminRole = useCallback(async () => {
-    try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('user_id', user?.id)
-        .single();
-
-      setIsAdmin(profile?.role === 'admin');
-    } catch (error) {
-      console.error('Error checking admin role:', error);
-    }
-  }, [user?.id]);
-
-  const handleSignOut = async () => {
-    await signOut();
-    window.location.href = '/';
-  };
-
   return (
     <header className="sticky top-0 z-50 w-full border-b border-card-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -51,65 +22,25 @@ export const Header: React.FC = () => {
 
         {/* Navigation */}
         <nav className="hidden md:flex items-center gap-6">
-          {user ? (
-            <>
-              <Link to="/fmh" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
-                FMH Tracking
-              </Link>
-              <Link to="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
-                Dashboard
-              </Link>
-              <Link to="/courses" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
-                Courses
-              </Link>
-              {isAdmin && (
-                <Link to="/admin" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors flex items-center gap-1">
-                  <Settings className="h-4 w-4" />
-                  Admin
-                </Link>
-              )}
-            </>
-          ) : (
-            <>
-              <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
-                Features
-              </a>
-              <Link to="/courses" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
-                Courses
-              </Link>
-              <a href="#contact" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
-                Kontakt
-              </a>
-            </>
-          )}
+          <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
+            Features
+          </a>
+          <Link to="/courses" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
+            Courses
+          </Link>
+          <a href="#contact" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
+            Kontakt
+          </a>
         </nav>
 
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
-          {user ? (
-            <div className="flex items-center gap-3">
-              <div className="text-sm text-muted-foreground">
-                Willkommen zurück!
-              </div>
-              <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Abmelden
-              </Button>
-            </div>
-          ) : (
-            <>
-              <Link to="/auth">
-                <Button variant="ghost" size="sm" className="hidden md:inline-flex">
-                  Anmelden
-                </Button>
-              </Link>
-              <Link to="/auth">
-                <Button variant="medical" size="sm">
-                  Kostenlos testen
-                </Button>
-              </Link>
-            </>
-          )}
+          <Link to="/auth">
+            <Button variant="default" size="sm">
+              <User className="h-4 w-4 mr-2" />
+              Anmelden
+            </Button>
+          </Link>
         </div>
       </div>
     </header>
