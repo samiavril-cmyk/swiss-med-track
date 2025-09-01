@@ -12,8 +12,8 @@ export default defineConfig(({ mode }) => ({
   // Use relative paths for proper GitHub Pages deployment
   base: './',
   build: {
-    // Output to root for GitHub Pages deployment
-    outDir: 'dist',
+    // Output to docs/ so GitHub Pages can serve it correctly
+    outDir: 'docs',
     emptyOutDir: true,
   },
   plugins: [
