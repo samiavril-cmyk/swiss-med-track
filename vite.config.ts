@@ -9,8 +9,8 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
-  // Use repo subpath as base on GitHub Pages; fallback to './' locally
-  base: process.env.GITHUB_PAGES === 'true' ? '/swiss-med-track/' : './',
+  // Use relative paths for proper GitHub Pages deployment
+  base: './',
   build: {
     // Output to docs/ so GitHub Pages (Deploy from branch) can serve it
     outDir: 'docs',
