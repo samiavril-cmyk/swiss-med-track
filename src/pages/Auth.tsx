@@ -26,7 +26,7 @@ export default function Auth() {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate('/');
+        navigate('/fmh');
       }
     };
     checkUser();
@@ -50,7 +50,7 @@ export default function Auth() {
           title: "Anmeldung erfolgreich",
           description: "Willkommen zurück!",
         });
-        navigate('/');
+        navigate('/fmh');
       }
     } catch (error: unknown) {
       console.error('Sign in error:', error);
@@ -92,7 +92,7 @@ export default function Auth() {
         
         // If email confirmation is disabled, redirect immediately
         if (data.session) {
-          navigate('/');
+          navigate('/fmh');
         }
       }
     } catch (error: unknown) {
