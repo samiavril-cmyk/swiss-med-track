@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,9 +44,9 @@ export const ProcedureQuickAdd: React.FC<ProcedureQuickAddProps> = ({ onClose, o
 
   useEffect(() => {
     loadProcedures();
-  }, []);
+  }, [loadProcedures]);
 
-  const loadProcedures = async () => {
+  const loadProcedures = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('procedures')
@@ -79,7 +79,7 @@ export const ProcedureQuickAdd: React.FC<ProcedureQuickAddProps> = ({ onClose, o
         variant: 'destructive'
       });
     }
-  };
+  }, [toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

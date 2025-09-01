@@ -318,7 +318,7 @@ async function findProcedureMatch(procedureName: string): Promise<MatchResult> {
     .eq('active', true);
   
   if (allProcedures) {
-    let bestMatch: { procedure: any; score: number } | null = null;
+    let bestMatch: { procedure: { id: string; title_de: string }; score: number } | null = null;
     
     for (const proc of allProcedures) {
       const score = calculateSimilarity(procedureName.toLowerCase(), proc.title_de.toLowerCase());
@@ -433,12 +433,12 @@ async function extractTextFromPDF(buffer: ArrayBuffer): Promise<string> {
     return new Promise((resolve, reject) => {
       const pdfParser = new PDFParser();
       
-      pdfParser.on("pdfParser_dataError", (errData: any) => {
+      pdfParser.on("pdfParser_dataError", (errData: { parserError: string }) => {
         console.error('PDF parsing error:', errData.parserError);
         reject(new Error(`PDF parsing failed: ${errData.parserError}`));
       });
       
-      pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
+      pdfParser.on("pdfParser_dataReady", (pdfData: { Pages?: Array<{ Texts?: Array<{ R?: Array<{ T?: string }> }> }> }) => {
         try {
           console.log('✅ PDF data extracted successfully');
           

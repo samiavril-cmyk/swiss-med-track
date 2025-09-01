@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,13 +42,7 @@ export const FMHCorrections: React.FC<FMHCorrectionsProps> = ({
   const [editingLog, setEditingLog] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Partial<ProcedureLog>>({});
 
-  useEffect(() => {
-    if (open && user) {
-      loadProcedureLogs();
-    }
-  }, [open, user]);
-
-  const loadProcedureLogs = async () => {
+  const loadProcedureLogs = useCallback(async () => {
     if (!user) return;
     
     setLoading(true);
@@ -99,7 +93,15 @@ export const FMHCorrections: React.FC<FMHCorrectionsProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (open && user) {
+      loadProcedureLogs();
+    }
+  }, [open, user, loadProcedureLogs]);
+
+
 
   const handleEdit = (log: ProcedureLog) => {
     setEditingLog(log.id);

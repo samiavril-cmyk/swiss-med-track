@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,36 +41,36 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ userId }) => {
     procedures: false
   });
 
+  const fetchProfile = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) throw error;
+
+      const p = data as unknown as ProfileRow;
+      setProfile(p);
+      setHandle(p.handle || '');
+      setIsPublic(Boolean(p.is_public));
+      setPublicFields((p.public_fields as PublicFields | null) || publicFields);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      toast({
+        title: "Fehler",
+        description: "Profil konnte nicht geladen werden.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [userId, publicFields]);
+
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', userId)
-          .single();
-
-        if (error) throw error;
-
-        const p = data as unknown as ProfileRow;
-        setProfile(p);
-        setHandle(p.handle || '');
-        setIsPublic(Boolean(p.is_public));
-        setPublicFields((p.public_fields as PublicFields | null) || publicFields);
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-        toast({
-          title: "Fehler",
-          description: "Profil konnte nicht geladen werden.",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProfile();
-  }, [userId]);
+  }, [fetchProfile]);
 
   const generateHandle = () => {
     if (profile?.full_name) {

@@ -80,7 +80,7 @@ const Profile: React.FC = () => {
 
         setProfile({
           ...profileData,
-          public_fields: profileData.public_fields as any || {
+          public_fields: profileData.public_fields as Record<string, boolean> || {
             courses: true,
             awards: true,
             publications: true,

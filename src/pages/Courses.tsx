@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -58,9 +58,9 @@ export default function Courses() {
 
   useEffect(() => {
     fetchCourses();
-  }, [searchTerm, selectedCountry, selectedSpecialty, selectedModality, priceRange]);
+  }, [fetchCourses]);
 
-  const fetchCourses = async () => {
+  const fetchCourses = useCallback(async () => {
     setLoading(true);
     try {
       let query = supabase
@@ -106,7 +106,7 @@ export default function Courses() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, selectedCountry, selectedSpecialty, selectedModality, priceRange]);
 
   const updateSearchParams = (key: string, value: string) => {
     const newParams = new URLSearchParams(searchParams);

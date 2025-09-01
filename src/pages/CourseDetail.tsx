@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -111,9 +111,9 @@ export default function CourseDetail() {
     if (id) {
       fetchCourseDetails();
     }
-  }, [id]);
+  }, [id, fetchCourseDetails]);
 
-  const fetchCourseDetails = async () => {
+  const fetchCourseDetails = useCallback(async () => {
     if (!id) return;
     
     setLoading(true);
@@ -200,7 +200,7 @@ export default function CourseDetail() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   const handleEnrollment = async () => {
     if (!course || !selectedSession) {

@@ -157,7 +157,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [user, userPgyLevel, open]);
+  }, [user, userPgyLevel, loadExistingData]);
 
   useEffect(() => {
     if (open) {
@@ -189,7 +189,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
     }
   }, [user]);
 
-  const loadExistingData = async (moduleData: Record<string, ModuleData>) => {
+  const loadExistingData = useCallback(async (moduleData: Record<string, ModuleData>) => {
     if (!user) return;
 
     try {
@@ -270,7 +270,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
     } catch (error) {
       console.error('Error loading existing procedure data:', error);
     }
-  };
+  }, [user]);
 
   const updateProcedureValue = (
     moduleKey: string,

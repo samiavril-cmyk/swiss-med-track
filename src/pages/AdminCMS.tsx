@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/hooks/useAuth';
@@ -84,9 +84,9 @@ export const AdminCMS: React.FC = () => {
     if (user) {
       checkAdminAccess();
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, checkAdminAccess]);
 
-  const checkAdminAccess = async () => {
+  const checkAdminAccess = useCallback(async () => {
     try {
       const { data: profile } = await supabase
         .from('profiles')
@@ -105,7 +105,7 @@ export const AdminCMS: React.FC = () => {
       console.error('Error checking admin access:', error);
       navigate('/');
     }
-  };
+  }, [user?.id, navigate]);
 
   const loadCourses = async () => {
     try {
@@ -232,7 +232,7 @@ export const AdminCMS: React.FC = () => {
     }
   };
 
-  const handleInputChange = (field: keyof Course, value: any) => {
+  const handleInputChange = (field: keyof Course, value: string | number | boolean | null | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 

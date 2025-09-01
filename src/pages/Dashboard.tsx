@@ -194,9 +194,9 @@ export const Dashboard: React.FC = () => {
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <ring.icon className="w-4 h-4 text-muted-foreground" />
                       <Badge variant="outline" className="text-xs">
-                        {ring.id === 'procedures' ? `${(ring.data as any).completed}/${(ring.data as any).target}` :
-                         ring.id === 'courses' || ring.id === 'mandatory' ? `${(ring.data as any).completed}/${(ring.data as any).target}` :
-                         `${(ring.data as any).count || (ring.data as any).completed || 0}`}
+                        {ring.id === 'procedures' ? `${(ring.data as { completed: number; target: number }).completed}/${(ring.data as { completed: number; target: number }).target}` :
+                         ring.id === 'courses' || ring.id === 'mandatory' ? `${(ring.data as { completed: number; target: number }).completed}/${(ring.data as { completed: number; target: number }).target}` :
+                         `${(ring.data as { count?: number; completed?: number }).count || (ring.data as { count?: number; completed?: number }).completed || 0}`}
                       </Badge>
                     </div>
                   </div>

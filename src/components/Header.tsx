@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -14,9 +14,9 @@ export const Header: React.FC = () => {
     if (user) {
       checkAdminRole();
     }
-  }, [user]);
+  }, [user, checkAdminRole]);
 
-  const checkAdminRole = async () => {
+  const checkAdminRole = useCallback(async () => {
     try {
       const { data: profile } = await supabase
         .from('profiles')
@@ -28,7 +28,7 @@ export const Header: React.FC = () => {
     } catch (error) {
       console.error('Error checking admin role:', error);
     }
-  };
+  }, [user?.id]);
 
   const handleSignOut = async () => {
     await signOut();

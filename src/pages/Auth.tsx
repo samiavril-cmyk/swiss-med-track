@@ -52,9 +52,10 @@ export default function Auth() {
         });
         navigate('/');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign in error:', error);
-      setError(error.message || 'Anmeldung fehlgeschlagen');
+      const errorMessage = error instanceof Error ? error.message : 'Anmeldung fehlgeschlagen';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -94,9 +95,10 @@ export default function Auth() {
           navigate('/');
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign up error:', error);
-      setError(error.message || 'Registrierung fehlgeschlagen');
+      const errorMessage = error instanceof Error ? error.message : 'Registrierung fehlgeschlagen';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
