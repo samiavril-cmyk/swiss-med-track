@@ -9,8 +9,8 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
-  // Use relative paths for HashRouter
-  base: './',
+  // Use GitHub Pages subpath as base
+  base: '/swiss-med-track/',
   build: {
     // Output to docs/ so GitHub Pages can serve it correctly
     outDir: 'docs',
