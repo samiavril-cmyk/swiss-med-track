@@ -21,25 +21,32 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="/swiss-med-track/assets/index-BBG-EeqI.js"></script>
+    <script type="module" crossorigin src="/swiss-med-track/assets/index-fOACdUqC.js"></script>
     <link rel="stylesheet" crossorigin href="/swiss-med-track/assets/index-Ql8nQel1.css">
     
-    <!-- SPA Routing for GitHub Pages -->
+    <!-- Improved SPA Routing for GitHub Pages -->
     <script>
-      // Single Page Apps for GitHub Pages
-      // This script takes the current url and converts the path and query
-      // string into just a query string, and then redirects the browser
-      // to the new url with only a query string and hash fragment.
-      var pathSegmentsToKeep = 1;
-
-      var l = window.location;
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-        l.hash
-      );
+      // Enhanced SPA routing for GitHub Pages
+      (function() {
+        var redirect = function() {
+          var currentPath = window.location.pathname;
+          var basePath = '/swiss-med-track';
+          
+          // Remove the base path to get the actual route
+          var route = currentPath.replace(basePath, '');
+          
+          // If we're not on the root, redirect to the main app
+          if (route !== '' && route !== '/') {
+            // Store the intended route in sessionStorage
+            sessionStorage.setItem('intendedRoute', route);
+            // Redirect to the main app
+            window.location.href = basePath + '/';
+          }
+        };
+        
+        // Execute redirect
+        redirect();
+      })();
     </script>
   </head>
   <body>

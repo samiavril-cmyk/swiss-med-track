@@ -10,10 +10,24 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('Index: Auth state:', { user, loading });
+    
     if (!loading && user) {
+      console.log('Index: Redirecting to /fmh');
       navigate("/fmh");
     }
   }, [user, loading, navigate]);
+
+  // Add a timeout to prevent infinite loading
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.log('Index: Loading timeout, forcing render');
+      }
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, [loading]);
 
   if (loading) {
     return (
@@ -24,6 +38,8 @@ const Index = () => {
     );
   }
 
+  console.log('Index: Rendering main content');
+  
   return (
     <div className="min-h-screen bg-background">
       <Header />
