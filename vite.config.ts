@@ -14,7 +14,16 @@ export default defineConfig(({ mode }) => ({
   build: {
     // Output to docs/ so GitHub Pages can serve it correctly
     outDir: 'docs',
-    emptyOutDir: false, // Don't empty to preserve images
+    emptyOutDir: true, // Clean build
+    rollupOptions: {
+      // Ensure public assets are copied
+      external: [],
+      output: {
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+      }
+    }
   },
   publicDir: 'public', // Ensure public assets are copied
   plugins: [
