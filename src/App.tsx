@@ -10,6 +10,7 @@ import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
 import { FMHDashboard } from "./pages/FMHDashboard";
 import { AdminCMS } from "./pages/AdminCMS";
+import Publications from "./pages/Publications";
 import AuthNew from "./pages/AuthNew";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./hooks/useAuth";
@@ -38,6 +39,7 @@ const SPARouter = () => {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/courses" element={<Courses />} />
       <Route path="/courses/:id" element={<CourseDetail />} />
+      <Route path="/publications" element={<Publications />} />
       <Route path="/profile/:handle" element={<Profile />} />
       <Route path="/fmh" element={<FMHDashboard />} />
       <Route path="/admin" element={<AdminCMS />} />

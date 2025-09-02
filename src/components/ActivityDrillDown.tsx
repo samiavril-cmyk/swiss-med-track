@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ActivityRing } from '@/components/ActivityRing';
 import { ProgressBar } from '@/components/ProgressBar';
 import { VerticalCourseTimeline, mockCourses2024 } from '@/components/VerticalCourseTimeline';
+import PublicationsShowcase from '@/components/PublicationsShowcase';
 import { X, Calendar, TrendingUp, BookOpen, Award, FileText, Stethoscope } from 'lucide-react';
 
 interface ActivityDrillDownProps {
@@ -213,50 +214,7 @@ export const ActivityDrillDown: React.FC<ActivityDrillDownProps> = ({
   );
 
   const renderPublicationsContent = () => (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-4">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-card-foreground">{data.count}</p>
-            <p className="text-sm text-muted-foreground">Publikationen</p>
-          </div>
-        </Card>
-        <Card className="p-4">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-card-foreground">4</p>
-            <p className="text-sm text-muted-foreground">Peer-reviewed</p>
-          </div>
-        </Card>
-        <Card className="p-4">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-card-foreground">2.4</p>
-            <p className="text-sm text-muted-foreground">Ø Impact Factor</p>
-          </div>
-        </Card>
-      </div>
-
-      <div className="space-y-4">
-        <h4 className="font-semibold text-card-foreground">Alle Publikationen</h4>
-        <div className="space-y-3">
-          {data.articles.map((article: { title: string; journal: string; date: string; doi?: string }, index: number) => (
-            <div key={index} className="p-4 border border-card-border rounded-medical">
-              <h5 className="font-medium text-card-foreground mb-2">{article.title}</h5>
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">{article.journal}</p>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline">{article.date}</Badge>
-                  {article.doi && (
-                    <Button variant="ghost" size="sm" className="text-xs">
-                      DOI
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+    <PublicationsShowcase />
   );
 
   const renderAwardsContent = () => (

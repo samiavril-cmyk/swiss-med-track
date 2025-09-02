@@ -40,6 +40,9 @@ export const Header: React.FC = () => {
               <Link to="/courses" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
                 Courses
               </Link>
+              <Link to="/publications" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
+                Publikationen
+              </Link>
               {isAdmin && (
                 <Link to="/admin" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors flex items-center gap-1">
                   <Settings className="h-4 w-4" />
