@@ -14,8 +14,9 @@ export default defineConfig(({ mode }) => ({
   build: {
     // Output to docs/ so GitHub Pages can serve it correctly
     outDir: 'docs',
-    emptyOutDir: true,
+    emptyOutDir: false, // Don't empty to preserve images
   },
+  publicDir: 'public', // Ensure public assets are copied
   plugins: [
     react(),
     mode === 'development' &&
