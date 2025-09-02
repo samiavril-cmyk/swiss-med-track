@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BookOpen, GraduationCap, Stethoscope, Trophy, FileText, Calendar, Settings, Share2 } from 'lucide-react';
 import { ActivityDrillDown } from '@/components/ActivityDrillDown';
-import { MultiYearCourseTimeline, mockCoursesByYear } from '@/components/MultiYearCourseTimeline';
+
 
 interface ActivityData {
   courses: {
@@ -255,8 +255,7 @@ export const Dashboard: React.FC = () => {
           </Card>
         </div>
 
-        {/* Course Timeline */}
-        <MultiYearCourseTimeline coursesByYear={mockCoursesByYear} />
+
 
         {/* Recent Activity */}
         <Card className="medical-card p-6">

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ActivityRing } from '@/components/ActivityRing';
 import { ProgressBar } from '@/components/ProgressBar';
+import { VerticalCourseTimeline, mockCourses2024 } from '@/components/VerticalCourseTimeline';
 import { X, Calendar, TrendingUp, BookOpen, Award, FileText, Stethoscope } from 'lucide-react';
 
 interface ActivityDrillDownProps {
@@ -79,6 +80,11 @@ export const ActivityDrillDown: React.FC<ActivityDrillDownProps> = ({
           </div>
         </Card>
       </div>
+
+      {/* Show vertical timeline for mandatory courses */}
+      {activityId === 'mandatory' && (
+        <VerticalCourseTimeline courses={mockCourses2024} year={2024} />
+      )}
 
       <div className="space-y-4">
         <h4 className="font-semibold text-card-foreground">Jahresverlauf</h4>

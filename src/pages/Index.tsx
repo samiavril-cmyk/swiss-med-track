@@ -2,6 +2,7 @@ import React from 'react';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { InteractiveProgressDemo } from '@/components/InteractiveProgressDemo';
+import { VerticalCourseTimeline, mockCourses2024 } from '@/components/VerticalCourseTimeline';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<
@@ -61,6 +62,24 @@ const Index = () => {
           <main>
             <HeroSection />
             <InteractiveProgressDemo />
+            
+            {/* Course Timeline Example */}
+            <section className="py-16 bg-gray-50">
+              <div className="container mx-auto px-4">
+                <div className="text-center mb-12">
+                  <h2 className="text-3xl font-bold text-card-foreground mb-4">
+                    Kurs-Timeline Beispiel
+                  </h2>
+                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                    Verfolgen Sie Ihre Fortbildung mit unserer professionellen Timeline-Darstellung. 
+                    Pflichtkurse werden hervorgehoben und der Fortschritt wird visuell dargestellt.
+                  </p>
+                </div>
+                <div className="max-w-4xl mx-auto">
+                  <VerticalCourseTimeline courses={mockCourses2024} year={2024} />
+                </div>
+              </div>
+            </section>
           </main>
         </div>
       </ErrorBoundary>
