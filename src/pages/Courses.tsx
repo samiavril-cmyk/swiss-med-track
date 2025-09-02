@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Filter, MapPin, Calendar, Star, Clock, Users } from "lucide-react";
 import { Header } from "@/components/Header";
+import { CourseInputModal } from "@/components/CourseInputModal";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Course {
   id: string;
@@ -35,8 +37,10 @@ interface Course {
 }
 
 export default function Courses() {
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [courses, setCourses] = useState<Course[]>([]);
+  const [userCourses, setUserCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
   const [selectedCountry, setSelectedCountry] = useState(searchParams.get("country") || "");
@@ -44,6 +48,7 @@ export default function Courses() {
   const [selectedModality, setSelectedModality] = useState(searchParams.get("modality") || "");
   const [priceRange, setPriceRange] = useState(searchParams.get("price") || "");
   const [view, setView] = useState<"grid" | "list">("grid");
+  const [activeTab, setActiveTab] = useState<"available" | "my-courses">("available");
 
   const countries = ["Switzerland", "Germany", "Austria", "France", "Italy"];
   const specialties = ["Cardiology", "Surgery", "Neurology", "Radiology", "Emergency Medicine", "Internal Medicine"];
@@ -58,7 +63,10 @@ export default function Courses() {
 
   useEffect(() => {
     fetchCourses();
-  }, [fetchCourses]);
+    if (user) {
+      fetchUserCourses();
+    }
+  }, [fetchCourses, user]);
 
   const fetchCourses = useCallback(async () => {
     setLoading(true);
@@ -107,6 +115,27 @@ export default function Courses() {
       setLoading(false);
     }
   }, [searchTerm, selectedCountry, selectedSpecialty, selectedModality, priceRange]);
+
+  const fetchUserCourses = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from("user_courses")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("date", { ascending: false });
+
+      if (error) throw error;
+      setUserCourses(data || []);
+    } catch (error) {
+      console.error("Error fetching user courses:", error);
+    }
+  }, [user]);
+
+  const handleCourseAdded = (newCourse: Course) => {
+    setUserCourses(prev => [newCourse, ...prev]);
+  };
 
   const updateSearchParams = (key: string, value: string) => {
     const newParams = new URLSearchParams(searchParams);
@@ -263,8 +292,42 @@ export default function Courses() {
       <Header />
       
       <div className="container mx-auto px-4 py-8">
-        {/* Search and Filters */}
-        <div className="mb-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-card-foreground mb-2">
+              Medizinische Kurse
+            </h1>
+            <p className="text-muted-foreground">
+              Entdecken Sie FMH-konforme Fortbildungsmöglichkeiten
+            </p>
+          </div>
+          
+          <div className="flex gap-3 mt-4 md:mt-0">
+            {user && (
+              <CourseInputModal onCourseAdded={handleCourseAdded} />
+            )}
+            <Button variant="outline" size="sm" className="gap-2">
+              <Filter className="w-4 h-4" />
+              Filter
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Calendar className="w-4 h-4" />
+              Kalender
+            </Button>
+          </div>
+        </div>
+
+        {/* Tabs for Available vs My Courses */}
+        <Tabs value={activeTab} onValueChange={(value: "available" | "my-courses") => setActiveTab(value)} className="mb-8">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="available">Verfügbare Kurse</TabsTrigger>
+            <TabsTrigger value="my-courses">Meine Kurse ({userCourses.length})</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="available" className="mt-6">
+            {/* Search and Filters */}
+            <div className="mb-8">
           <div className="flex flex-col lg:flex-row gap-4 mb-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -399,6 +462,42 @@ export default function Courses() {
             ))}
           </div>
         )}
+          </TabsContent>
+
+          <TabsContent value="my-courses" className="mt-6">
+            {user ? (
+              <div>
+                {userCourses.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {userCourses.map((course) => (
+                      <CourseCard key={course.id} course={course} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">📚</div>
+                    <h3 className="text-xl font-semibold mb-2">Noch keine Kurse hinzugefügt</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Fügen Sie Ihren ersten Kurs hinzu, um Ihre Fortbildung zu verfolgen.
+                    </p>
+                    <CourseInputModal onCourseAdded={handleCourseAdded} />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">🔒</div>
+                <h3 className="text-xl font-semibold mb-2">Anmeldung erforderlich</h3>
+                <p className="text-muted-foreground mb-4">
+                  Melden Sie sich an, um Ihre Kurse zu verwalten.
+                </p>
+                <Button asChild>
+                  <a href="/auth">Anmelden</a>
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
