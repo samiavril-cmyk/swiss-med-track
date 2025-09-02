@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +17,6 @@ export default function Auth() {
   const [institution, setInstitution] = useState('');
   const [pgyLevel, setPgyLevel] = useState('1');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -26,11 +24,11 @@ export default function Auth() {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate('/fmh');
+        window.location.href = '/swiss-med-track/fmh';
       }
     };
     checkUser();
-  }, [navigate]);
+  }, []);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +48,7 @@ export default function Auth() {
           title: "Anmeldung erfolgreich",
           description: "Willkommen zurück!",
         });
-        navigate('/fmh');
+        window.location.href = '/swiss-med-track/fmh';
       }
     } catch (error: unknown) {
       console.error('Sign in error:', error);
@@ -67,7 +65,7 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/swiss-med-track/`;
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -92,7 +90,7 @@ export default function Auth() {
         
         // If email confirmation is disabled, redirect immediately
         if (data.session) {
-          navigate('/fmh');
+          window.location.href = '/swiss-med-track/fmh';
         }
       }
     } catch (error: unknown) {
