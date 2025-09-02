@@ -144,6 +144,150 @@ const Index = () => {
                 </div>
               </div>
             </section>
+
+            {/* Awards & Recognition Section */}
+            <section className="py-16 bg-gradient-to-br from-amber-50 to-orange-50">
+              <div className="container mx-auto px-4">
+                <div className="text-center mb-12">
+                  <h2 className="text-3xl font-bold text-card-foreground mb-4">
+                    Auszeichnungen & Anerkennung
+                  </h2>
+                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                    Ihre Erfolge und Errungenschaften in der chirurgischen Ausbildung
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                  <div className="space-y-6">
+                    <div className="space-y-4">
+                      <h3 className="text-2xl font-semibold text-card-foreground">
+                        Exzellenz in der Ausbildung
+                      </h3>
+                      <p className="text-muted-foreground">
+                        Ihre herausragenden Leistungen und Anerkennungen spiegeln Ihr Engagement 
+                        für die chirurgische Ausbildung wider.
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-4 bg-background rounded-lg shadow-sm border">
+                        <div className="text-2xl font-bold text-amber-600">5+</div>
+                        <div className="text-sm text-muted-foreground">Auszeichnungen</div>
+                      </div>
+                      <div className="text-center p-4 bg-background rounded-lg shadow-sm border">
+                        <div className="text-2xl font-bold text-amber-600">100%</div>
+                        <div className="text-sm text-muted-foreground">Erfolgsrate</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                      <img
+                        src="/awardsresidents2-image.png"
+                        alt="Awards & Recognition - Chirurgische Ausbildung"
+                        className="w-full h-auto object-cover"
+                        style={{ minHeight: '400px' }}
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-2xl -z-10 transform rotate-3 scale-105"></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Course Excellence Section */}
+            <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-50">
+              <div className="container mx-auto px-4">
+                <div className="text-center mb-12">
+                  <h2 className="text-3xl font-bold text-card-foreground mb-4">
+                    Kurs-Exzellenz
+                  </h2>
+                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                    Ihre Teilnahme an hochwertigen Kursen und Weiterbildungen
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                  <div className="relative order-2 lg:order-1">
+                    <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                      <img
+                        src="/courseresidentsimage.png"
+                        alt="Course Excellence - Chirurgische Ausbildung"
+                        className="w-full h-auto object-cover"
+                        style={{ minHeight: '400px' }}
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl -z-10 transform -rotate-3 scale-105"></div>
+                  </div>
+                  <div className="space-y-6 order-1 lg:order-2">
+                    <div className="space-y-4">
+                      <h3 className="text-2xl font-semibold text-card-foreground">
+                        Kontinuierliche Weiterbildung
+                      </h3>
+                      <p className="text-muted-foreground">
+                        Ihre aktive Teilnahme an Kursen und Weiterbildungen zeigt Ihr 
+                        Engagement für lebenslanges Lernen in der Chirurgie.
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-4 bg-background rounded-lg shadow-sm border">
+                        <div className="text-2xl font-bold text-blue-600">15+</div>
+                        <div className="text-sm text-muted-foreground">Kurse</div>
+                      </div>
+                      <div className="text-center p-4 bg-background rounded-lg shadow-sm border">
+                        <div className="text-2xl font-bold text-blue-600">120+</div>
+                        <div className="text-sm text-muted-foreground">CME Punkte</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Training Excellence Section */}
+            <section className="py-16 bg-gradient-to-br from-green-50 to-emerald-50">
+              <div className="container mx-auto px-4">
+                <div className="text-center mb-12">
+                  <h2 className="text-3xl font-bold text-card-foreground mb-4">
+                    Trainings-Exzellenz
+                  </h2>
+                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                    Ihre praktische Ausbildung und operative Erfahrung
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                  <div className="space-y-6">
+                    <div className="space-y-4">
+                      <h3 className="text-2xl font-semibold text-card-foreground">
+                        Praktische Ausbildung
+                      </h3>
+                      <p className="text-muted-foreground">
+                        Ihre operative Erfahrung und praktische Ausbildung bilden das 
+                        Fundament Ihrer chirurgischen Kompetenz.
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-4 bg-background rounded-lg shadow-sm border">
+                        <div className="text-2xl font-bold text-green-600">500+</div>
+                        <div className="text-sm text-muted-foreground">Operationen</div>
+                      </div>
+                      <div className="text-center p-4 bg-background rounded-lg shadow-sm border">
+                        <div className="text-2xl font-bold text-green-600">6</div>
+                        <div className="text-sm text-muted-foreground">Jahre</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                      <img
+                        src="/trainingimage.png"
+                        alt="Training Excellence - Chirurgische Ausbildung"
+                        className="w-full h-auto object-cover"
+                        style={{ minHeight: '400px' }}
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl -z-10 transform rotate-3 scale-105"></div>
+                  </div>
+                </div>
+              </div>
+            </section>
           </main>
         </div>
       </ErrorBoundary>
