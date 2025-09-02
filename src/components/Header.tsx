@@ -65,6 +65,9 @@ export const Header: React.FC = () => {
               <a href="#contact" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
                 Kontakt
               </a>
+              <Link to="/auth" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
+                Anmelden
+              </Link>
             </>
           )}
         </nav>

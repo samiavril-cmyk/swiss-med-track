@@ -29,8 +29,8 @@ export const ActivityDrillDown: React.FC<ActivityDrillDownProps> = ({
         color: 'hsl(var(--activity-coral))'
       },
       mandatory: {
-        title: 'Pflichtkurse',
-        icon: BookOpen,
+        title: 'Examen & Prüfungen',
+        icon: Award,
         variant: 'lavender' as const,
         color: 'hsl(var(--activity-lavender))'
       },
@@ -103,47 +103,129 @@ export const ActivityDrillDown: React.FC<ActivityDrillDownProps> = ({
     </div>
   );
 
-  const renderMandatoryCoursesContent = () => (
+  // Examen-Daten
+  const examData = [
+    {
+      id: 'basisexamen',
+      title: 'Basisexamen',
+      description: 'Grundlagenprüfung für Medizinstudierende',
+      status: 'completed',
+      date: '2020-03-15',
+      score: '85%',
+      type: 'required'
+    },
+    {
+      id: 'facharztpruefung',
+      title: 'Facharztprüfung Chirurgie',
+      description: 'Abschlussprüfung für Facharzt Chirurgie',
+      status: 'pending',
+      date: '2025-06-20',
+      score: null,
+      type: 'required'
+    },
+    {
+      id: 'usmle_step1',
+      title: 'USMLE Step 1',
+      description: 'United States Medical Licensing Examination Step 1',
+      status: 'completed',
+      date: '2021-08-10',
+      score: '245',
+      type: 'optional'
+    },
+    {
+      id: 'usmle_step2',
+      title: 'USMLE Step 2 CK',
+      description: 'Clinical Knowledge Examination',
+      status: 'completed',
+      date: '2022-05-15',
+      score: '258',
+      type: 'optional'
+    },
+    {
+      id: 'usmle_step3',
+      title: 'USMLE Step 3',
+      description: 'Final Step of USMLE',
+      status: 'pending',
+      date: '2025-03-10',
+      score: null,
+      type: 'optional'
+    },
+    {
+      id: 'plab',
+      title: 'PLAB Test',
+      description: 'Professional and Linguistic Assessments Board',
+      status: 'not_taken',
+      date: null,
+      score: null,
+      type: 'optional'
+    }
+  ];
+
+  const renderExamsContent = () => (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="p-4">
           <div className="text-center">
-            <p className="text-2xl font-bold text-card-foreground">{data.completed}</p>
+            <p className="text-2xl font-bold text-card-foreground">3</p>
             <p className="text-sm text-muted-foreground">Abgeschlossen</p>
           </div>
         </Card>
         <Card className="p-4">
           <div className="text-center">
-            <p className="text-2xl font-bold text-card-foreground">{data.target - data.completed}</p>
-            <p className="text-sm text-muted-foreground">Verbleibend</p>
+            <p className="text-2xl font-bold text-card-foreground">2</p>
+            <p className="text-sm text-muted-foreground">Ausstehend</p>
           </div>
         </Card>
         <Card className="p-4">
           <div className="text-center">
-            <p className="text-2xl font-bold text-card-foreground">{data.points}</p>
-            <p className="text-sm text-muted-foreground">Punkte</p>
+            <p className="text-2xl font-bold text-card-foreground">1</p>
+            <p className="text-sm text-muted-foreground">Nicht geplant</p>
           </div>
         </Card>
       </div>
 
-      {/* Show vertical timeline ONLY for mandatory courses */}
-      <VerticalCourseTimeline courses={mockCourses2024} year={2024} />
-
+      {/* Examen Timeline */}
       <div className="space-y-4">
-        <h4 className="font-semibold text-card-foreground">Jahresverlauf</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {['2021', '2022', '2023', '2024'].map((year, index) => (
-            <div key={year} className="flex items-center justify-between p-4 border border-card-border rounded-medical">
-              <span className="font-medium">{year}</span>
-              <div className="flex items-center gap-3">
-                <ProgressBar 
-                  progress={Math.min((index + 1) * 25, 100)} 
-                  variant="compact" 
-                  className="w-24"
-                />
-                <Badge variant="outline">{(index + 1) * 7} Kurse</Badge>
+        <h4 className="font-semibold text-card-foreground">Examen & Prüfungen</h4>
+        <div className="space-y-4">
+          {examData.map((exam, index) => (
+            <Card key={exam.id} className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-3 h-3 rounded-full bg-gradient-to-r from-primary to-secondary"></div>
+                  <div>
+                    <h5 className="font-semibold text-card-foreground flex items-center gap-2">
+                      {exam.title}
+                      {exam.type === 'required' && <span className="text-red-500">⭐</span>}
+                    </h5>
+                    <p className="text-sm text-muted-foreground">{exam.description}</p>
+                    {exam.date && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {exam.status === 'completed' ? 'Abgeschlossen' : 'Geplant'}: {new Date(exam.date).toLocaleDateString('de-DE')}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  {exam.score && (
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      {exam.score}
+                    </Badge>
+                  )}
+                  <Badge 
+                    variant={exam.status === 'completed' ? 'default' : exam.status === 'pending' ? 'secondary' : 'outline'}
+                    className={
+                      exam.status === 'completed' ? 'bg-green-100 text-green-800' :
+                      exam.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-600'
+                    }
+                  >
+                    {exam.status === 'completed' ? 'Abgeschlossen' : 
+                     exam.status === 'pending' ? 'Ausstehend' : 'Nicht geplant'}
+                  </Badge>
+                </div>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       </div>
@@ -263,9 +345,9 @@ export const ActivityDrillDown: React.FC<ActivityDrillDownProps> = ({
   const renderContent = () => {
     switch (activityId) {
       case 'courses':
-        return renderCoursesContent();
+        return renderMandatoryCoursesContent(); // Use Pflichtkurse content for Kurse
       case 'mandatory':
-        return renderMandatoryCoursesContent();
+        return renderExamsContent(); // Use Examen content for Pflichtkurse
       case 'procedures':
         return renderProceduresContent();
       case 'publications':
