@@ -22,7 +22,7 @@ import {
   Heart,
   Share2
 } from "lucide-react";
-import { Header } from "@/components/Header";
+import { Header } from "@/components/HeaderSimple";
 import { toast } from "sonner";
 
 interface Course {

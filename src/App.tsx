@@ -12,7 +12,7 @@ import { FMHDashboard } from "./pages/FMHDashboard";
 import { AdminCMS } from "./pages/AdminCMS";
 import AuthNew from "./pages/AuthNew";
 import NotFound from "./pages/NotFound";
-import { AuthProviderSimple } from "./hooks/useAuthSimple";
+import { AuthProvider } from "./hooks/useAuthSimple";
 
 const queryClient = new QueryClient();
 
@@ -49,13 +49,13 @@ const SPARouter = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProviderSimple>
+    <AuthProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter basename="/swiss-med-track">
         <SPARouter />
       </BrowserRouter>
-    </AuthProviderSimple>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

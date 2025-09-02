@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HeaderSimple } from '@/components/HeaderSimple';
-import { useAuthSimple } from '@/hooks/useAuthSimple';
+import { Header } from '@/components/HeaderSimple';
+import { useAuth } from '@/hooks/useAuthSimple';
 import { ImageUpload } from '@/components/ImageUpload';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -56,7 +56,7 @@ interface Course {
 }
 
 export const AdminCMS: React.FC = () => {
-  const { user, loading: authLoading } = useAuthSimple();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -239,7 +239,7 @@ export const AdminCMS: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <HeaderSimple />
+        <Header />
         <main className="container mx-auto px-4 py-8">
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

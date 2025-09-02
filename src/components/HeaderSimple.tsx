@@ -1,14 +1,16 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
-import { GraduationCap, LogOut, Settings } from 'lucide-react';
-import { useAuthSimple } from '@/hooks/useAuthSimple';
+import { GraduationCap, LogOut, Settings, User } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuthSimple';
 
-export const HeaderSimple: React.FC = () => {
-  const { user, signOut } = useAuthSimple();
+export const Header: React.FC = () => {
+  const { user, signOut, isAdmin, userProfile } = useAuth();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await signOut();
+    navigate('/');
   };
 
   return (
@@ -38,6 +40,12 @@ export const HeaderSimple: React.FC = () => {
               <Link to="/courses" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
                 Courses
               </Link>
+              {isAdmin && (
+                <Link to="/admin" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors flex items-center gap-1">
+                  <Settings className="h-4 w-4" />
+                  Admin
+                </Link>
+              )}
             </>
           ) : (
             <>
@@ -58,8 +66,11 @@ export const HeaderSimple: React.FC = () => {
         <div className="flex items-center gap-3">
           {user ? (
             <div className="flex items-center gap-3">
-              <div className="text-sm text-muted-foreground">
-                Willkommen zurück!
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">
+                  {userProfile?.full_name || user.email}
+                </span>
               </div>
               <Button variant="ghost" size="sm" onClick={handleSignOut}>
                 <LogOut className="h-4 w-4 mr-2" />

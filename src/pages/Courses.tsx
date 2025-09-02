@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Filter, MapPin, Calendar, Star, Clock, Users } from "lucide-react";
-import { Header } from "@/components/Header";
+import { Header } from "@/components/HeaderSimple";
 
 interface Course {
   id: string;
