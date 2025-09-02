@@ -6,61 +6,61 @@
 
 @layer base {
   :root {
-    /* Clean Medical Foundation - Off-White Background */
-    --background: 0 0% 98%; /* #FAFAFA - Clean off-white */
-    --foreground: 210 22% 18%; /* #2D3748 - Dark anthracite for high contrast */
+    /* Residents Website Farbpalette - Clean Medical Foundation */
+    --background: 0 0% 100%; /* #FFFFFF - Pure white */
+    --foreground: 210 25% 20%; /* #2C3E50 - Dark gray for text */
 
-    /* Primary: Deep Teal - Professional Medical */
-    --primary: 195 100% 18%; /* #0F4C5C - Deep teal for headers, CTAs */
+    /* Primärfarben (OP & Corporate Look) */
+    --primary: 175 70% 35%; /* #16A085 - Teal-Grün (Scrubs) */
     --primary-foreground: 0 0% 100%; /* Pure white text */
-    --primary-hover: 195 100% 15%; /* Darker on hover */
+    --primary-hover: 175 70% 30%; /* Darker teal on hover */
 
-    /* Secondary: Fresh Mint - Active States */
-    --secondary: 175 70% 55%; /* #36CFC9 - Fresh mint for hover, active */
+    /* Secondary: Dunkelblau (Hintergrund-Formen) */
+    --secondary: 220 70% 20%; /* #0C2D57 - Dunkelblau */
     --secondary-foreground: 0 0% 100%;
-    --secondary-hover: 175 70% 48%; /* Slightly darker mint */
+    --secondary-hover: 220 70% 15%; /* Darker blue on hover */
 
-    /* Accent Colors - Sparingly Used */
-    --accent-coral: 0 79% 70%; /* #FF6B6B - Coral for progress rings */
-    --accent-gold: 35 100% 64%; /* #FFB347 - Gold for awards */
-    --accent-lavender: 259 73% 68%; /* #A78BFA - Lavender for special states */
+    /* Sekundärfarben (Highlights & Akzente) */
+    --accent-coral: 200 70% 55%; /* #2E86C1 - Mittelblau (Charts/Details) */
+    --accent-gold: 45 100% 60%; /* #F1C40F - Gold-Gelb (Awards/Trophäen) */
+    --accent-lavender: 195 70% 65%; /* #5DADE2 - Hellblau (Monitore/Details) */
 
     /* Typography Colors - High Contrast */
-    --text-primary: 210 22% 18%; /* #2D3748 - Main text, dark anthracite */
-    --text-secondary: 210 15% 46%; /* #718096 - Secondary text, cool gray */
+    --text-primary: 210 25% 20%; /* #2C3E50 - Dark gray for main text */
+    --text-secondary: 210 15% 46%; /* #718096 - Secondary text */
     --text-muted: 210 15% 58%; /* #A0AEC0 - Muted text */
 
     /* Card System - Clean White Cards */
     --card: 0 0% 100%; /* Pure white cards */
-    --card-foreground: 210 22% 18%; /* Dark text on cards */
+    --card-foreground: 210 25% 20%; /* Dark text on cards */
     --card-border: 210 15% 88%; /* #E2E8F0 - Subtle borders */
 
     /* Interactive Elements */
     --muted: 210 15% 96%; /* #F7FAFC - Very light background for inputs */
     --muted-foreground: 210 15% 46%; /* Cool gray text on muted */
 
-    --accent: 175 70% 55%; /* Mint accent */
+    --accent: 175 70% 50%; /* #1ABC9C - Türkis/Aqua (Icons & Logos) */
     --accent-foreground: 0 0% 100%;
 
     --border: 210 15% 88%; /* Subtle borders */
     --input: 210 15% 96%; /* Light input backgrounds */
-    --ring: 195 100% 18%; /* Focus ring - deep teal */
+    --ring: 175 70% 35%; /* Focus ring - teal */
 
-    /* Activity Ring Colors - Vibrant but Elegant */
-    --activity-mint: 175 70% 55%; /* #36CFC9 - Operations */
-    --activity-coral: 0 79% 70%; /* #FF6B6B - Courses */
-    --activity-lavender: 259 73% 68%; /* #A78BFA - Mandatory */
-    --activity-amber: 35 100% 64%; /* #FFB347 - Awards */
+    /* Activity Ring Colors - Residents Palette */
+    --activity-mint: 175 70% 35%; /* #16A085 - Teal-Grün (Operations) */
+    --activity-coral: 200 70% 55%; /* #2E86C1 - Mittelblau (Courses) */
+    --activity-lavender: 195 70% 65%; /* #5DADE2 - Hellblau (Mandatory) */
+    --activity-amber: 45 100% 60%; /* #F1C40F - Gold-Gelb (Awards) */
 
     /* Status Colors */
-    --success: 155 55% 50%; /* Success green */
-    --warning: 35 100% 64%; /* Warning amber */
+    --success: 175 70% 35%; /* Success teal */
+    --warning: 45 100% 60%; /* Warning gold */
     --error: 0 72% 51%; /* Error red */
 
-    /* Elegant Gradients - Minimal Use */
-    --gradient-medical: linear-gradient(135deg, hsl(195, 100%, 18%), hsl(175, 70%, 55%));
+    /* Elegant Gradients - Residents Palette */
+    --gradient-medical: linear-gradient(135deg, hsl(175, 70%, 35%), hsl(200, 70%, 55%));
     --gradient-subtle: linear-gradient(180deg, hsl(0, 0%, 100%), hsl(210, 15%, 98%));
-    --gradient-progress: linear-gradient(90deg, hsl(175, 70%, 55%), hsl(195, 100%, 18%));
+    --gradient-progress: linear-gradient(90deg, hsl(175, 70%, 35%), hsl(200, 70%, 55%));
 
     /* Soft Shadows - Glass Effect */
     --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06);
@@ -76,40 +76,40 @@
     --radius-medical: 12px;
     --radius-progress: 16px;
 
-    /* Progress Colors */
-    --progress-complete: 155 55% 50%; /* Success green */
-    --progress-partial: 35 100% 64%; /* Warning amber */
-    --progress-pending: 210 15% 58%; /* Muted gray */
-    --swiss-gray: 210 15% 96%; /* Light gray background */
-    --medical-primary: 195 100% 18%; /* Same as primary */
+    /* Progress Colors - Residents Palette */
+    --progress-complete: 175 70% 35%; /* #16A085 - Teal-Grün (Success) */
+    --progress-partial: 45 100% 60%; /* #F1C40F - Gold-Gelb (Warning) */
+    --progress-pending: 210 15% 58%; /* #A0AEC0 - Muted gray */
+    --swiss-gray: 210 15% 96%; /* #F7FAFC - Light gray background */
+    --medical-primary: 175 70% 35%; /* #16A085 - Same as primary */
   }
 
   .dark {
-    --background: 210 22% 8%; /* Very dark background */
+    --background: 220 70% 8%; /* Very dark blue background */
     --foreground: 0 0% 98%;
 
-    --primary: 175 70% 55%; /* Mint as primary in dark */
-    --primary-foreground: 210 22% 8%;
-    --primary-hover: 175 70% 48%;
+    --primary: 175 70% 45%; /* Lighter teal in dark */
+    --primary-foreground: 220 70% 8%;
+    --primary-hover: 175 70% 40%;
 
-    --secondary: 195 100% 25%; /* Lighter teal in dark */
+    --secondary: 200 70% 35%; /* Lighter blue in dark */
     --secondary-foreground: 0 0% 98%;
-    --secondary-hover: 195 100% 20%;
+    --secondary-hover: 200 70% 30%;
 
     --text-primary: 0 0% 98%;
     --text-secondary: 210 15% 70%;
     --text-muted: 210 15% 55%;
 
-    --card: 210 22% 10%;
+    --card: 220 70% 10%;
     --card-foreground: 0 0% 98%;
-    --card-border: 210 22% 18%;
+    --card-border: 220 70% 18%;
 
-    --muted: 210 22% 12%;
+    --muted: 220 70% 12%;
     --muted-foreground: 210 15% 65%;
 
-    --border: 210 22% 18%;
-    --input: 210 22% 12%;
-    --ring: 175 70% 55%;
+    --border: 220 70% 18%;
+    --input: 220 70% 12%;
+    --ring: 175 70% 45%;
 
     --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.2);
     --shadow-card-hover: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);

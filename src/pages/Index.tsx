@@ -127,6 +127,31 @@ const Index = () => {
               </div>
             </section>
 
+            {/* Dashboard Preview Section */}
+            <section className="py-16 bg-gradient-to-br from-slate-50 to-slate-100">
+              <div className="container mx-auto px-4">
+                <div className="text-center mb-12">
+                  <h2 className="text-3xl font-bold text-card-foreground mb-4">
+                    Ihr persönliches Dashboard
+                  </h2>
+                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                    Verfolgen Sie Ihren Fortschritt mit unserem intuitiven Dashboard. 
+                    Alle wichtigen Metriken auf einen Blick.
+                  </p>
+                </div>
+                <div className="max-w-6xl mx-auto">
+                  <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                    <img
+                      src="/dashboard.png"
+                      alt="ResidentTrack Dashboard - Übersicht der chirurgischen Ausbildung"
+                      className="w-full h-auto object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5"></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
             {/* Course Timeline Example */}
             <section className="py-16 bg-gray-50">
               <div className="container mx-auto px-4">
@@ -146,7 +171,7 @@ const Index = () => {
             </section>
 
             {/* Awards & Recognition Section */}
-            <section className="py-16 bg-gradient-to-br from-amber-50 to-orange-50">
+            <section className="py-16 bg-gradient-to-br from-yellow-50 to-amber-50">
               <div className="container mx-auto px-4">
                 <div className="text-center mb-12">
                   <h2 className="text-3xl font-bold text-card-foreground mb-4">
@@ -194,7 +219,7 @@ const Index = () => {
             </section>
 
             {/* Course Excellence Section */}
-            <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-50">
+            <section className="py-16 bg-gradient-to-br from-blue-50 to-cyan-50">
               <div className="container mx-auto px-4">
                 <div className="text-center mb-12">
                   <h2 className="text-3xl font-bold text-card-foreground mb-4">
@@ -242,7 +267,7 @@ const Index = () => {
             </section>
 
             {/* Training Excellence Section */}
-            <section className="py-16 bg-gradient-to-br from-green-50 to-emerald-50">
+            <section className="py-16 bg-gradient-to-br from-teal-50 to-cyan-50">
               <div className="container mx-auto px-4">
                 <div className="text-center mb-12">
                   <h2 className="text-3xl font-bold text-card-foreground mb-4">
