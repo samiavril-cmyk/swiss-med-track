@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { SupabaseAuth } from '@/components/SupabaseAuth';
+import { SimpleAuth } from '@/components/SimpleAuth';
 
 export default function AuthNew() {
   const navigate = useNavigate();
@@ -17,5 +17,5 @@ export default function AuthNew() {
     checkUser();
   }, [navigate]);
 
-  return <SupabaseAuth />;
+  return <SimpleAuth />;
 }
