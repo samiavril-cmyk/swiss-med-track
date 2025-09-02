@@ -63,6 +63,88 @@ const Index = () => {
             <HeroSection />
             <InteractiveProgressDemo />
             
+            {/* Residents Community Section */}
+            <section className="py-16 bg-gradient-to-br from-slate-50 to-slate-100">
+              <div className="container mx-auto px-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                  {/* Text Content */}
+                  <div className="space-y-6">
+                    <div>
+                      <h2 className="text-3xl font-bold text-card-foreground mb-4">
+                        Werden Sie Teil unserer
+                        <span className="bg-gradient-medical bg-clip-text text-transparent"> Resident-Community</span>
+                      </h2>
+                      <p className="text-lg text-muted-foreground mb-6">
+                        Schließen Sie sich über 500 Assistenzärzt:innen an, die bereits ihre chirurgische 
+                        Ausbildung mit ResidentTrack digital verwalten und dokumentieren.
+                      </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                        <div className="text-2xl font-bold text-primary mb-1">500+</div>
+                        <div className="text-sm text-muted-foreground">Aktive Residents</div>
+                      </div>
+                      <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                        <div className="text-2xl font-bold text-primary mb-1">15+</div>
+                        <div className="text-sm text-muted-foreground">Krankenhäuser</div>
+                      </div>
+                      <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                        <div className="text-2xl font-bold text-primary mb-1">1000+</div>
+                        <div className="text-sm text-muted-foreground">Dokumentierte Prozeduren</div>
+                      </div>
+                      <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                        <div className="text-2xl font-bold text-primary mb-1">95%</div>
+                        <div className="text-sm text-muted-foreground">Zufriedenheitsrate</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <button className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+                        Jetzt beitreten
+                      </button>
+                      <button className="border border-primary text-primary px-6 py-3 rounded-lg font-medium hover:bg-primary/10 transition-colors">
+                        Mehr erfahren
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Image Content */}
+                  <div className="relative">
+                    <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                      <img 
+                        src="/residents-image-2.png" 
+                        alt="Resident Community - Chirurgische Ausbildung"
+                        className="w-full h-auto object-cover"
+                        style={{ minHeight: '400px' }}
+                      />
+                      {/* Overlay with gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                      
+                      {/* Floating stats overlay */}
+                      <div className="absolute bottom-6 left-6 right-6">
+                        <div className="bg-white/95 backdrop-blur-sm rounded-lg p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-semibold text-gray-900">Universitätsspital Zürich</h4>
+                              <p className="text-sm text-gray-600">Führendes Ausbildungszentrum</p>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-primary">120+</div>
+                              <div className="text-xs text-gray-600">Residents</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Background decoration */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl -z-10 transform rotate-3 scale-105"></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
             {/* Course Timeline Example */}
             <section className="py-16 bg-gray-50">
               <div className="container mx-auto px-4">
