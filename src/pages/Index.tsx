@@ -113,7 +113,7 @@ const Index = () => {
                   <div className="relative">
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                       <img 
-                        src="/residents-image-2.png" 
+                        src="https://samiavril-cmyk.github.io/swiss-med-track/residents-image-2.png" 
                         alt="Resident Community - Chirurgische Ausbildung"
                         className="w-full h-auto object-cover"
                         style={{ minHeight: '500px' }}
@@ -142,7 +142,7 @@ const Index = () => {
                 <div className="max-w-6xl mx-auto">
                   <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                     <img
-                      src="/dashboard.png"
+                      src="https://samiavril-cmyk.github.io/swiss-med-track/dashboard.png"
                       alt="ResidentTrack Dashboard - Übersicht der chirurgischen Ausbildung"
                       className="w-full h-auto object-cover"
                     />
@@ -206,7 +206,7 @@ const Index = () => {
                   <div className="relative">
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                       <img
-                        src="/awardsresidents2-image.png"
+                        src="https://samiavril-cmyk.github.io/swiss-med-track/awardsresidents2-image.png"
                         alt="Awards & Recognition - Chirurgische Ausbildung"
                         className="w-full h-auto object-cover"
                         style={{ minHeight: '400px' }}
@@ -233,7 +233,7 @@ const Index = () => {
                   <div className="relative order-2 lg:order-1">
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                       <img
-                        src="/courseresidentsimage.png"
+                        src="https://samiavril-cmyk.github.io/swiss-med-track/courseresidentsimage.png"
                         alt="Course Excellence - Chirurgische Ausbildung"
                         className="w-full h-auto object-cover"
                         style={{ minHeight: '400px' }}
@@ -302,7 +302,7 @@ const Index = () => {
                   <div className="relative">
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                       <img
-                        src="/trainingimage.png"
+                        src="https://samiavril-cmyk.github.io/swiss-med-track/trainingimage.png"
                         alt="Training Excellence - Chirurgische Ausbildung"
                         className="w-full h-auto object-cover"
                         style={{ minHeight: '400px' }}

@@ -20,7 +20,7 @@ export const Header: React.FC = () => {
         <Link to="/" className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-medical overflow-hidden">
             <img 
-              src="/logo.png" 
+              src="https://samiavril-cmyk.github.io/swiss-med-track/logo.png" 
               alt="ResidentTrack Logo" 
               className="w-full h-full object-contain"
             />
