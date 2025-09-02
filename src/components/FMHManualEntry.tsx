@@ -19,7 +19,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuthSimple';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 interface DbProcedure {

@@ -12,7 +12,7 @@ import { FMHDashboard } from "./pages/FMHDashboard";
 import { AdminCMS } from "./pages/AdminCMS";
 import AuthNew from "./pages/AuthNew";
 import NotFound from "./pages/NotFound";
-import { AuthProvider } from "./hooks/useAuthSimple";
+import { AuthProvider } from "./hooks/useAuth";
 
 const queryClient = new QueryClient();
 

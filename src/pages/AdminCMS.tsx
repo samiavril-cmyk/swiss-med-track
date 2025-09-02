@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Header } from '@/components/HeaderSimple';
-import { useAuth } from '@/hooks/useAuthSimple';
+import { Header } from '@/components/Header';
+import { useAuth } from '@/hooks/useAuth';
 import { ImageUpload } from '@/components/ImageUpload';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

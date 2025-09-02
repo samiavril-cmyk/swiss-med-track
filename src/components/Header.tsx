@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { GraduationCap, LogOut, Settings, User } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuthSimple';
+import { useAuth } from '@/hooks/useAuth';
 
 export const Header: React.FC = () => {
   const { user, signOut, isAdmin, userProfile } = useAuth();

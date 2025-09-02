@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Header } from '@/components/HeaderSimple';
+import { Header } from '@/components/Header';
 import { ActivityRing } from '@/components/ActivityRing';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

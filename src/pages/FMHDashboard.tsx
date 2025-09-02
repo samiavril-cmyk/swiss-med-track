@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Header } from '@/components/HeaderSimple';
-import { useAuth } from '@/hooks/useAuthSimple';
+import { Header } from '@/components/Header';
+import { useAuth } from '@/hooks/useAuth';
 import { ActivityRing } from '@/components/ActivityRing';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
