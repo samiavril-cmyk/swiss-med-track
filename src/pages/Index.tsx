@@ -109,33 +109,15 @@ const Index = () => {
                     </div>
                   </div>
                   
-                  {/* Image Content */}
+                  {/* Image Content - Clean Design */}
                   <div className="relative">
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                       <img 
                         src="/residents-image-2.png" 
                         alt="Resident Community - Chirurgische Ausbildung"
                         className="w-full h-auto object-cover"
-                        style={{ minHeight: '400px' }}
+                        style={{ minHeight: '500px' }}
                       />
-                      {/* Overlay with gradient */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                      
-                      {/* Floating stats overlay */}
-                      <div className="absolute bottom-6 left-6 right-6">
-                        <div className="bg-white/95 backdrop-blur-sm rounded-lg p-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-semibold text-gray-900">Universitätsspital Zürich</h4>
-                              <p className="text-sm text-gray-600">Führendes Ausbildungszentrum</p>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-lg font-bold text-primary">120+</div>
-                              <div className="text-xs text-gray-600">Residents</div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
                     </div>
                     
                     {/* Background decoration */}
