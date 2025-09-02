@@ -10,9 +10,9 @@ import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
 import { FMHDashboard } from "./pages/FMHDashboard";
 import { AdminCMS } from "./pages/AdminCMS";
-import Auth from "./pages/Auth";
+import AuthNew from "./pages/AuthNew";
 import NotFound from "./pages/NotFound";
-import { AuthProvider } from "./hooks/useAuth";
+import { AuthProviderSimple } from "./hooks/useAuthSimple";
 
 const queryClient = new QueryClient();
 
@@ -34,7 +34,7 @@ const SPARouter = () => {
   return (
     <Routes>
       <Route path="/" element={<Index />} />
-      <Route path="/auth" element={<Auth />} />
+      <Route path="/auth" element={<AuthNew />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/courses" element={<Courses />} />
       <Route path="/courses/:id" element={<CourseDetail />} />
@@ -49,13 +49,13 @@ const SPARouter = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
+    <AuthProviderSimple>
       <Toaster />
       <Sonner />
       <BrowserRouter basename="/swiss-med-track">
         <SPARouter />
       </BrowserRouter>
-    </AuthProvider>
+    </AuthProviderSimple>
   </QueryClientProvider>
 );
 

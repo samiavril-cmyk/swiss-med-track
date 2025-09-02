@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AuthenticatedHeader } from '@/components/Header';
+import { HeaderSimple } from '@/components/HeaderSimple';
 import { ActivityRing } from '@/components/ActivityRing';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -131,7 +131,7 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-              <AuthenticatedHeader />
+              <HeaderSimple />
       
       <main className="container mx-auto px-4 py-8">
         {/* Header Section */}
