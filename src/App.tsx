@@ -10,6 +10,7 @@ import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
 import { FMHDashboard } from "./pages/FMHDashboard";
 import { FMHDashboardTest } from "./pages/FMHDashboardTest";
+import { AuthTest } from "./pages/AuthTest";
 import { AdminCMS } from "./pages/AdminCMS";
 import Publications from "./pages/Publications";
 import AuthNew from "./pages/AuthNew";
@@ -36,7 +37,7 @@ const SPARouter = () => {
   return (
     <Routes>
       <Route path="/" element={<Index />} />
-      <Route path="/auth" element={<AuthNew />} />
+      <Route path="/auth" element={<AuthTest />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/courses" element={<Courses />} />
       <Route path="/courses/:id" element={<CourseDetail />} />
@@ -52,13 +53,11 @@ const SPARouter = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter basename="/swiss-med-track">
-        <SPARouter />
-      </BrowserRouter>
-    </AuthProvider>
+    <Toaster />
+    <Sonner />
+    <BrowserRouter basename="/swiss-med-track">
+      <SPARouter />
+    </BrowserRouter>
   </QueryClientProvider>
 );
 
