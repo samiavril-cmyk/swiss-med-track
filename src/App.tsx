@@ -9,6 +9,7 @@ import Profile from "./pages/Profile";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
 import { FMHDashboard } from "./pages/FMHDashboard";
+import { FMHDashboardTest } from "./pages/FMHDashboardTest";
 import { AdminCMS } from "./pages/AdminCMS";
 import Publications from "./pages/Publications";
 import AuthNew from "./pages/AuthNew";
@@ -41,7 +42,7 @@ const SPARouter = () => {
       <Route path="/courses/:id" element={<CourseDetail />} />
       <Route path="/publications" element={<Publications />} />
       <Route path="/profile/:handle" element={<Profile />} />
-      <Route path="/fmh" element={<FMHDashboard />} />
+      <Route path="/fmh" element={<FMHDashboardTest />} />
       <Route path="/admin" element={<AdminCMS />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />

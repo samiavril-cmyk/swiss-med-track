@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
-import { InteractiveProgressDemo } from './InteractiveProgressDemo';
+
 import { ArrowRight, CheckCircle, Users, BookOpen, Award } from 'lucide-react';
 
 const features = [
@@ -235,7 +235,7 @@ export const HeroSection: React.FC = () => {
             </p>
           </div>
           
-          <InteractiveProgressDemo />
+
         </div>
       </div>
       

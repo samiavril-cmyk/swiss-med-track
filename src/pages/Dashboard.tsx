@@ -96,7 +96,7 @@ export const Dashboard: React.FC = () => {
     },
     {
       id: 'mandatory',
-      label: 'Pflichtkurse',
+      label: 'Examen & Prüfungen',
       progress: (mockActivityData.mandatoryCourses.completed / mockActivityData.mandatoryCourses.target) * 100,
       variant: 'lavender' as const,
       icon: GraduationCap,
