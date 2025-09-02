@@ -81,10 +81,52 @@ export const ActivityDrillDown: React.FC<ActivityDrillDownProps> = ({
         </Card>
       </div>
 
-      {/* Show vertical timeline for mandatory courses */}
-      {activityId === 'mandatory' && (
-        <VerticalCourseTimeline courses={mockCourses2024} year={2024} />
-      )}
+      <div className="space-y-4">
+        <h4 className="font-semibold text-card-foreground">Jahresverlauf</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {['2021', '2022', '2023', '2024'].map((year, index) => (
+            <div key={year} className="flex items-center justify-between p-4 border border-card-border rounded-medical">
+              <span className="font-medium">{year}</span>
+              <div className="flex items-center gap-3">
+                <ProgressBar 
+                  progress={Math.min((index + 1) * 25, 100)} 
+                  variant="compact" 
+                  className="w-24"
+                />
+                <Badge variant="outline">{(index + 1) * 7} Kurse</Badge>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderMandatoryCoursesContent = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="p-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-card-foreground">{data.completed}</p>
+            <p className="text-sm text-muted-foreground">Abgeschlossen</p>
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-card-foreground">{data.target - data.completed}</p>
+            <p className="text-sm text-muted-foreground">Verbleibend</p>
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-card-foreground">{data.points}</p>
+            <p className="text-sm text-muted-foreground">Punkte</p>
+          </div>
+        </Card>
+      </div>
+
+      {/* Show vertical timeline ONLY for mandatory courses */}
+      <VerticalCourseTimeline courses={mockCourses2024} year={2024} />
 
       <div className="space-y-4">
         <h4 className="font-semibold text-card-foreground">Jahresverlauf</h4>
@@ -263,8 +305,9 @@ export const ActivityDrillDown: React.FC<ActivityDrillDownProps> = ({
   const renderContent = () => {
     switch (activityId) {
       case 'courses':
-      case 'mandatory':
         return renderCoursesContent();
+      case 'mandatory':
+        return renderMandatoryCoursesContent();
       case 'procedures':
         return renderProceduresContent();
       case 'publications':
