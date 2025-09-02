@@ -65,9 +65,6 @@ export const Header: React.FC = () => {
               <Link to="/contact" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
                 Kontakt
               </Link>
-              <Link to="/auth" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
-                Anmelden
-              </Link>
             </>
           )}
         </nav>
@@ -87,7 +84,20 @@ export const Header: React.FC = () => {
                 Abmelden
               </Button>
             </div>
-          ) : null}
+          ) : (
+            <>
+              <Link to="/auth">
+                <Button variant="ghost" size="sm" className="hidden md:inline-flex">
+                  Anmelden
+                </Button>
+              </Link>
+              <Link to="/auth">
+                <Button variant="medical" size="sm">
+                  Kostenlos testen
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

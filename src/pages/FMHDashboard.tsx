@@ -54,6 +54,7 @@ export const FMHDashboard: React.FC = () => {
   const [modules, setModules] = useState<FMHModule[]>([]);
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [timeoutReached, setTimeoutReached] = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [showPDFUpload, setShowPDFUpload] = useState(false);
   const [showManualEntry, setShowManualEntry] = useState(false);
@@ -68,6 +69,8 @@ export const FMHDashboard: React.FC = () => {
       return;
     }
     loadModulesAndProgress();
+    const t = setTimeout(() => setTimeoutReached(true), 6000);
+    return () => clearTimeout(t);
   }, [user, authLoading, navigate]);
 
   const loadModulesAndProgress = async () => {
@@ -75,13 +78,14 @@ export const FMHDashboard: React.FC = () => {
       setLoading(true);
       
       // Get user profile for PGY level
-      const { data: { user } } = await supabase.auth.getUser();
-      console.log('🔍 FMHDashboard - Loading data for user ID:', user?.id);
-      if (user) {
+      const { data: { user: authUser }, error: getUserError } = await supabase.auth.getUser();
+      if (getUserError) console.error('getUser error', getUserError);
+      console.log('🔍 FMHDashboard - Loading data for user ID:', authUser?.id);
+      if (authUser) {
         const { data: profile } = await supabase
           .from('profiles')
           .select('pgy_level')
-          .eq('user_id', user.id)
+          .eq('user_id', authUser.id)
           .single();
         
         if (profile?.pgy_level) {
@@ -101,11 +105,11 @@ export const FMHDashboard: React.FC = () => {
       const modulesWithProgress: FMHModule[] = [];
 
       for (const module of moduleData || []) {
-        if (user) {
-          console.log('📊 FMHDashboard - Getting progress for module:', module.key, 'user:', user.id);
+        if (authUser) {
+          console.log('📊 FMHDashboard - Getting progress for module:', module.key, 'user:', authUser.id);
           const { data: progressData } = await supabase
             .rpc('get_module_progress', {
-              user_id_param: user.id,
+              user_id_param: authUser.id,
               module_key: module.key
             });
 
