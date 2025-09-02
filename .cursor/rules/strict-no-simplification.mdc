@@ -1,0 +1,29 @@
+# Strict Rule: Keine Vereinfachungen / Funktionsreduktionen im Projekt
+
+## Zweck
+Diese Regel stellt sicher, dass zu keinem Zeitpunkt vereinfachte Platzhalter-Lösungen, Minimal-Apps oder funktional beschnittene Varianten in den Hauptentwicklungszweig oder in das ausgelieferte Produkt gelangen. Debugging und Isolationsschritte müssen erfolgen, ohne Funktionen zu entfernen oder zu degradieren.
+
+## Verbindliche Vorgaben
+- Niemals produktive Komponenten durch vereinfachte Varianten ersetzen (z. B. `AppMinimal`, Dummy-Auth, entfernte Supabase-/FMH-/Courses-Funktionalität).
+- Niemals Features temporär deaktivieren oder ausbauen, um einen Fehler zu „umgehen“.
+- Authentifizierung (Supabase), FMH-Tracking, Courses, Dashboard, Routing und UI-Komponenten müssen jederzeit vollständig erhalten bleiben.
+- Keine „vereinfachten“ Builds oder das Entfernen komplexer Imports als Debug-Strategie im Hauptzweig (main) oder in Deployments.
+
+## Erlaubtes Debugging-Vorgehen
+- Isolations-/Debug-Code ausschließlich in separaten Feature-Branches oder klar gekennzeichneten Debug-Routen (z. B. `/debug/*`) einführen.
+- Feature-Flags oder Guards verwenden, die Standardverhalten unverändert lassen.
+- Detailliertes Logging, ErrorBoundaries, Netzwerk-/Konsolen-Logs aktivieren.
+- Reproduzierbare Testfälle erstellen, ohne produktive Routen zu verändern.
+- Temporäre Debug-Hilfen sind vor Merge/Deploy zu entfernen oder deaktiviert per Flag (Default: aus).
+
+## Zustimmungserfordernis
+- Jede Form von Funktionsdeaktivierung, Stubbing oder Placeholder-Ersatz erfordert EXPLIZITE, schriftliche Zustimmung des Owners.
+- Ohne Zustimmung: Abbruch der Änderung, Rückkehr zum ursprünglichen, vollständigen Zustand.
+
+## Durchsetzung
+- PR-Checks prüfen auf: Minimal-/Dummy-Komponenten, Entfernen kritischer Routen/Provider, Wegfall von Auth/FMHDashboard/Courses.
+- Verstöße müssen sofort rückgängig gemacht werden und dürfen nicht deployt werden.
+
+## Zielbild
+- Fehler werden „in place“ behoben, ohne die App zu simplifizieren.
+- Stabilität und Vollständigkeit haben Priorität – Debugging ohne Funktionsverlust.
