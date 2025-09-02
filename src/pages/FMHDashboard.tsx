@@ -61,13 +61,13 @@ export const FMHDashboard: React.FC = () => {
   const [userPgyLevel, setUserPgyLevel] = useState<number>(4);
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    // Warte bis Auth-Status geklärt ist, vermeide Redirect-Loops
+    if (authLoading) return;
+    if (!user) {
       navigate('/auth');
       return;
     }
-    if (user) {
-      loadModulesAndProgress();
-    }
+    loadModulesAndProgress();
   }, [user, authLoading, navigate]);
 
   const loadModulesAndProgress = async () => {

@@ -40,33 +40,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [userProfile, setUserProfile] = useState<any>(null);
 
   useEffect(() => {
-    // Set up auth state listener
+    // Set up auth state listener with detailed logging
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state change:', event, session?.user?.id);
+        console.debug('[Auth] state change:', event, 'user:', session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         if (session?.user) {
+          console.debug('[Auth] loading user profile...');
           await loadUserProfile(session.user.id);
         } else {
           setUserProfile(null);
           setIsAdmin(false);
         }
-        
+
         setLoading(false);
       }
     );
 
     // Check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.debug('[Auth] initial session:', Boolean(session), 'user:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
-      
+
       if (session?.user) {
         await loadUserProfile(session.user.id);
       }
-      
+
+      setLoading(false);
+    }).catch((error) => {
+      console.error('[Auth] Error getting initial session:', error);
       setLoading(false);
     });
 

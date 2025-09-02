@@ -168,6 +168,17 @@ const Features = () => {
         {/* Main Features */}
         <section className="py-20">
           <div className="container mx-auto px-4">
+            {/* Hero Image */}
+            <div className="max-w-6xl mx-auto mb-12">
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                <img
+                  src="https://samiavril-cmyk.github.io/swiss-med-track/trainingimage.png"
+                  alt="Features Hero"
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+            </div>
+
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold text-card-foreground mb-4">
                 Kernfunktionen
@@ -210,6 +221,17 @@ const Features = () => {
         {/* Technical Features */}
         <section className="py-20 bg-muted/30">
           <div className="container mx-auto px-4">
+            {/* Secondary Image */}
+            <div className="max-w-6xl mx-auto mb-12">
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                <img
+                  src="https://samiavril-cmyk.github.io/swiss-med-track/courseresidentsimage.png"
+                  alt="Kurse und Fortbildungen"
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+            </div>
+
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold text-card-foreground mb-4">
                 Technische Highlights

@@ -359,11 +359,14 @@ export const ActivityDrillDown: React.FC<ActivityDrillDownProps> = ({
     }
   };
 
+  const safeCompleted = typeof (data as any)?.completed === 'number' ? (data as any).completed : 0;
+  const safeTarget = typeof (data as any)?.target === 'number' && (data as any).target > 0 ? (data as any).target : 1;
+  const safeCount = typeof (data as any)?.count === 'number' ? (data as any).count : 0;
   const progress = activityId === 'procedures' 
-    ? (data.completed / data.target) * 100
+    ? (safeCompleted / safeTarget) * 100
     : activityId === 'courses' || activityId === 'mandatory'
-    ? (data.completed / data.target) * 100
-    : Math.min((data.count / 5) * 100, 100);
+    ? (safeCompleted / safeTarget) * 100
+    : Math.min((safeCount / 5) * 100, 100);
 
   return (
     <Card className="medical-card p-6 mb-8 animate-fade-in">
