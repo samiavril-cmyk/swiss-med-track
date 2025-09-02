@@ -19,7 +19,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthSimple } from '@/hooks/useAuthSimple';
 import { toast } from 'sonner';
 
 interface DbProcedure {
@@ -67,7 +67,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
   onOpenChange,
   onSuccess
 }) => {
-  const { user } = useAuth();
+  const { user } = useAuthSimple();
   const [modules, setModules] = useState<Record<string, ModuleData>>({});
   const [savedModules, setSavedModules] = useState<Record<string, ModuleData>>({});
   const [currentDate, setCurrentDate] = useState(new Date().toLocaleDateString('de-CH'));

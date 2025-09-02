@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Trash2, Edit, Save, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthSimple } from '@/hooks/useAuthSimple';
 import { toast } from 'sonner';
 
 interface ProcedureLog {
@@ -36,7 +36,7 @@ export const FMHCorrections: React.FC<FMHCorrectionsProps> = ({
   onOpenChange,
   onSuccess
 }) => {
-  const { user } = useAuth();
+  const { user } = useAuthSimple();
   const [logs, setLogs] = useState<ProcedureLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingLog, setEditingLog] = useState<string | null>(null);
