@@ -113,7 +113,7 @@ const Index = () => {
                   <div className="relative">
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                       <img 
-                        src="/residents-image-2.png" 
+                        src="/images/residents-image-2.png" 
                         alt="Resident Community - Chirurgische Ausbildung"
                         className="w-full h-auto object-cover"
                         style={{ minHeight: '500px' }}
@@ -181,7 +181,7 @@ const Index = () => {
                   <div className="relative">
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                       <img
-                        src="/awardsresidents2-image.png"
+                        src="/images/awardsresidents2-image.png"
                         alt="Awards & Recognition - Chirurgische Ausbildung"
                         className="w-full h-auto object-cover"
                         style={{ minHeight: '400px' }}
@@ -208,7 +208,7 @@ const Index = () => {
                   <div className="relative order-2 lg:order-1">
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                       <img
-                        src="/courseresidentsimage.png"
+                        src="/images/courseresidentsimage.png"
                         alt="Course Excellence - Chirurgische Ausbildung"
                         className="w-full h-auto object-cover"
                         style={{ minHeight: '400px' }}
@@ -277,7 +277,7 @@ const Index = () => {
                   <div className="relative">
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                       <img
-                        src="/trainingimage.png"
+                        src="/images/trainingimage.png"
                         alt="Training Excellence - Chirurgische Ausbildung"
                         className="w-full h-auto object-cover"
                         style={{ minHeight: '400px' }}
