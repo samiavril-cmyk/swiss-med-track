@@ -86,136 +86,118 @@ export const HeroSection: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Column - Hero Image */}
+            {/* Right Column - Modern Hero Visual */}
             <div className="relative">
-              <div className="relative z-10">
-                {/* Main Hero Image - FMH Training Timeline */}
-                <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-slate-50 to-slate-100 p-8">
-                  {/* Timeline Background */}
-                  <div className="relative h-96">
-                    {/* Central Timeline Line */}
-                    <div className="absolute left-8 top-0 bottom-0 w-1 bg-gradient-to-b from-teal-200 via-teal-400 to-teal-200 rounded-full"></div>
-                    
-                    {/* Timeline Nodes and Content */}
-                    <div className="space-y-8">
-                      {/* PGY-1 */}
-                      <div className="relative flex items-start gap-6">
-                        <div className="relative z-10 flex-shrink-0">
-                          <div className="w-4 h-4 rounded-full border-2 border-white shadow-lg bg-green-500">
-                            <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500"></div>
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-yellow-500">⭐</span>
-                              <h4 className="font-bold text-gray-900 text-sm">PGY-1: Basis Notfallchirurgie</h4>
-                            </div>
-                            <p className="text-xs text-gray-600">85 Prozeduren erforderlich</p>
-                          </div>
-                        </div>
-                      </div>
+              {/* Main Visual Container */}
+              <div className="relative">
+                {/* Background with subtle pattern */}
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-100 rounded-3xl"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.1),transparent_50%)] rounded-3xl"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(16,185,129,0.1),transparent_50%)] rounded-3xl"></div>
+                
+                {/* Main Content */}
+                <div className="relative z-10 p-8">
+                  {/* Header */}
+                  <div className="text-center mb-8">
+                    <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm border border-white/20 mb-4">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm font-medium text-slate-700">Live Dashboard</span>
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-800 mb-2">FMH Training Progress</h3>
+                    <p className="text-sm text-slate-600">Chirurgische Ausbildung 2024</p>
+                  </div>
 
-                      {/* PGY-2 */}
-                      <div className="relative flex items-start gap-6">
-                        <div className="relative z-10 flex-shrink-0">
-                          <div className="w-4 h-4 rounded-full border-2 border-white shadow-lg bg-blue-500">
-                            <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500"></div>
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-yellow-500">⭐</span>
-                              <h4 className="font-bold text-gray-900 text-sm">PGY-2: Basis Allgemeinchirurgie</h4>
-                            </div>
-                            <p className="text-xs text-gray-600">260 Prozeduren erforderlich</p>
-                          </div>
+                  {/* Progress Rings */}
+                  <div className="grid grid-cols-2 gap-6 mb-8">
+                    {/* PGY-1 Progress */}
+                    <div className="text-center">
+                      <div className="relative w-20 h-20 mx-auto mb-3">
+                        <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 36 36">
+                          <path
+                            className="text-slate-200"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                            fill="none"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          />
+                          <path
+                            className="text-green-500"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            fill="none"
+                            strokeDasharray="85, 100"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-sm font-bold text-slate-700">85%</span>
                         </div>
                       </div>
+                      <div className="text-xs font-medium text-slate-700">PGY-1</div>
+                      <div className="text-xs text-slate-500">Notfall</div>
+                    </div>
 
-                      {/* PGY-3 */}
-                      <div className="relative flex items-start gap-6">
-                        <div className="relative z-10 flex-shrink-0">
-                          <div className="w-4 h-4 rounded-full border-2 border-white shadow-lg bg-purple-500">
-                            <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-blue-500"></div>
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
-                            <h4 className="font-medium text-gray-900 text-sm">PGY-3: Viszeralchirurgie</h4>
-                            <p className="text-xs text-gray-600">165 Prozeduren erforderlich</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* PGY-4 */}
-                      <div className="relative flex items-start gap-6">
-                        <div className="relative z-10 flex-shrink-0">
-                          <div className="w-4 h-4 rounded-full border-2 border-white shadow-lg bg-orange-500">
-                            <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-blue-500"></div>
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
-                            <h4 className="font-medium text-gray-900 text-sm">PGY-4: Traumatologie</h4>
-                            <p className="text-xs text-gray-600">165 Prozeduren erforderlich</p>
-                          </div>
+                    {/* PGY-2 Progress */}
+                    <div className="text-center">
+                      <div className="relative w-20 h-20 mx-auto mb-3">
+                        <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 36 36">
+                          <path
+                            className="text-slate-200"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                            fill="none"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          />
+                          <path
+                            className="text-blue-500"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            fill="none"
+                            strokeDasharray="60, 100"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-sm font-bold text-slate-700">60%</span>
                         </div>
                       </div>
-
-                      {/* PGY-5 */}
-                      <div className="relative flex items-start gap-6">
-                        <div className="relative z-10 flex-shrink-0">
-                          <div className="w-4 h-4 rounded-full border-2 border-white shadow-lg bg-red-500">
-                            <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-blue-500"></div>
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
-                            <h4 className="font-medium text-gray-900 text-sm">PGY-5: Kombination</h4>
-                            <p className="text-xs text-gray-600">165 Prozeduren erforderlich</p>
-                          </div>
-                        </div>
-                      </div>
+                      <div className="text-xs font-medium text-slate-700">PGY-2</div>
+                      <div className="text-xs text-slate-500">Allgemein</div>
                     </div>
                   </div>
 
-                  {/* Timeline Title */}
-                  <div className="absolute top-4 left-4">
-                    <h3 className="text-lg font-bold text-gray-800">FMH Training Timeline</h3>
-                    <p className="text-xs text-gray-600">Chirurgische Ausbildung 2024</p>
-                  </div>
-                </div>
-
-                {/* Floating Cards */}
-                <div className="absolute -top-4 -left-4 bg-white rounded-lg shadow-lg p-4 border">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                      <CheckCircle className="w-4 h-4 text-green-600" />
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                      <div className="text-lg font-bold text-slate-800">345</div>
+                      <div className="text-xs text-slate-600">Prozeduren</div>
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold">85 Prozeduren</p>
-                      <p className="text-xs text-muted-foreground">Basis Notfall</p>
+                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                      <div className="text-lg font-bold text-slate-800">12</div>
+                      <div className="text-xs text-slate-600">Kurse</div>
+                    </div>
+                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                      <div className="text-lg font-bold text-slate-800">95%</div>
+                      <div className="text-xs text-slate-600">Fortschritt</div>
+                    </div>
+                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                      <div className="text-lg font-bold text-slate-800">2.5</div>
+                      <div className="text-xs text-slate-600">Jahre</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="absolute -bottom-4 -right-4 bg-white rounded-lg shadow-lg p-4 border">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Award className="w-4 h-4 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold">260 Prozeduren</p>
-                      <p className="text-xs text-muted-foreground">Basis Allgemein</p>
-                    </div>
-                  </div>
+                {/* Floating Elements */}
+                <div className="absolute -top-2 -left-2 w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg flex items-center justify-center">
+                  <CheckCircle className="w-8 h-8 text-white" />
+                </div>
+                
+                <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg flex items-center justify-center">
+                  <Award className="w-6 h-6 text-white" />
                 </div>
               </div>
-
-              {/* Background Decoration */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl -z-10 transform rotate-3 scale-105"></div>
             </div>
           </div>
         </div>
