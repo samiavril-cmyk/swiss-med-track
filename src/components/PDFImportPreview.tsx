@@ -117,7 +117,7 @@ export const PDFImportPreview: React.FC<PDFImportPreviewProps> = ({
           for (let i = 0; i < proc.responsible; i++) {
             procedureLogs.push({
               ...baseLog,
-              role_in_surgery: 'responsible',
+              role_in_surgery: 'primary',
               notes: `${baseLog.notes} - Verantwortlich ${i + 1}/${proc.responsible}`
             });
           }

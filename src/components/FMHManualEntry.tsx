@@ -222,11 +222,11 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
           procedureCounts[log.procedure_id] = { verantwortlich: 0, instruierend: 0, assistent: 0 };
         }
         
-        if (log.role_in_surgery === 'responsible') {
+        if (log.role_in_surgery === 'primary' || log.role_in_surgery === 'responsible') {
           procedureCounts[log.procedure_id].verantwortlich++;
         } else if (log.role_in_surgery === 'instructing') {
           procedureCounts[log.procedure_id].instruierend++;
-        } else if (log.role_in_surgery === 'assistant') {
+        } else if (log.role_in_surgery === 'assistant' || log.role_in_surgery === 'assist') {
           procedureCounts[log.procedure_id].assistent++;
         }
       });
@@ -392,7 +392,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
               procedureLogsToInsert.push({
                 user_id: user.id,
                 procedure_id: procedureId,
-                role_in_surgery: 'responsible',
+                role_in_surgery: 'primary',
                 performed_date: new Date().toISOString().split('T')[0],
                 notes: `Manuelle Eingabe - ${moduleData.title}`
               });
@@ -431,7 +431,7 @@ export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
               .select('id')
               .eq('user_id', user.id)
               .eq('procedure_id', procedureId)
-              .eq('role_in_surgery', 'responsible')
+              .in('role_in_surgery', ['primary', 'responsible'])
               .order('created_at', { ascending: false })
               .limit(Math.abs(diffVerantwortlich));
             

@@ -42,7 +42,7 @@ interface ProcedureCategory {
 interface ProcedureLog {
   id: string;
   procedure_id: string;
-  role_in_surgery: 'primary' | 'instructing' | 'assist';
+  role_in_surgery: 'primary' | 'instructing' | 'assistant';
   count: number;
 }
 
@@ -138,7 +138,7 @@ export const FMHProcedureTracking: React.FC = () => {
         
         const responsible = procedureLogs.filter(log => log.role_in_surgery === 'primary').length;
         const instructing = procedureLogs.filter(log => log.role_in_surgery === 'instructing').length;
-        const assistant = procedureLogs.filter(log => log.role_in_surgery === 'assist').length;
+        const assistant = procedureLogs.filter(log => log.role_in_surgery === 'assistant').length;
         
         const total = responsible + instructing + assistant;
         const required = procedure.min_required_by_pgy[`pgy${pgyLevel}`] || 0;
@@ -169,7 +169,7 @@ export const FMHProcedureTracking: React.FC = () => {
     }
   };
 
-  const updateProcedureCount = async (procedureId: string, role: 'primary' | 'instructing' | 'assist', increment: boolean) => {
+  const updateProcedureCount = async (procedureId: string, role: 'primary' | 'instructing' | 'assistant', increment: boolean) => {
     if (!user) return;
 
     try {
@@ -413,7 +413,7 @@ export const FMHProcedureTracking: React.FC = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => updateProcedureCount(progress.procedure.id, 'assist', false)}
+                          onClick={() => updateProcedureCount(progress.procedure.id, 'assistant', false)}
                           disabled={saving || progress.assistant === 0}
                         >
                           <Minus className="w-3 h-3" />
@@ -422,7 +422,7 @@ export const FMHProcedureTracking: React.FC = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => updateProcedureCount(progress.procedure.id, 'assist', true)}
+                          onClick={() => updateProcedureCount(progress.procedure.id, 'assistant', true)}
                           disabled={saving}
                         >
                           <Plus className="w-3 h-3" />

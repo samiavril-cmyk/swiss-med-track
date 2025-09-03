@@ -98,9 +98,9 @@ export const FMHModuleDetail: React.FC<ModuleDetailProps> = ({ moduleKey, onClos
           .order('performed_date', { ascending: false });
 
         // Count by role
-        const responsible_count = logs?.filter(l => l.role_in_surgery === 'responsible').length || 0;
+        const responsible_count = logs?.filter(l => l.role_in_surgery === 'primary' || l.role_in_surgery === 'responsible').length || 0;
         const instructing_count = logs?.filter(l => l.role_in_surgery === 'instructing').length || 0;
-        const assistant_count = logs?.filter(l => l.role_in_surgery === 'assistant').length || 0;
+        const assistant_count = logs?.filter(l => l.role_in_surgery === 'assistant' || l.role_in_surgery === 'assist').length || 0;
         
         // Calculate weighted score
         const weighted_score = responsible_count * 1.0 + instructing_count * 0.75 + assistant_count * 0.5;
@@ -357,11 +357,11 @@ export const FMHModuleDetail: React.FC<ModuleDetailProps> = ({ moduleKey, onClos
                       </div>
                       <Badge 
                         variant={
-                          log.role_in_surgery === 'responsible' ? 'default' :
+                          (log.role_in_surgery === 'primary' || log.role_in_surgery === 'responsible') ? 'default' :
                           log.role_in_surgery === 'instructing' ? 'secondary' : 'outline'
                         }
                       >
-                        {log.role_in_surgery === 'responsible' ? 'Verantwortlich' :
+                        {(log.role_in_surgery === 'primary' || log.role_in_surgery === 'responsible') ? 'Verantwortlich' :
                          log.role_in_surgery === 'instructing' ? 'Instruierend' : 'Assistent'}
                       </Badge>
                     </div>

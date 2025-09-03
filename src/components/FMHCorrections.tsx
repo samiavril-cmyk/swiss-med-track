@@ -79,7 +79,7 @@ export const FMHCorrections: React.FC<FMHCorrectionsProps> = ({
         procedure_title: log.procedures?.title_de || 'Unknown Procedure',
         category_key: log.procedures?.procedure_categories?.key || 'unknown',
         category_title: log.procedures?.procedure_categories?.title_de || 'Unknown Category',
-        role_in_surgery: log.role_in_surgery || 'responsible',
+        role_in_surgery: log.role_in_surgery || 'primary',
         weighted_score: log.weighted_score || 1,
         notes: log.notes,
         hospital: log.hospital,
