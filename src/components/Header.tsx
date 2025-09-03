@@ -9,8 +9,16 @@ export const Header: React.FC = () => {
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
+    try {
+      console.log('[Header] Starting sign out...');
+      await signOut();
+      console.log('[Header] Sign out completed, navigating to home...');
+      navigate('/');
+    } catch (error) {
+      console.error('[Header] Error during sign out:', error);
+      // Still navigate to home even if sign out fails
+      navigate('/');
+    }
   };
 
   return (

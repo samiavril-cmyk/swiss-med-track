@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ActivityRing } from '@/components/ActivityRing';
 import { ProgressBar } from '@/components/ProgressBar';
-import { VerticalCourseTimeline, mockCourses2024 } from '@/components/VerticalCourseTimeline';
+import { VerticalCourseTimeline, mockCourses2024, mockCourses2025, mockCourses2026, mockAllCourses } from '@/components/VerticalCourseTimeline';
 import PublicationsShowcase from '@/components/PublicationsShowcase';
 import { X, Calendar, TrendingUp, BookOpen, Award, FileText, Stethoscope } from 'lucide-react';
 
@@ -341,6 +341,72 @@ export const ActivityDrillDown: React.FC<ActivityDrillDownProps> = ({
       </div>
     </div>
   );
+
+  const renderMandatoryCoursesContent = () => {
+    // Guard to prevent crash if mockAllCourses is empty
+    if (!mockAllCourses || mockAllCourses.length === 0) {
+      return (
+        <div className="space-y-6">
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Keine Kurse verfügbar</p>
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="p-4">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-card-foreground">{data.completed}</p>
+              <p className="text-sm text-muted-foreground">Abgeschlossen</p>
+            </div>
+          </Card>
+          <Card className="p-4">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-card-foreground">{data.target - data.completed}</p>
+              <p className="text-sm text-muted-foreground">Verbleibend</p>
+            </div>
+          </Card>
+          <Card className="p-4">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-card-foreground">{data.points}</p>
+              <p className="text-sm text-muted-foreground">Punkte</p>
+            </div>
+          </Card>
+        </div>
+
+        <div className="space-y-4">
+          <h4 className="font-semibold text-card-foreground">Kurs-Timeline (2024-2026)</h4>
+          <Tabs defaultValue="all" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="all">Alle Jahre</TabsTrigger>
+              <TabsTrigger value="2024">2024</TabsTrigger>
+              <TabsTrigger value="2025">2025</TabsTrigger>
+              <TabsTrigger value="2026">2026</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="all" className="mt-4">
+              <VerticalCourseTimeline courses={mockAllCourses} year={2024} />
+            </TabsContent>
+            
+            <TabsContent value="2024" className="mt-4">
+              <VerticalCourseTimeline courses={mockCourses2024} year={2024} />
+            </TabsContent>
+            
+            <TabsContent value="2025" className="mt-4">
+              <VerticalCourseTimeline courses={mockCourses2025} year={2025} />
+            </TabsContent>
+            
+            <TabsContent value="2026" className="mt-4">
+              <VerticalCourseTimeline courses={mockCourses2026} year={2026} />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    );
+  };
 
   const renderContent = () => {
     switch (activityId) {

@@ -163,7 +163,7 @@ export const VerticalCourseTimeline: React.FC<VerticalCourseTimelineProps> = ({ 
   );
 };
 
-// Mock data for demonstration
+// Mock data for demonstration - Extended to include 2025 and 2026
 export const mockCourses2024: Course[] = [
   {
     id: '1',
@@ -231,4 +231,149 @@ export const mockCourses2024: Course[] = [
     points: 6,
     category: 'Forschung'
   }
+];
+
+export const mockCourses2025: Course[] = [
+  {
+    id: '7',
+    title: 'Minimally Invasive Surgery Advanced',
+    date: '2025-02-14',
+    location: 'Zürich',
+    duration: '3 Tage',
+    type: 'required',
+    status: 'upcoming',
+    points: 15,
+    category: 'Chirurgie'
+  },
+  {
+    id: '8',
+    title: 'Critical Care Management',
+    date: '2025-04-18',
+    location: 'Basel',
+    duration: '2 Tage',
+    type: 'required',
+    status: 'upcoming',
+    points: 10,
+    category: 'Intensivmedizin'
+  },
+  {
+    id: '9',
+    title: 'AI in Medical Diagnosis',
+    date: '2025-06-22',
+    location: 'Bern',
+    duration: '1 Tag',
+    type: 'optional',
+    status: 'upcoming',
+    points: 5,
+    category: 'Digital Health'
+  },
+  {
+    id: '10',
+    title: 'Pediatric Surgery Workshop',
+    date: '2025-08-15',
+    location: 'Lausanne',
+    duration: '2 Tage',
+    type: 'required',
+    status: 'upcoming',
+    points: 8,
+    category: 'Pädiatrie'
+  },
+  {
+    id: '11',
+    title: 'Global Health Perspectives',
+    date: '2025-10-10',
+    location: 'Genf',
+    duration: '1 Tag',
+    type: 'optional',
+    status: 'upcoming',
+    points: 4,
+    category: 'Global Health'
+  },
+  {
+    id: '12',
+    title: 'Leadership in Healthcare',
+    date: '2025-12-05',
+    location: 'Zürich',
+    duration: '2 Tage',
+    type: 'optional',
+    status: 'upcoming',
+    points: 7,
+    category: 'Management'
+  }
+];
+
+export const mockCourses2026: Course[] = [
+  {
+    id: '13',
+    title: 'Robotic Surgery Certification',
+    date: '2026-01-20',
+    location: 'Zürich',
+    duration: '4 Tage',
+    type: 'required',
+    status: 'upcoming',
+    points: 20,
+    category: 'Chirurgie'
+  },
+  {
+    id: '14',
+    title: 'Advanced Trauma Life Support',
+    date: '2026-03-15',
+    location: 'Basel',
+    duration: '2 Tage',
+    type: 'required',
+    status: 'upcoming',
+    points: 12,
+    category: 'Traumatologie'
+  },
+  {
+    id: '15',
+    title: 'Precision Medicine Workshop',
+    date: '2026-05-18',
+    location: 'Bern',
+    duration: '1 Tag',
+    type: 'optional',
+    status: 'upcoming',
+    points: 6,
+    category: 'Personalized Medicine'
+  },
+  {
+    id: '16',
+    title: 'Surgical Innovation Summit',
+    date: '2026-07-22',
+    location: 'Lausanne',
+    duration: '3 Tage',
+    type: 'optional',
+    status: 'upcoming',
+    points: 18,
+    category: 'Innovation'
+  },
+  {
+    id: '17',
+    title: 'Medical Communication Skills',
+    date: '2026-09-12',
+    location: 'Genf',
+    duration: '1 Tag',
+    type: 'required',
+    status: 'upcoming',
+    points: 5,
+    category: 'Kommunikation'
+  },
+  {
+    id: '18',
+    title: 'Healthcare Quality Management',
+    date: '2026-11-08',
+    location: 'Zürich',
+    duration: '2 Tage',
+    type: 'optional',
+    status: 'upcoming',
+    points: 8,
+    category: 'Qualitätsmanagement'
+  }
+];
+
+// Combined courses for multi-year view
+export const mockAllCourses: Course[] = [
+  ...mockCourses2024,
+  ...mockCourses2025,
+  ...mockCourses2026
 ];

@@ -19,7 +19,8 @@ import {
   Plus,
   Download,
   Upload,
-  FileText
+  FileText,
+  Stethoscope
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { FMHModuleDetail } from '@/components/FMHModuleDetail';
@@ -28,6 +29,7 @@ import { GapAnalysis } from '@/components/GapAnalysis';
 import { PDFUploadModal } from '@/components/PDFUploadModal';
 import { FMHManualEntry } from '@/components/FMHManualEntry';
 import { FMHCorrections } from '@/components/FMHCorrections';
+import { FMHProcedureTracking } from '@/components/FMHProcedureTracking';
 
 interface ModuleProgress {
   module_name: string;
@@ -59,6 +61,7 @@ export const FMHDashboard: React.FC = () => {
   const [showPDFUpload, setShowPDFUpload] = useState(false);
   const [showManualEntry, setShowManualEntry] = useState(false);
   const [showCorrections, setShowCorrections] = useState(false);
+  const [showProcedureTracking, setShowProcedureTracking] = useState(false);
   const [userPgyLevel, setUserPgyLevel] = useState<number>(4);
 
   useEffect(() => {
@@ -204,7 +207,7 @@ export const FMHDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <AuthenticatedHeader />
+      <Header />
       
       <main className="container mx-auto px-4 py-8">
         {/* Header Section */}
@@ -226,6 +229,15 @@ export const FMHDashboard: React.FC = () => {
           <div className="flex gap-3 mt-4 md:mt-0">
             <Button 
               variant="default" 
+              size="sm" 
+              className="gap-2"
+              onClick={() => setShowProcedureTracking(true)}
+            >
+              <Stethoscope className="w-4 h-4" />
+              Prozeduren Tracking
+            </Button>
+            <Button 
+              variant="outline" 
               size="sm" 
               className="gap-2"
               onClick={() => setShowQuickAdd(true)}
@@ -410,6 +422,27 @@ export const FMHDashboard: React.FC = () => {
           onOpenChange={setShowCorrections}
           onSuccess={loadModulesAndProgress}
         />
+
+        {/* Procedure Tracking Modal */}
+        {showProcedureTracking && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-background rounded-lg w-full max-w-7xl h-[90vh] overflow-hidden">
+              <div className="flex items-center justify-between p-6 border-b">
+                <h2 className="text-xl font-semibold">FMH Prozeduren Tracking</h2>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowProcedureTracking(false)}
+                >
+                  ✕
+                </Button>
+              </div>
+              <div className="p-6 h-[calc(100%-80px)] overflow-auto">
+                <FMHProcedureTracking />
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
