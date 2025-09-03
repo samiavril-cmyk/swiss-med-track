@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build && npm run build:spa-fallback",
     "build:dev": "vite build --mode development && npm run build:spa-fallback",
-    "build:spa-fallback": "cp docs/index.html docs/404.html",
+    "build:spa-fallback": "cp docs/index.html docs/404.html && touch docs/.nojekyll",
     "lint": "eslint .",
     "preview": "vite preview"
   },
