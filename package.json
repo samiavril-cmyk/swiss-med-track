@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build:dev": "vite build --mode development",
+    "build": "vite build && npm run build:spa-fallback",
+    "build:dev": "vite build --mode development && npm run build:spa-fallback",
+    "build:spa-fallback": "cp docs/index.html docs/404.html",
     "lint": "eslint .",
     "preview": "vite preview"
   },
