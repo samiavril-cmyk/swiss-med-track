@@ -40,42 +40,57 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [userProfile, setUserProfile] = useState<any>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    
     // Set up auth state listener with detailed logging
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!isMounted) return;
+        
         console.debug('[Auth] state change:', event, 'user:', session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
 
-        if (session?.user) {
+        if (session?.user && isMounted) {
           console.debug('[Auth] loading user profile...');
           await loadUserProfile(session.user.id);
-        } else {
+        } else if (isMounted) {
           setUserProfile(null);
           setIsAdmin(false);
         }
 
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     );
 
     // Check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!isMounted) return;
+      
       console.debug('[Auth] initial session:', Boolean(session), 'user:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
 
-      if (session?.user) {
+      if (session?.user && isMounted) {
         await loadUserProfile(session.user.id);
       }
 
-      setLoading(false);
+      if (isMounted) {
+        setLoading(false);
+      }
     }).catch((error) => {
       console.error('[Auth] Error getting initial session:', error);
-      setLoading(false);
+      if (isMounted) {
+        setLoading(false);
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const loadUserProfile = async (userId: string) => {

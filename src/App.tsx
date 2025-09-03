@@ -16,6 +16,7 @@ import Publications from "./pages/Publications";
 import AuthNew from "./pages/AuthNew";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./hooks/useAuth";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -56,11 +57,13 @@ const SPARouter = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter basename="/swiss-med-track">
-        <SPARouter />
-      </BrowserRouter>
+      <ErrorBoundary>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter basename="/swiss-med-track">
+          <SPARouter />
+        </BrowserRouter>
+      </ErrorBoundary>
     </AuthProvider>
   </QueryClientProvider>
 );

@@ -62,11 +62,23 @@ export default function Courses() {
   ];
 
   useEffect(() => {
-    fetchCourses();
-    if (user) {
-      fetchUserCourses();
-    }
-  }, [fetchCourses, user]);
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (!isMounted) return;
+      
+      await fetchCourses();
+      if (user && isMounted) {
+        await fetchUserCourses();
+      }
+    };
+    
+    loadData();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [user]); // Remove fetchCourses from dependencies to prevent loops
 
   const fetchCourses = useCallback(async () => {
     setLoading(true);

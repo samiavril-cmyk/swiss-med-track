@@ -30,6 +30,7 @@ import { PDFUploadModal } from '@/components/PDFUploadModal';
 import { FMHManualEntry } from '@/components/FMHManualEntry';
 import { FMHCorrections } from '@/components/FMHCorrections';
 import { FMHProcedureTracking } from '@/components/FMHProcedureTracking';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 interface ModuleProgress {
   module_name: string;
@@ -71,10 +72,14 @@ export const FMHDashboard: React.FC = () => {
       navigate('/auth');
       return;
     }
+    
+    // Prevent multiple simultaneous loads
+    if (loading) return;
+    
     loadModulesAndProgress();
     const t = setTimeout(() => setTimeoutReached(true), 6000);
     return () => clearTimeout(t);
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading]); // Remove navigate from dependencies to prevent loops
 
   const loadModulesAndProgress = async () => {
     try {
@@ -110,11 +115,32 @@ export const FMHDashboard: React.FC = () => {
       for (const module of moduleData || []) {
         if (authUser) {
           console.log('📊 FMHDashboard - Getting progress for module:', module.key, 'user:', authUser.id);
-          const { data: progressData } = await supabase
-            .rpc('get_module_progress', {
-              user_id_param: authUser.id,
-              module_key: module.key
-            });
+          
+          // Add timeout and error handling for RPC calls
+          let progressData = null;
+          try {
+            const rpcPromise = supabase
+              .rpc('get_module_progress', {
+                user_id_param: authUser.id,
+                module_key: module.key
+              });
+            
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('RPC timeout')), 10000)
+            );
+            
+            const { data, error } = await Promise.race([rpcPromise, timeoutPromise]) as any;
+            
+            if (error) {
+              console.error('RPC error for module', module.key, ':', error);
+              progressData = null;
+            } else {
+              progressData = data;
+            }
+          } catch (error) {
+            console.error('RPC timeout or error for module', module.key, ':', error);
+            progressData = null;
+          }
 
           console.log('📈 Progress data for', module.key, ':', progressData);
           console.log('🔍 Module data:', { 
