@@ -4,6 +4,10 @@ import { HeroSection } from '@/components/HeroSection';
 import { InteractiveProgressDemo } from '@/components/InteractiveProgressDemo';
 import { VerticalCourseTimeline, mockCourses2024 } from '@/components/VerticalCourseTimeline';
 import AnimatedSection, { StaggeredContainer } from '@/components/AnimatedSection';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Users, TrendingUp, CheckCircle, AlertTriangle, Stethoscope } from 'lucide-react';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<
@@ -259,6 +263,126 @@ const Index = () => {
                     </div>
                   </AnimatedSection>
                 </div>
+              </div>
+            </section>
+
+            {/* Real-time Progress Tracking Section */}
+            <section className="py-20 bg-gradient-to-br from-blue-50 to-indigo-100 relative overflow-hidden">
+              <div className="container mx-auto px-4 relative">
+                <AnimatedSection animation="fadeIn" delay={0}>
+                  <div className="text-center mb-16">
+                    <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+                      <TrendingUp className="h-4 w-4" />
+                      Supervisor Dashboard
+                    </div>
+                    <h2 className="text-4xl font-bold text-slate-900 mb-6">
+                      Fortschritt in Echtzeit verfolgen
+                    </h2>
+                    <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                      Dr. Jose Martinez überwacht sein Team von 5 Residents und deren FMH-Fortschritt
+                    </p>
+                  </div>
+                </AnimatedSection>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                  <AnimatedSection animation="slideLeft" delay={200}>
+                    <div className="space-y-8">
+                      <div className="space-y-6">
+                        <h3 className="text-3xl font-bold text-slate-900">
+                          Team-Übersicht: Allgemeinchirurgie
+                        </h3>
+                        <p className="text-lg text-slate-600 leading-relaxed">
+                          Echtzeit-Einblicke in die Fortschritte aller Residents mit detaillierten 
+                          Statistiken und Fortschrittsverfolgung pro FMH-Modul.
+                        </p>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-white/20">
+                          <div className="flex items-center gap-3 mb-3">
+                            <Users className="h-5 w-5 text-blue-600" />
+                            <span className="text-sm font-medium text-slate-600">Team Größe</span>
+                          </div>
+                          <div className="text-3xl font-bold text-slate-900">5</div>
+                          <div className="text-sm text-slate-500">Aktive Residents</div>
+                        </div>
+                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-white/20">
+                          <div className="flex items-center gap-3 mb-3">
+                            <Stethoscope className="h-5 w-5 text-green-600" />
+                            <span className="text-sm font-medium text-slate-600">Prozeduren</span>
+                          </div>
+                          <div className="text-3xl font-bold text-slate-900">247</div>
+                          <div className="text-sm text-slate-500">Gesamt 2024</div>
+                        </div>
+                      </div>
+                    </div>
+                  </AnimatedSection>
+
+                  <AnimatedSection animation="slideRight" delay={400}>
+                    <div className="space-y-6">
+                      <h4 className="text-xl font-semibold text-slate-900 mb-4">Resident Fortschritte</h4>
+                      
+                      {/* Anna Schmidt */}
+                      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-white/20">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h5 className="font-semibold text-slate-900">Dr. Anna Schmidt</h5>
+                            <p className="text-sm text-slate-600">PGY 3 • 45 Prozeduren</p>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">85%</Badge>
+                        </div>
+                        <Progress value={85} className="mb-2" />
+                        <div className="flex justify-between text-xs text-slate-500">
+                          <span>Basis: 30/35</span>
+                          <span>Viszeral: 15/20</span>
+                        </div>
+                      </div>
+
+                      {/* Michael Müller */}
+                      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-white/20">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h5 className="font-semibold text-slate-900">Dr. Michael Müller</h5>
+                            <p className="text-sm text-slate-600">PGY 4 • 52 Prozeduren</p>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">92%</Badge>
+                        </div>
+                        <Progress value={92} className="mb-2" />
+                        <div className="flex justify-between text-xs text-slate-500">
+                          <span>Basis: 35/38</span>
+                          <span>Viszeral: 17/20</span>
+                        </div>
+                      </div>
+
+                      {/* Sarah Johnson */}
+                      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-white/20">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h5 className="font-semibold text-slate-900">Dr. Sarah Johnson</h5>
+                            <p className="text-sm text-slate-600">PGY 2 • 28 Prozeduren</p>
+                          </div>
+                          <Badge className="bg-yellow-100 text-yellow-700">65%</Badge>
+                        </div>
+                        <Progress value={65} className="mb-2" />
+                        <div className="flex justify-between text-xs text-slate-500">
+                          <span>Basis: 20/30</span>
+                          <span>Viszeral: 8/15</span>
+                        </div>
+                      </div>
+                    </div>
+                  </AnimatedSection>
+                </div>
+
+                <AnimatedSection animation="fadeIn" delay={600}>
+                  <div className="mt-16 text-center">
+                    <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-sm border border-white/20">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <span className="text-sm font-medium text-slate-700">
+                        Durchschnittlicher Team-Fortschritt: <strong>81%</strong>
+                      </span>
+                    </div>
+                  </div>
+                </AnimatedSection>
               </div>
             </section>
 
