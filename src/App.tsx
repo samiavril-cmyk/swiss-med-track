@@ -45,7 +45,7 @@ const SPARouter = () => {
       <Route path="/courses/:id" element={<CourseDetail />} />
       <Route path="/publications" element={<Publications />} />
       <Route path="/profile/:handle" element={<Profile />} />
-      <Route path="/fmh" element={<FMHDashboard />} />
+      <Route path="/fmh" element={<FMHDashboardSimple />} />
       <Route path="/features" element={<Features />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/admin" element={<AdminCMS />} />

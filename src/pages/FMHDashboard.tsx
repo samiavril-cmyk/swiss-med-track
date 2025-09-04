@@ -81,6 +81,86 @@ export const FMHDashboard: React.FC = () => {
     return () => clearTimeout(t);
   }, [user, authLoading]); // Remove navigate from dependencies to prevent loops
 
+  // Manual progress calculation fallback when RPC fails
+  const calculateProgressManually = async (userId: string, moduleKey: string) => {
+    try {
+      console.log('🔄 Calculating progress manually for module:', moduleKey);
+      
+      // Get procedures for this module
+      const { data: procedures, error: procError } = await supabase
+        .from('procedures')
+        .select('id, code, title_de, min_required_by_pgy')
+        .eq('category_id', (await supabase
+          .from('procedure_categories')
+          .select('id')
+          .eq('key', moduleKey)
+          .single()
+        ).data?.id)
+        .eq('active', true);
+
+      if (procError || !procedures) {
+        console.error('Error fetching procedures:', procError);
+        return null;
+      }
+
+      // Get user's procedure logs
+      const { data: logs, error: logsError } = await supabase
+        .from('procedure_logs')
+        .select('procedure_id, role_in_surgery')
+        .eq('user_id', userId);
+
+      if (logsError) {
+        console.error('Error fetching logs:', logsError);
+        return null;
+      }
+
+      // Calculate progress
+      let totalWeightedScore = 0;
+      let totalMinimum = 0;
+      let responsibleCount = 0;
+      let instructingCount = 0;
+      let assistantCount = 0;
+
+      procedures.forEach(proc => {
+        const procLogs = logs?.filter(log => log.procedure_id === proc.id) || [];
+        const minRequired = (proc.min_required_by_pgy as any)?.pgy5 || 0;
+        
+        const responsible = procLogs.filter(log => 
+          ['primary', 'responsible'].includes(log.role_in_surgery)
+        ).length;
+        const instructing = procLogs.filter(log => 
+          log.role_in_surgery === 'instructing'
+        ).length;
+        const assistant = procLogs.filter(log => 
+          ['assistant', 'assist'].includes(log.role_in_surgery)
+        ).length;
+
+        const weightedScore = (responsible * 1.0) + (instructing * 0.5) + (assistant * 0.25);
+        
+        totalWeightedScore += weightedScore;
+        totalMinimum += minRequired;
+        responsibleCount += responsible;
+        instructingCount += instructing;
+        assistantCount += assistant;
+      });
+
+      const progressPercentage = totalMinimum > 0 ? (totalWeightedScore / totalMinimum) * 100 : 0;
+
+      return [{
+        module_name: moduleKey,
+        total_weighted_score: totalWeightedScore,
+        total_minimum: totalMinimum,
+        progress_percentage: progressPercentage,
+        responsible_count: responsibleCount,
+        instructing_count: instructingCount,
+        assistant_count: assistantCount
+      }];
+    } catch (error) {
+      console.error('Error in manual calculation:', error);
+      return null;
+    }
+  };
+
   const loadModulesAndProgress = async () => {
     try {
       setLoading(true);
@@ -116,30 +196,37 @@ export const FMHDashboard: React.FC = () => {
         if (authUser) {
           console.log('📊 FMHDashboard - Getting progress for module:', module.key, 'user:', authUser.id);
           
-          // Add timeout and error handling for RPC calls
+          // Robust RPC call with comprehensive error handling
           let progressData = null;
           try {
+            console.log('🔄 Starting RPC call for module:', module.key);
+            
             const rpcPromise = supabase
               .rpc('get_module_progress', {
                 user_id_param: authUser.id,
                 module_key: module.key
               });
             
+            // Shorter timeout with immediate fallback
             const timeoutPromise = new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('RPC timeout')), 15000)
+              setTimeout(() => reject(new Error('RPC timeout after 8 seconds')), 8000)
             );
             
-            const { data, error } = await Promise.race([rpcPromise, timeoutPromise]) as any;
+            const result = await Promise.race([rpcPromise, timeoutPromise]) as any;
+            const { data, error } = result;
             
             if (error) {
-              console.error('RPC error for module', module.key, ':', error);
-              progressData = null;
+              console.error('❌ RPC error for module', module.key, ':', error);
+              // Fallback: Calculate progress manually from procedure_logs
+              progressData = await calculateProgressManually(authUser.id, module.key);
             } else {
+              console.log('✅ RPC success for module', module.key, ':', data);
               progressData = data;
             }
           } catch (error) {
-            console.error('RPC timeout or error for module', module.key, ':', error);
-            progressData = null;
+            console.error('❌ RPC timeout/error for module', module.key, ':', error);
+            // Fallback: Calculate progress manually from procedure_logs
+            progressData = await calculateProgressManually(authUser.id, module.key);
           }
 
           console.log('📈 Progress data for', module.key, ':', progressData);
