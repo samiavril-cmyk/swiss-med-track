@@ -77,7 +77,7 @@ export const FMHDashboard: React.FC = () => {
     if (loading) return;
     
     loadModulesAndProgress();
-    const t = setTimeout(() => setTimeoutReached(true), 6000);
+    const t = setTimeout(() => setTimeoutReached(true), 10000); // Increased timeout
     return () => clearTimeout(t);
   }, [user, authLoading]); // Remove navigate from dependencies to prevent loops
 
@@ -126,7 +126,7 @@ export const FMHDashboard: React.FC = () => {
               });
             
             const timeoutPromise = new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('RPC timeout')), 10000)
+              setTimeout(() => reject(new Error('RPC timeout')), 15000)
             );
             
             const { data, error } = await Promise.race([rpcPromise, timeoutPromise]) as any;
@@ -186,6 +186,8 @@ export const FMHDashboard: React.FC = () => {
       setModules(modulesWithProgress);
     } catch (error) {
       console.error('Error loading modules:', error);
+      // Set empty modules to prevent endless loading
+      setModules([]);
     } finally {
       setLoading(false);
     }
