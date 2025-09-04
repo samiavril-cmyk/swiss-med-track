@@ -95,14 +95,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const loadUserProfile = async (userId: string) => {
     try {
+      console.log('[Auth] Loading profile for user ID:', userId);
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
         .single();
 
+      console.log('[Auth] Profile query result:', { profile, error });
+
       if (error) {
-        console.error('Error loading user profile:', error);
+        console.error('[Auth] Error loading user profile:', error);
+        console.error('[Auth] Error details:', error.message, error.code, error.details);
         return;
       }
 
@@ -111,7 +115,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUserProfile(profile);
       setIsAdmin(profile?.role === 'admin');
     } catch (error) {
-      console.error('Error loading user profile:', error);
+      console.error('[Auth] Exception loading user profile:', error);
     }
   };
 
