@@ -61,7 +61,7 @@ export const Header: React.FC = () => {
               <Link to="/publications" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
                 Publikationen
               </Link>
-              {(userProfile?.role === 'supervisor' || userProfile?.role === 'admin') && (
+              {user && (userProfile?.role === 'supervisor' || userProfile?.role === 'admin' || isAdmin) && (
                 <Link to="/supervisor" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors flex items-center gap-1">
                   <Users className="h-4 w-4" />
                   Supervisor
