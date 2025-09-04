@@ -76,8 +76,13 @@ export const FMHDashboard: React.FC = () => {
     // Prevent multiple simultaneous loads
     if (loading) return;
     
+    console.log('🔄 FMHDashboard useEffect triggered for user:', user.id);
     loadModulesAndProgress();
-    const t = setTimeout(() => setTimeoutReached(true), 10000); // Increased timeout
+    const t = setTimeout(() => {
+      console.log('⏰ Timeout reached - stopping loading');
+      setTimeoutReached(true);
+      setLoading(false);
+    }, 10000);
     return () => clearTimeout(t);
   }, [user, authLoading]); // Remove navigate from dependencies to prevent loops
 
@@ -86,16 +91,23 @@ export const FMHDashboard: React.FC = () => {
     try {
       console.log('🔄 Calculating progress manually for module:', moduleKey);
       
+      // Get category ID first
+      const { data: categoryData, error: categoryError } = await supabase
+        .from('procedure_categories')
+        .select('id')
+        .eq('key', moduleKey)
+        .single();
+
+      if (categoryError || !categoryData) {
+        console.error('Error fetching category:', categoryError);
+        return null;
+      }
+
       // Get procedures for this module
       const { data: procedures, error: procError } = await supabase
         .from('procedures')
         .select('id, code, title_de, min_required_by_pgy')
-        .eq('category_id', (await supabase
-          .from('procedure_categories')
-          .select('id')
-          .eq('key', moduleKey)
-          .single()
-        ).data?.id)
+        .eq('category_id', categoryData.id)
         .eq('active', true);
 
       if (procError || !procedures) {
