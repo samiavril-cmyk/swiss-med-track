@@ -106,6 +106,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
+      console.log('[Auth] Loaded user profile:', profile);
+      console.log('[Auth] User role:', profile?.role);
       setUserProfile(profile);
       setIsAdmin(profile?.role === 'admin');
     } catch (error) {

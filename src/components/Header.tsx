@@ -7,6 +7,11 @@ import { useAuth } from '@/hooks/useAuth';
 export const Header: React.FC = () => {
   const { user, signOut, isAdmin, userProfile } = useAuth();
   const navigate = useNavigate();
+  
+  // Debug logging
+  console.log('[Header] User:', user?.email);
+  console.log('[Header] UserProfile:', userProfile);
+  console.log('[Header] UserProfile Role:', userProfile?.role);
 
   const handleSignOut = async () => {
     try {
