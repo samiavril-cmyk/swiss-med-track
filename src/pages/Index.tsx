@@ -7,7 +7,7 @@ import AnimatedSection, { StaggeredContainer } from '@/components/AnimatedSectio
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Users, TrendingUp, CheckCircle, AlertTriangle, Stethoscope } from 'lucide-react';
+import { Users, TrendingUp, CheckCircle, AlertTriangle, Stethoscope, Award, FileText, Calendar } from 'lucide-react';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<
@@ -379,6 +379,303 @@ const Index = () => {
                       <CheckCircle className="h-5 w-5 text-green-600" />
                       <span className="text-sm font-medium text-slate-700">
                         Durchschnittlicher Team-Fortschritt: <strong>81%</strong>
+                      </span>
+                    </div>
+                  </div>
+                </AnimatedSection>
+              </div>
+            </section>
+
+            {/* Milestone Tracking Section */}
+            <section className="py-20 bg-white relative overflow-hidden">
+              <div className="container mx-auto px-4 relative">
+                <AnimatedSection animation="fadeIn" delay={0}>
+                  <div className="text-center mb-16">
+                    <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+                      <Calendar className="h-4 w-4" />
+                      Milestone Tracking
+                    </div>
+                    <h2 className="text-4xl font-bold text-slate-900 mb-6">
+                      Fortschrittsverfolgung in Echtzeit
+                    </h2>
+                    <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                      Dr. Jose Obermann verfolgt die Meilensteine seiner Residents: Prozeduren, Publikationen und Auszeichnungen
+                    </p>
+                  </div>
+                </AnimatedSection>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {/* Anna Schmidt Milestone Track */}
+                  <AnimatedSection animation="slideUp" delay={200}>
+                    <Card className="h-full">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span className="text-blue-600 font-bold">AS</span>
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold">Dr. Anna Schmidt</h3>
+                            <p className="text-sm text-slate-600">PGY 3 • Allgemeinchirurgie</p>
+                          </div>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        {/* Procedures Milestone */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Stethoscope className="h-4 w-4 text-green-600" />
+                              <span className="text-sm font-medium">Prozeduren</span>
+                            </div>
+                            <Badge className="bg-green-100 text-green-700">45/50</Badge>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-xs text-slate-500">
+                              <span>Jan</span>
+                              <span>Mär</span>
+                              <span>Mai</span>
+                              <span>Jul</span>
+                              <span>Sep</span>
+                              <span>Nov</span>
+                            </div>
+                            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full" style={{width: '90%'}}></div>
+                            </div>
+                            <div className="text-xs text-slate-600">Trend: +12% vs. Vorjahr</div>
+                          </div>
+                        </div>
+
+                        {/* Publications Milestone */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4 text-blue-600" />
+                              <span className="text-sm font-medium">Publikationen</span>
+                            </div>
+                            <Badge className="bg-blue-100 text-blue-700">3/5</Badge>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-xs text-slate-500">
+                              <span>2023</span>
+                              <span>2024</span>
+                              <span>2025</span>
+                            </div>
+                            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" style={{width: '60%'}}></div>
+                            </div>
+                            <div className="text-xs text-slate-600">2 Papers in Review</div>
+                          </div>
+                        </div>
+
+                        {/* Awards Milestone */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Award className="h-4 w-4 text-amber-600" />
+                              <span className="text-sm font-medium">Auszeichnungen</span>
+                            </div>
+                            <Badge className="bg-amber-100 text-amber-700">2/3</Badge>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-xs text-slate-500">
+                              <span>Q1</span>
+                              <span>Q2</span>
+                              <span>Q3</span>
+                              <span>Q4</span>
+                            </div>
+                            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-amber-400 to-amber-600 rounded-full" style={{width: '67%'}}></div>
+                            </div>
+                            <div className="text-xs text-slate-600">Best Resident Award 2024</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </AnimatedSection>
+
+                  {/* Michael Müller Milestone Track */}
+                  <AnimatedSection animation="slideUp" delay={400}>
+                    <Card className="h-full">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                            <span className="text-green-600 font-bold">MM</span>
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold">Dr. Michael Müller</h3>
+                            <p className="text-sm text-slate-600">PGY 4 • Allgemeinchirurgie</p>
+                          </div>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        {/* Procedures Milestone */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Stethoscope className="h-4 w-4 text-green-600" />
+                              <span className="text-sm font-medium">Prozeduren</span>
+                            </div>
+                            <Badge className="bg-green-100 text-green-700">52/55</Badge>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-xs text-slate-500">
+                              <span>Jan</span>
+                              <span>Mär</span>
+                              <span>Mai</span>
+                              <span>Jul</span>
+                              <span>Sep</span>
+                              <span>Nov</span>
+                            </div>
+                            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full" style={{width: '95%'}}></div>
+                            </div>
+                            <div className="text-xs text-slate-600">Trend: +18% vs. Vorjahr</div>
+                          </div>
+                        </div>
+
+                        {/* Publications Milestone */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4 text-blue-600" />
+                              <span className="text-sm font-medium">Publikationen</span>
+                            </div>
+                            <Badge className="bg-blue-100 text-blue-700">4/5</Badge>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-xs text-slate-500">
+                              <span>2023</span>
+                              <span>2024</span>
+                              <span>2025</span>
+                            </div>
+                            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" style={{width: '80%'}}></div>
+                            </div>
+                            <div className="text-xs text-slate-600">1 Paper accepted</div>
+                          </div>
+                        </div>
+
+                        {/* Awards Milestone */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Award className="h-4 w-4 text-amber-600" />
+                              <span className="text-sm font-medium">Auszeichnungen</span>
+                            </div>
+                            <Badge className="bg-amber-100 text-amber-700">3/3</Badge>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-xs text-slate-500">
+                              <span>Q1</span>
+                              <span>Q2</span>
+                              <span>Q3</span>
+                              <span>Q4</span>
+                            </div>
+                            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-amber-400 to-amber-600 rounded-full" style={{width: '100%'}}></div>
+                            </div>
+                            <div className="text-xs text-slate-600">Excellence Award 2024</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </AnimatedSection>
+
+                  {/* Sarah Johnson Milestone Track */}
+                  <AnimatedSection animation="slideUp" delay={600}>
+                    <Card className="h-full">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                            <span className="text-purple-600 font-bold">SJ</span>
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold">Dr. Sarah Johnson</h3>
+                            <p className="text-sm text-slate-600">PGY 2 • Allgemeinchirurgie</p>
+                          </div>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        {/* Procedures Milestone */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Stethoscope className="h-4 w-4 text-green-600" />
+                              <span className="text-sm font-medium">Prozeduren</span>
+                            </div>
+                            <Badge className="bg-yellow-100 text-yellow-700">28/40</Badge>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-xs text-slate-500">
+                              <span>Jan</span>
+                              <span>Mär</span>
+                              <span>Mai</span>
+                              <span>Jul</span>
+                              <span>Sep</span>
+                              <span>Nov</span>
+                            </div>
+                            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full" style={{width: '70%'}}></div>
+                            </div>
+                            <div className="text-xs text-slate-600">Trend: +8% vs. Vorjahr</div>
+                          </div>
+                        </div>
+
+                        {/* Publications Milestone */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4 text-blue-600" />
+                              <span className="text-sm font-medium">Publikationen</span>
+                            </div>
+                            <Badge className="bg-blue-100 text-blue-700">1/3</Badge>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-xs text-slate-500">
+                              <span>2023</span>
+                              <span>2024</span>
+                              <span>2025</span>
+                            </div>
+                            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" style={{width: '33%'}}></div>
+                            </div>
+                            <div className="text-xs text-slate-600">Case Report submitted</div>
+                          </div>
+                        </div>
+
+                        {/* Awards Milestone */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Award className="h-4 w-4 text-amber-600" />
+                              <span className="text-sm font-medium">Auszeichnungen</span>
+                            </div>
+                            <Badge className="bg-amber-100 text-amber-700">1/2</Badge>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-xs text-slate-500">
+                              <span>Q1</span>
+                              <span>Q2</span>
+                              <span>Q3</span>
+                              <span>Q4</span>
+                            </div>
+                            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-amber-400 to-amber-600 rounded-full" style={{width: '50%'}}></div>
+                            </div>
+                            <div className="text-xs text-slate-600">Rising Star Award</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </AnimatedSection>
+                </div>
+
+                <AnimatedSection animation="fadeIn" delay={800}>
+                  <div className="mt-16 text-center">
+                    <div className="inline-flex items-center gap-2 bg-slate-100 rounded-full px-6 py-3">
+                      <TrendingUp className="h-5 w-5 text-slate-600" />
+                      <span className="text-sm font-medium text-slate-700">
+                        Supervisor Dashboard zeigt alle Meilensteine in Echtzeit
                       </span>
                     </div>
                   </div>
