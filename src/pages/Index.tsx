@@ -279,7 +279,7 @@ const Index = () => {
                       Fortschritt in Echtzeit verfolgen
                     </h2>
                     <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-                      Dr. Jose Martinez überwacht sein Team von 5 Residents und deren FMH-Fortschritt
+                      Dr. Jose Obermann überwacht sein Team von 5 Residents und deren FMH-Fortschritt
                     </p>
                   </div>
                 </AnimatedSection>

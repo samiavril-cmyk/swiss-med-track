@@ -2,8 +2,8 @@
 
 ## 👨‍⚕️ **Supervisors (Vorgesetzte)**
 
-### Dr. Jose Martinez
-- **Email:** `jose.martinez@hospital.ch`
+### Dr. Jose Obermann
+- **Email:** `jose.obermann@hospital.ch`
 - **Password:** `password123`
 - **Rolle:** Supervisor
 - **Abteilung:** Allgemeinchirurgie
@@ -26,35 +26,35 @@
 - **Email:** `anna.schmidt@hospital.ch`
 - **Password:** `password123`
 - **PGY Level:** 3
-- **Supervisor:** Dr. Jose Martinez
+- **Supervisor:** Dr. Jose Obermann
 - **Notizen:** Sehr motiviert, gute technische Fähigkeiten
 
 ### Dr. Michael Müller
 - **Email:** `michael.mueller@hospital.ch`
 - **Password:** `password123`
 - **PGY Level:** 4
-- **Supervisor:** Dr. Jose Martinez
+- **Supervisor:** Dr. Jose Obermann
 - **Notizen:** Erfahren in laparoskopischen Eingriffen
 
 ### Dr. Sarah Johnson
 - **Email:** `sarah.johnson@hospital.ch`
 - **Password:** `password123`
 - **PGY Level:** 2
-- **Supervisor:** Dr. Jose Martinez
+- **Supervisor:** Dr. Jose Obermann
 - **Notizen:** Starke Kommunikationsfähigkeiten
 
 ### Dr. Thomas Brown
 - **Email:** `thomas.brown@hospital.ch`
 - **Password:** `password123`
 - **PGY Level:** 5
-- **Supervisor:** Dr. Jose Martinez
+- **Supervisor:** Dr. Jose Obermann
 - **Notizen:** Senior Resident, bereit für komplexe Fälle
 
 ### Dr. Lisa Garcia
 - **Email:** `lisa.garcia@hospital.ch`
 - **Password:** `password123`
 - **PGY Level:** 3
-- **Supervisor:** Dr. Jose Martinez
+- **Supervisor:** Dr. Jose Obermann
 - **Notizen:** Gute Teamplayerin, zuverlässig
 
 ---
@@ -124,7 +124,7 @@
 
 ### 1. **Supervisor Login**
 ```
-Email: jose.martinez@hospital.ch
+Email: jose.obermann@hospital.ch
 Password: password123
 → Navigate to /supervisor
 ```
