@@ -239,7 +239,7 @@ const SupervisorDashboard: React.FC = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Team-Durchschnitt</span>
-                    <span className="font-semibold">{teamStats.averageProgress.toFixed(1)}%</span>
+                    <span className="font-semibold">{Math.round(teamStats.averageProgress)}%</span>
                   </div>
                   <Progress value={teamStats.averageProgress} className="h-2" />
                 </div>
@@ -524,7 +524,7 @@ const SupervisorDashboard: React.FC = () => {
                           <div className="flex items-center justify-between mb-2">
                             <h4 className="font-semibold">{module.module_name}</h4>
                             <Badge className={getProgressColor(module.progress_percentage)}>
-                              {module.progress_percentage.toFixed(1)}%
+                              {Math.round(module.progress_percentage)}%
                             </Badge>
                           </div>
                           

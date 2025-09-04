@@ -216,10 +216,10 @@ export const GapAnalysis: React.FC<GapAnalysisProps> = ({ modules, userPgyLevel 
                   </div>
                   <div className="text-right min-w-32">
                     <div className="text-sm font-medium">
-                      {gap.current_weighted.toFixed(1)} / {gap.required}
+                      {Math.round(gap.current_weighted)} / {gap.required}
                     </div>
                     <div className="text-xs text-orange-600">
-                      Lücke: {gap.gap.toFixed(1)} Punkte
+                      Lücke: {Math.round(gap.gap)} Punkte
                     </div>
                     <Progress 
                       value={(gap.current_weighted / gap.required) * 100} 
@@ -251,7 +251,7 @@ export const GapAnalysis: React.FC<GapAnalysisProps> = ({ modules, userPgyLevel 
                   ${getIntensityColor(quarter.intensity)}
                   hover:scale-105 transition-transform cursor-pointer
                 `}
-                title={`${quarter.label}: ${quarter.procedureCount} Eingriffe (${quarter.totalWeighted.toFixed(1)} Punkte)`}
+                title={`${quarter.label}: ${quarter.procedureCount} Eingriffe (${Math.round(quarter.totalWeighted)} Punkte)`}
               >
                 <div>{quarter.label}</div>
                 <div className="text-xs opacity-75 mt-1">
@@ -297,7 +297,7 @@ export const GapAnalysis: React.FC<GapAnalysisProps> = ({ modules, userPgyLevel 
                 return (
                   <Alert>
                     <AlertDescription>
-                      Ihre Rollen-Balance ist ausgezeichnet! {responsiblePercentage.toFixed(1)}% 
+                      Ihre Rollen-Balance ist ausgezeichnet! {Math.round(responsiblePercentage)}% 
                       Ihrer Eingriffe als Verantwortlicher durchgeführt.
                     </AlertDescription>
                   </Alert>
@@ -307,7 +307,7 @@ export const GapAnalysis: React.FC<GapAnalysisProps> = ({ modules, userPgyLevel 
                   <Alert>
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription>
-                      Achtung: Nur {responsiblePercentage.toFixed(1)}% Ihrer Eingriffe als Verantwortlicher. 
+                      Achtung: Nur {Math.round(responsiblePercentage)}% Ihrer Eingriffe als Verantwortlicher. 
                       Ziel: ≥30% für optimale FMH-Bewertung. 
                       Fokus auf eigenständige Eingriffe empfohlen.
                     </AlertDescription>

@@ -427,7 +427,7 @@ export default function CourseDetail() {
                 </div>
                 <div className="text-center p-4 bg-accent/50 rounded-lg">
                   <Star className="h-6 w-6 mx-auto mb-2 text-medical-primary" />
-                  <div className="font-semibold">{course.average_rating.toFixed(1)}</div>
+                  <div className="font-semibold">{Math.round(course.average_rating)}</div>
                   <div className="text-sm text-muted-foreground">Rating</div>
                 </div>
               </div>

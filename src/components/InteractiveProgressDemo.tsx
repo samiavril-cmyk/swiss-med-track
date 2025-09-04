@@ -57,7 +57,7 @@ export const InteractiveProgressDemo: React.FC = () => {
   };
 
   const getOverallProgress = () => {
-    const totalCompleted = pgyData.reduce((sum, level) => 
+    const totalCompleted = pgyData.reduce((sum, level) =>
       sum + Math.min(level.procedures, level.required), 0
     );
     const totalRequired = pgyData.reduce((sum, level) => sum + level.required, 0);
@@ -118,8 +118,8 @@ export const InteractiveProgressDemo: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {pgyData.map((level, index) => {
           const progress = getPGYProgress(level);
-          const displayProgress = isAnimating 
-            ? Math.min(animationProgress * 0.8 + index * 5, progress)
+          const displayProgress = isAnimating
+            ? Math.min(Math.round(animationProgress * 0.8 + index * 5), progress)
             : progress;
           
           return (

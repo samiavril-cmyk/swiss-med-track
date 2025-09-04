@@ -180,7 +180,7 @@ export const FMHModuleDetail: React.FC<ModuleDetailProps> = ({ moduleKey, onClos
               {moduleData?.title_de}
             </CardTitle>
             <p className="text-muted-foreground">
-              {totalWeightedScore.toFixed(1)} / {totalRequired} Punkte (gewichtet)
+              {Math.round(totalWeightedScore)} / {totalRequired} Punkte (gewichtet)
             </p>
           </div>
         </div>
@@ -231,7 +231,7 @@ export const FMHModuleDetail: React.FC<ModuleDetailProps> = ({ moduleKey, onClos
                   <div>
                     <div className="flex justify-between text-sm mb-1">
                       <span>Erfüllung</span>
-                      <span>{moduleProgress.toFixed(1)}%</span>
+                      <span>{Math.round(moduleProgress)}%</span>
                     </div>
                     <Progress value={moduleProgress} className="h-2" />
                   </div>
@@ -257,7 +257,7 @@ export const FMHModuleDetail: React.FC<ModuleDetailProps> = ({ moduleKey, onClos
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Punkte total:</span>
-                    <span>{totalWeightedScore.toFixed(1)}</span>
+                    <span>{Math.round(totalWeightedScore)}</span>
                   </div>
                 </div>
               </Card>
@@ -294,7 +294,7 @@ export const FMHModuleDetail: React.FC<ModuleDetailProps> = ({ moduleKey, onClos
                         {required || '-'}
                       </TableCell>
                       <TableCell className="text-center">
-                        {procedure.weighted_score.toFixed(1)}
+                        {Math.round(procedure.weighted_score)}
                       </TableCell>
                       <TableCell className="text-center">
                         <div className="flex gap-1 justify-center">
