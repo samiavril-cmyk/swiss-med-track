@@ -10,8 +10,8 @@
 - **Krankenhaus:** Universitätsspital Zürich
 - **Team:** Allgemeinchirurgie Team A (5 Residents)
 
-### Prof. Dr. Matthias Weber
-- **Email:** `matthias.weber@hospital.ch`
+### Prof. Dr. Mathias Turmann
+- **Email:** `mathias.turmann@hospital.ch`
 - **Password:** `password123`
 - **Rolle:** Supervisor
 - **Abteilung:** Traumatologie
@@ -65,35 +65,35 @@
 - **Email:** `david.wilson@hospital.ch`
 - **Password:** `password123`
 - **PGY Level:** 4
-- **Supervisor:** Prof. Dr. Matthias Weber
+- **Supervisor:** Prof. Dr. Mathias Turmann
 - **Notizen:** Spezialist für Beckenfrakturen
 
 ### Dr. Emma Davis
 - **Email:** `emma.davis@hospital.ch`
 - **Password:** `password123`
 - **PGY Level:** 2
-- **Supervisor:** Prof. Dr. Matthias Weber
+- **Supervisor:** Prof. Dr. Mathias Turmann
 - **Notizen:** Begabt in der Arthroskopie
 
 ### Dr. James Miller
 - **Email:** `james.miller@hospital.ch`
 - **Password:** `password123`
 - **PGY Level:** 3
-- **Supervisor:** Prof. Dr. Matthias Weber
+- **Supervisor:** Prof. Dr. Mathias Turmann
 - **Notizen:** Starke anatomische Kenntnisse
 
 ### Dr. Maria Rodriguez
 - **Email:** `maria.rodriguez@hospital.ch`
 - **Password:** `password123`
 - **PGY Level:** 5
-- **Supervisor:** Prof. Dr. Matthias Weber
+- **Supervisor:** Prof. Dr. Mathias Turmann
 - **Notizen:** Erfahren in der Notfallchirurgie
 
 ### Dr. Robert Taylor
 - **Email:** `robert.taylor@hospital.ch`
 - **Password:** `password123`
 - **PGY Level:** 1
-- **Supervisor:** Prof. Dr. Matthias Weber
+- **Supervisor:** Prof. Dr. Mathias Turmann
 - **Notizen:** Neuer Resident, vielversprechend
 
 ---
@@ -152,7 +152,7 @@ Password: password123
 - **~150-250 Prozeduren** insgesamt
 - **Fokus auf:** Appendektomie, Cholezystektomie, Hernienoperationen
 
-### **Matthias's Team (Traumatologie)**
+### **Mathias's Team (Traumatologie)**
 - **5 Residents** mit verschiedenen PGY Levels
 - **~150-250 Prozeduren** insgesamt
 - **Fokus auf:** Frakturen, Arthroskopie, Osteosynthese
