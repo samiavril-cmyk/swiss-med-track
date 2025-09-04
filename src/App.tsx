@@ -10,6 +10,7 @@ import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
 import { FMHDashboard } from "./pages/FMHDashboard";
 import { FMHDashboardDebug } from "./pages/FMHDashboardDebug";
+import SupervisorDashboard from "./pages/SupervisorDashboard";
 import Features from "./pages/Features";
 import Contact from "./pages/Contact";
 import { AdminCMS } from "./pages/AdminCMS";
@@ -45,7 +46,8 @@ const SPARouter = () => {
       <Route path="/courses/:id" element={<CourseDetail />} />
       <Route path="/publications" element={<Publications />} />
       <Route path="/profile/:handle" element={<Profile />} />
-              <Route path="/fmh" element={<FMHDashboard />} />
+      <Route path="/fmh" element={<FMHDashboard />} />
+      <Route path="/supervisor" element={<SupervisorDashboard />} />
       <Route path="/features" element={<Features />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/admin" element={<AdminCMS />} />

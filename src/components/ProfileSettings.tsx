@@ -5,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Share2, Copy } from 'lucide-react';
+import { Share2, Copy, Users, UserCheck } from 'lucide-react';
 
 interface ProfileSettingsProps {
   userId: string;
@@ -26,6 +27,17 @@ type ProfileRow = {
   handle?: string | null;
   is_public?: boolean | null;
   public_fields?: PublicFields | null;
+  supervisor_id?: string | null;
+  role?: string | null;
+  department?: string | null;
+  hospital?: string | null;
+};
+
+type Supervisor = {
+  user_id: string;
+  full_name: string;
+  department?: string;
+  hospital?: string;
 };
 
 export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ userId }) => {
@@ -34,6 +46,10 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ userId }) => {
   const [saving, setSaving] = useState(false);
   const [handle, setHandle] = useState('');
   const [isPublic, setIsPublic] = useState(false);
+  const [supervisorId, setSupervisorId] = useState<string>('');
+  const [department, setDepartment] = useState<string>('');
+  const [hospital, setHospital] = useState<string>('');
+  const [supervisors, setSupervisors] = useState<Supervisor[]>([]);
   const [publicFields, setPublicFields] = useState<PublicFields>({
     courses: true,
     awards: true,
@@ -55,7 +71,21 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ userId }) => {
       setProfile(p);
       setHandle(p.handle || '');
       setIsPublic(Boolean(p.is_public));
+      setSupervisorId(p.supervisor_id || '');
+      setDepartment(p.department || '');
+      setHospital(p.hospital || '');
       setPublicFields((p.public_fields as PublicFields | null) || publicFields);
+
+      // Fetch available supervisors
+      const { data: supervisorsData, error: supervisorsError } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, department, hospital')
+        .eq('role', 'supervisor')
+        .order('full_name');
+
+      if (!supervisorsError && supervisorsData) {
+        setSupervisors(supervisorsData as Supervisor[]);
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast({
@@ -94,7 +124,10 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ userId }) => {
         .update({
           handle: handle || null,
           is_public: isPublic,
-          public_fields: publicFields
+          public_fields: publicFields,
+          supervisor_id: supervisorId || null,
+          department: department || null,
+          hospital: hospital || null
         })
         .eq('user_id', userId);
 
@@ -168,6 +201,68 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ userId }) => {
 
   return (
     <div className="space-y-6">
+      {/* Supervisor & Team Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Supervisor & Team
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Supervisor Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="supervisor">Supervisor auswählen</Label>
+            <Select value={supervisorId} onValueChange={setSupervisorId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Supervisor auswählen..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Kein Supervisor</SelectItem>
+                {supervisors.map((supervisor) => (
+                  <SelectItem key={supervisor.user_id} value={supervisor.user_id}>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{supervisor.full_name}</span>
+                      {supervisor.department && (
+                        <span className="text-sm text-muted-foreground">
+                          {supervisor.department}
+                          {supervisor.hospital && ` - ${supervisor.hospital}`}
+                        </span>
+                      )}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-sm text-muted-foreground">
+              Wählen Sie Ihren Supervisor aus, um Ihren Fortschritt zu teilen
+            </p>
+          </div>
+
+          {/* Department */}
+          <div className="space-y-2">
+            <Label htmlFor="department">Abteilung</Label>
+            <Input
+              id="department"
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              placeholder="z.B. Allgemeinchirurgie, Traumatologie..."
+            />
+          </div>
+
+          {/* Hospital */}
+          <div className="space-y-2">
+            <Label htmlFor="hospital">Krankenhaus</Label>
+            <Input
+              id="hospital"
+              value={hospital}
+              onChange={(e) => setHospital(e.target.value)}
+              placeholder="z.B. Universitätsspital Zürich..."
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Öffentliches Profil</CardTitle>

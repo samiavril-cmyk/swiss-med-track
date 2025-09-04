@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
-import { GraduationCap, LogOut, Settings, User } from 'lucide-react';
+import { GraduationCap, LogOut, Settings, User, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 export const Header: React.FC = () => {
@@ -55,6 +55,12 @@ export const Header: React.FC = () => {
               <Link to="/publications" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors">
                 Publikationen
               </Link>
+              {userProfile?.role === 'supervisor' && (
+                <Link to="/supervisor" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors flex items-center gap-1">
+                  <Users className="h-4 w-4" />
+                  Supervisor
+                </Link>
+              )}
               {isAdmin && (
                 <Link to="/admin" className="text-sm font-medium text-muted-foreground hover:text-card-foreground transition-colors flex items-center gap-1">
                   <Settings className="h-4 w-4" />
