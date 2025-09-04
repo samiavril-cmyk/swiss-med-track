@@ -7,18 +7,22 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Users, 
-  TrendingUp, 
-  AlertTriangle, 
-  CheckCircle, 
+import {
+  Users,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle,
   Clock,
   UserCheck,
   BarChart3,
   FileText,
   Calendar,
   Stethoscope,
-  Settings
+  GraduationCap,
+  UserPlus,
+  Settings,
+  BookOpen,
+  Award
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import TeamManagement from '@/components/TeamManagement';
@@ -92,13 +96,19 @@ const SupervisorDashboard: React.FC = () => {
         return;
       }
 
-      setResidents(residentsData || []);
+      console.log('Raw residents data:', residentsData);
+      
+      // Parse JSON response (our RPC function returns JSON)
+      const parsedResidents = Array.isArray(residentsData) ? residentsData : (residentsData || []);
+      console.log('Parsed residents:', parsedResidents);
+      
+      setResidents(parsedResidents);
 
       // Calculate team statistics
       const stats: TeamStats = {
-        totalResidents: residentsData?.length || 0,
-        activeResidents: residentsData?.filter((r: Resident) => r.last_activity)?.length || 0,
-        totalProcedures: residentsData?.reduce((sum: number, r: Resident) => sum + r.total_procedures, 0) || 0,
+        totalResidents: parsedResidents?.length || 0,
+        activeResidents: parsedResidents?.filter((r: Resident) => r.last_activity)?.length || 0,
+        totalProcedures: parsedResidents?.reduce((sum: number, r: Resident) => sum + (r.total_procedures || 0), 0) || 0,
         averageProgress: 0, // Will be calculated per resident
         needsAttention: 0 // Will be calculated based on progress
       };
@@ -191,59 +201,244 @@ const SupervisorDashboard: React.FC = () => {
           </p>
         </div>
 
-        {/* Team Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Team Größe</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{teamStats.totalResidents}</div>
-              <p className="text-xs text-muted-foreground">
-                {teamStats.activeResidents} aktiv
-              </p>
-            </CardContent>
-          </Card>
+        {/* New Layout: Stats on Left, Residents on Right */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          {/* Left Side: Team Statistics */}
+          <div className="lg:col-span-1 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-blue-600" />
+                  Team Übersicht
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Team Größe</span>
+                  <span className="text-2xl font-bold">{teamStats.totalResidents}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Aktive Residents</span>
+                  <span className="text-lg font-semibold text-green-600">{teamStats.activeResidents}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Gesamt Prozeduren</span>
+                  <span className="text-lg font-semibold text-blue-600">{teamStats.totalProcedures}</span>
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Gesamt Prozeduren</CardTitle>
-              <Stethoscope className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{teamStats.totalProcedures}</div>
-              <p className="text-xs text-muted-foreground">
-                Alle Residents
-              </p>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-green-600" />
+                  Fortschritt
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Team-Durchschnitt</span>
+                    <span className="font-semibold">{teamStats.averageProgress.toFixed(1)}%</span>
+                  </div>
+                  <Progress value={teamStats.averageProgress} className="h-2" />
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span>Benötigt Aufmerksamkeit</span>
+                  <span className={`font-semibold ${teamStats.needsAttention > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    {teamStats.needsAttention}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Durchschnittlicher Fortschritt</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{teamStats.averageProgress.toFixed(1)}%</div>
-              <p className="text-xs text-muted-foreground">
-                Team-Durchschnitt
-              </p>
-            </CardContent>
-          </Card>
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Schnellaktionen</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button variant="outline" size="sm" className="w-full justify-start">
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Resident hinzufügen
+                </Button>
+                <Button variant="outline" size="sm" className="w-full justify-start">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Bericht exportieren
+                </Button>
+                <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Einstellungen
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Benötigt Aufmerksamkeit</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{teamStats.needsAttention}</div>
-              <p className="text-xs text-muted-foreground">
-                Residents
-              </p>
-            </CardContent>
-          </Card>
+          {/* Right Side: Residents with Milestone Charts */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5 text-purple-600" />
+                  Ihre Residents
+                </CardTitle>
+                <CardDescription>
+                  Klicken Sie auf einen Resident, um detaillierte Milestone-Informationen zu sehen
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {residents.map((resident) => (
+                    <Card
+                      key={resident.user_id}
+                      className={`cursor-pointer transition-all hover:shadow-lg border-l-4 ${
+                        selectedResident?.user_id === resident.user_id
+                          ? 'border-l-blue-500 bg-blue-50/50'
+                          : 'border-l-gray-200'
+                      }`}
+                      onClick={() => handleResidentSelect(resident)}
+                    >
+                      <CardContent className="p-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                          {/* Resident Info */}
+                          <div className="lg:col-span-1 space-y-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                <span className="text-white font-bold text-lg">
+                                  {resident.full_name?.split(' ').map(n => n[0]).join('') || 'R'}
+                                </span>
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-lg">{resident.full_name}</h3>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                                    PGY {resident.pgy_level}
+                                  </Badge>
+                                  <span className="text-sm text-gray-600">{resident.department}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-gray-600">Prozeduren</span>
+                                <span className="font-semibold">{resident.total_procedures || 0}</span>
+                              </div>
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-gray-600">Klinik</span>
+                                <span className="font-semibold">{resident.hospital}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Milestone Charts */}
+                          <div className="lg:col-span-2 space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              {/* Prozeduren Chart */}
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <Stethoscope className="h-4 w-4 text-green-600" />
+                                    <span className="text-sm font-medium">Prozeduren</span>
+                                  </div>
+                                  <Badge variant="outline" className="text-xs">Q4 2024</Badge>
+                                </div>
+                                <div className="h-16 bg-gray-100 rounded-lg p-2">
+                                  <div className="h-full flex items-end gap-1">
+                                    {[20, 35, 45, 50, 55, 60, 65, 70, 75, 78, 82, 85].map((height, i) => (
+                                      <div
+                                        key={i}
+                                        className="bg-gradient-to-t from-green-500 to-green-400 rounded-sm flex-1"
+                                        style={{ height: `${height}%` }}
+                                      ></div>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div className="flex justify-between text-xs text-gray-500">
+                                  <span>Jan</span><span>Jun</span><span>Dez</span>
+                                </div>
+                              </div>
+
+                              {/* Prüfungen Chart */}
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <FileText className="h-4 w-4 text-blue-600" />
+                                    <span className="text-sm font-medium">Prüfungen</span>
+                                  </div>
+                                  <Badge variant="outline" className="text-xs">3/4</Badge>
+                                </div>
+                                <div className="h-16 bg-gray-100 rounded-lg p-2">
+                                  <div className="h-full flex items-end gap-1">
+                                    {[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((height, i) => (
+                                      <div
+                                        key={i}
+                                        className={`rounded-sm flex-1 ${i < 9 ? 'bg-gradient-to-t from-blue-500 to-blue-400' : 'bg-gray-200'}`}
+                                        style={{ height: i < 9 ? '100%' : '20%' }}
+                                      ></div>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div className="flex justify-between text-xs text-gray-500">
+                                  <span>Q1</span><span>Q2</span><span>Q3</span><span>Q4</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              {/* Publikationen Chart */}
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <BookOpen className="h-4 w-4 text-purple-600" />
+                                    <span className="text-sm font-medium">Publikationen</span>
+                                  </div>
+                                  <Badge variant="outline" className="text-xs">2/3</Badge>
+                                </div>
+                                <div className="h-16 bg-gray-100 rounded-lg p-2">
+                                  <div className="h-full flex items-end gap-1">
+                                    {[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((height, i) => (
+                                      <div
+                                        key={i}
+                                        className={`rounded-sm flex-1 ${i < 8 ? 'bg-gradient-to-t from-purple-500 to-purple-400' : 'bg-gray-200'}`}
+                                        style={{ height: i < 8 ? '100%' : '20%' }}
+                                      ></div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Awards Chart */}
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <Award className="h-4 w-4 text-amber-600" />
+                                    <span className="text-sm font-medium">Awards</span>
+                                  </div>
+                                  <Badge variant="outline" className="text-xs">1/2</Badge>
+                                </div>
+                                <div className="h-16 bg-gray-100 rounded-lg p-2">
+                                  <div className="h-full flex items-end gap-1">
+                                    {[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((height, i) => (
+                                      <div
+                                        key={i}
+                                        className={`rounded-sm flex-1 ${i < 6 ? 'bg-gradient-to-t from-amber-500 to-amber-400' : 'bg-gray-200'}`}
+                                        style={{ height: i < 6 ? '100%' : '20%' }}
+                                      ></div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Main Content */}
