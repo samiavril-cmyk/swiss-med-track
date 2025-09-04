@@ -13,11 +13,12 @@ export const Header: React.FC = () => {
       console.log('[Header] Starting sign out...');
       await signOut();
       console.log('[Header] Sign out completed, navigating to home...');
-      navigate('/');
+      // Force page reload to ensure clean state
+      window.location.href = '/';
     } catch (error) {
       console.error('[Header] Error during sign out:', error);
       // Still navigate to home even if sign out fails
-      navigate('/');
+      window.location.href = '/';
     }
   };
 
