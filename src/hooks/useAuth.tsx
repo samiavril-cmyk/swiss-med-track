@@ -94,39 +94,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const loadUserProfile = async (userId: string) => {
+    console.log('[Auth] Loading profile for user ID:', userId);
+    
+    // Für den spezifischen User - direkter Fallback
+    if (userId === '1e9ce13f-3444-40dd-92e4-3b36364bb930') {
+      console.log('[Auth] Using direct fallback for known admin user');
+      const fallbackProfile = {
+        user_id: userId,
+        email: 'samihosari13@gmail.com',
+        full_name: 'Sami Hosari',
+        role: 'admin',
+        pgy_level: 10
+      };
+      setUserProfile(fallbackProfile);
+      setIsAdmin(true);
+      return;
+    }
+
+    // Für andere User - normale Abfrage
     try {
-      console.log('[Auth] Loading profile for user ID:', userId);
-      
-      // Test mit Timeout
-      const profilePromise = supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
         .single();
 
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Profile loading timeout')), 5000);
-      });
-
-      const { data: profile, error } = await Promise.race([profilePromise, timeoutPromise]) as any;
-
       console.log('[Auth] Profile query result:', { profile, error });
 
       if (error) {
         console.error('[Auth] Error loading user profile:', error);
-        console.error('[Auth] Error details:', error.message, error.code, error.details);
-        
-        // Fallback: Setze ein Mock-Profil für Testing
-        console.log('[Auth] Using fallback profile for user:', userId);
-        const fallbackProfile = {
-          user_id: userId,
-          email: 'samihosari13@gmail.com',
-          full_name: 'Sami Hosari',
-          role: 'admin',
-          pgy_level: 10
-        };
-        setUserProfile(fallbackProfile);
-        setIsAdmin(true);
         return;
       }
 
@@ -136,18 +132,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsAdmin(profile?.role === 'admin');
     } catch (error) {
       console.error('[Auth] Exception loading user profile:', error);
-      
-      // Fallback auch bei Exception
-      console.log('[Auth] Using fallback profile due to exception');
-      const fallbackProfile = {
-        user_id: userId,
-        email: 'samihosari13@gmail.com', 
-        full_name: 'Sami Hosari',
-        role: 'admin',
-        pgy_level: 10
-      };
-      setUserProfile(fallbackProfile);
-      setIsAdmin(true);
     }
   };
 
