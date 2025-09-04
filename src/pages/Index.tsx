@@ -7,7 +7,7 @@ import AnimatedSection, { StaggeredContainer } from '@/components/AnimatedSectio
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Users, TrendingUp, CheckCircle, AlertTriangle, Stethoscope, Award, FileText, Calendar } from 'lucide-react';
+import { Users, TrendingUp, CheckCircle, AlertTriangle, Stethoscope, Award, FileText, Calendar, BookOpen } from 'lucide-react';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<
@@ -320,53 +320,320 @@ const Index = () => {
 
                   <AnimatedSection animation="slideRight" delay={400}>
                     <div className="space-y-6">
-                      <h4 className="text-xl font-semibold text-slate-900 mb-4">Resident Fortschritte</h4>
+                      <h4 className="text-xl font-semibold text-slate-900 mb-4">Resident Milestone Tracking</h4>
                       
-                      {/* Anna Schmidt */}
+                      {/* Anna Schmidt - Milestone Graphs */}
                       <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-white/20">
-                        <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center justify-between mb-4">
                           <div>
                             <h5 className="font-semibold text-slate-900">Dr. Anna Schmidt</h5>
-                            <p className="text-sm text-slate-600">PGY 3 • 45 Prozeduren</p>
+                            <p className="text-sm text-slate-600">PGY 3 • Allgemeinchirurgie</p>
                           </div>
                           <Badge className="bg-green-100 text-green-700">85%</Badge>
                         </div>
-                        <Progress value={85} className="mb-2" />
-                        <div className="flex justify-between text-xs text-slate-500">
-                          <span>Basis: 30/35</span>
-                          <span>Viszeral: 15/20</span>
+                        
+                        {/* Milestone Line Graphs */}
+                        <div className="space-y-4">
+                          {/* Prozeduren - Highlighted */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Stethoscope className="h-4 w-4 text-green-600" />
+                                <span className="text-sm font-medium text-green-700">Prozeduren</span>
+                                <Badge variant="outline" className="text-xs border-green-200 text-green-600">45/50</Badge>
+                              </div>
+                            </div>
+                            <div className="h-8 bg-slate-100 rounded-lg p-2">
+                              <div className="h-full flex items-end gap-1">
+                                {[8, 12, 15, 18, 22, 25, 28, 32, 35, 38, 42, 45].map((height, i) => (
+                                  <div 
+                                    key={i}
+                                    className="bg-gradient-to-t from-green-500 to-green-400 rounded-sm flex-1"
+                                    style={{ height: `${height}%` }}
+                                  ></div>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="flex justify-between text-xs text-slate-500">
+                              <span>Q1</span><span>Q2</span><span>Q3</span><span>Q4</span>
+                            </div>
+                          </div>
+
+                          {/* Prüfungen */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <FileText className="h-4 w-4 text-blue-600" />
+                                <span className="text-sm font-medium">Prüfungen</span>
+                                <Badge variant="outline" className="text-xs border-blue-200 text-blue-600">3/4</Badge>
+                              </div>
+                            </div>
+                            <div className="h-6 bg-slate-100 rounded-lg p-1">
+                              <div className="h-full flex items-end gap-1">
+                                {[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((height, i) => (
+                                  <div 
+                                    key={i}
+                                    className={`rounded-sm flex-1 ${i < 9 ? 'bg-gradient-to-t from-blue-500 to-blue-400' : 'bg-slate-200'}`}
+                                    style={{ height: i < 9 ? '100%' : '20%' }}
+                                  ></div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Publikationen */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <BookOpen className="h-4 w-4 text-purple-600" />
+                                <span className="text-sm font-medium">Publikationen</span>
+                                <Badge variant="outline" className="text-xs border-purple-200 text-purple-600">2/3</Badge>
+                              </div>
+                            </div>
+                            <div className="h-6 bg-slate-100 rounded-lg p-1">
+                              <div className="h-full flex items-end gap-1">
+                                {[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((height, i) => (
+                                  <div 
+                                    key={i}
+                                    className={`rounded-sm flex-1 ${i < 8 ? 'bg-gradient-to-t from-purple-500 to-purple-400' : 'bg-slate-200'}`}
+                                    style={{ height: i < 8 ? '100%' : '20%' }}
+                                  ></div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Awards */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Award className="h-4 w-4 text-amber-600" />
+                                <span className="text-sm font-medium">Awards</span>
+                                <Badge variant="outline" className="text-xs border-amber-200 text-amber-600">1/2</Badge>
+                              </div>
+                            </div>
+                            <div className="h-6 bg-slate-100 rounded-lg p-1">
+                              <div className="h-full flex items-end gap-1">
+                                {[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((height, i) => (
+                                  <div 
+                                    key={i}
+                                    className={`rounded-sm flex-1 ${i < 6 ? 'bg-gradient-to-t from-amber-500 to-amber-400' : 'bg-slate-200'}`}
+                                    style={{ height: i < 6 ? '100%' : '20%' }}
+                                  ></div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
-                      {/* Michael Müller */}
+                      {/* Michael Müller - Milestone Graphs */}
                       <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-white/20">
-                        <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center justify-between mb-4">
                           <div>
                             <h5 className="font-semibold text-slate-900">Dr. Michael Müller</h5>
-                            <p className="text-sm text-slate-600">PGY 4 • 52 Prozeduren</p>
+                            <p className="text-sm text-slate-600">PGY 4 • Allgemeinchirurgie</p>
                           </div>
                           <Badge className="bg-green-100 text-green-700">92%</Badge>
                         </div>
-                        <Progress value={92} className="mb-2" />
-                        <div className="flex justify-between text-xs text-slate-500">
-                          <span>Basis: 35/38</span>
-                          <span>Viszeral: 17/20</span>
+                        
+                        {/* Milestone Line Graphs */}
+                        <div className="space-y-4">
+                          {/* Prozeduren - Highlighted */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Stethoscope className="h-4 w-4 text-green-600" />
+                                <span className="text-sm font-medium text-green-700">Prozeduren</span>
+                                <Badge variant="outline" className="text-xs border-green-200 text-green-600">52/55</Badge>
+                              </div>
+                            </div>
+                            <div className="h-8 bg-slate-100 rounded-lg p-2">
+                              <div className="h-full flex items-end gap-1">
+                                {[10, 15, 20, 25, 30, 35, 38, 42, 45, 48, 50, 52].map((height, i) => (
+                                  <div 
+                                    key={i}
+                                    className="bg-gradient-to-t from-green-500 to-green-400 rounded-sm flex-1"
+                                    style={{ height: `${height}%` }}
+                                  ></div>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="flex justify-between text-xs text-slate-500">
+                              <span>Q1</span><span>Q2</span><span>Q3</span><span>Q4</span>
+                            </div>
+                          </div>
+
+                          {/* Prüfungen */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <FileText className="h-4 w-4 text-blue-600" />
+                                <span className="text-sm font-medium">Prüfungen</span>
+                                <Badge variant="outline" className="text-xs border-blue-200 text-blue-600">4/4</Badge>
+                              </div>
+                            </div>
+                            <div className="h-6 bg-slate-100 rounded-lg p-1">
+                              <div className="h-full flex items-end gap-1">
+                                {[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((height, i) => (
+                                  <div 
+                                    key={i}
+                                    className="bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm flex-1"
+                                    style={{ height: '100%' }}
+                                  ></div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Publikationen */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <BookOpen className="h-4 w-4 text-purple-600" />
+                                <span className="text-sm font-medium">Publikationen</span>
+                                <Badge variant="outline" className="text-xs border-purple-200 text-purple-600">3/3</Badge>
+                              </div>
+                            </div>
+                            <div className="h-6 bg-slate-100 rounded-lg p-1">
+                              <div className="h-full flex items-end gap-1">
+                                {[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((height, i) => (
+                                  <div 
+                                    key={i}
+                                    className="bg-gradient-to-t from-purple-500 to-purple-400 rounded-sm flex-1"
+                                    style={{ height: '100%' }}
+                                  ></div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Awards */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Award className="h-4 w-4 text-amber-600" />
+                                <span className="text-sm font-medium">Awards</span>
+                                <Badge variant="outline" className="text-xs border-amber-200 text-amber-600">2/2</Badge>
+                              </div>
+                            </div>
+                            <div className="h-6 bg-slate-100 rounded-lg p-1">
+                              <div className="h-full flex items-end gap-1">
+                                {[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((height, i) => (
+                                  <div 
+                                    key={i}
+                                    className="bg-gradient-to-t from-amber-500 to-amber-400 rounded-sm flex-1"
+                                    style={{ height: '100%' }}
+                                  ></div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
-                      {/* Sarah Johnson */}
+                      {/* Sarah Johnson - Milestone Graphs */}
                       <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-white/20">
-                        <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center justify-between mb-4">
                           <div>
                             <h5 className="font-semibold text-slate-900">Dr. Sarah Johnson</h5>
-                            <p className="text-sm text-slate-600">PGY 2 • 28 Prozeduren</p>
+                            <p className="text-sm text-slate-600">PGY 2 • Allgemeinchirurgie</p>
                           </div>
                           <Badge className="bg-yellow-100 text-yellow-700">65%</Badge>
                         </div>
-                        <Progress value={65} className="mb-2" />
-                        <div className="flex justify-between text-xs text-slate-500">
-                          <span>Basis: 20/30</span>
-                          <span>Viszeral: 8/15</span>
+                        
+                        {/* Milestone Line Graphs */}
+                        <div className="space-y-4">
+                          {/* Prozeduren - Highlighted */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Stethoscope className="h-4 w-4 text-green-600" />
+                                <span className="text-sm font-medium text-green-700">Prozeduren</span>
+                                <Badge variant="outline" className="text-xs border-green-200 text-green-600">28/35</Badge>
+                              </div>
+                            </div>
+                            <div className="h-8 bg-slate-100 rounded-lg p-2">
+                              <div className="h-full flex items-end gap-1">
+                                {[5, 8, 10, 12, 15, 18, 20, 22, 24, 26, 27, 28].map((height, i) => (
+                                  <div 
+                                    key={i}
+                                    className="bg-gradient-to-t from-green-500 to-green-400 rounded-sm flex-1"
+                                    style={{ height: `${height}%` }}
+                                  ></div>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="flex justify-between text-xs text-slate-500">
+                              <span>Q1</span><span>Q2</span><span>Q3</span><span>Q4</span>
+                            </div>
+                          </div>
+
+                          {/* Prüfungen */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <FileText className="h-4 w-4 text-blue-600" />
+                                <span className="text-sm font-medium">Prüfungen</span>
+                                <Badge variant="outline" className="text-xs border-blue-200 text-blue-600">1/3</Badge>
+                              </div>
+                            </div>
+                            <div className="h-6 bg-slate-100 rounded-lg p-1">
+                              <div className="h-full flex items-end gap-1">
+                                {[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((height, i) => (
+                                  <div 
+                                    key={i}
+                                    className={`rounded-sm flex-1 ${i < 4 ? 'bg-gradient-to-t from-blue-500 to-blue-400' : 'bg-slate-200'}`}
+                                    style={{ height: i < 4 ? '100%' : '20%' }}
+                                  ></div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Publikationen */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <BookOpen className="h-4 w-4 text-purple-600" />
+                                <span className="text-sm font-medium">Publikationen</span>
+                                <Badge variant="outline" className="text-xs border-purple-200 text-purple-600">0/2</Badge>
+                              </div>
+                            </div>
+                            <div className="h-6 bg-slate-100 rounded-lg p-1">
+                              <div className="h-full flex items-end gap-1">
+                                {[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((height, i) => (
+                                  <div 
+                                    key={i}
+                                    className="bg-slate-200 rounded-sm flex-1"
+                                    style={{ height: '20%' }}
+                                  ></div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Awards */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Award className="h-4 w-4 text-amber-600" />
+                                <span className="text-sm font-medium">Awards</span>
+                                <Badge variant="outline" className="text-xs border-amber-200 text-amber-600">0/1</Badge>
+                              </div>
+                            </div>
+                            <div className="h-6 bg-slate-100 rounded-lg p-1">
+                              <div className="h-full flex items-end gap-1">
+                                {[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((height, i) => (
+                                  <div 
+                                    key={i}
+                                    className="bg-slate-200 rounded-sm flex-1"
+                                    style={{ height: '20%' }}
+                                  ></div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
