@@ -109,6 +109,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       };
       setUserProfile(fallbackProfile);
       setIsAdmin(true);
+      console.log('[Auth] Fallback profile set:', fallbackProfile);
       return;
     }
 

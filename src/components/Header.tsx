@@ -5,10 +5,11 @@ import { GraduationCap, LogOut, Settings, User, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 export const Header: React.FC = () => {
-  const { user, signOut, isAdmin, userProfile } = useAuth();
+  const { user, signOut, isAdmin, userProfile, loading } = useAuth();
   const navigate = useNavigate();
   
   // Debug logging
+  console.log('[Header] Loading:', loading);
   console.log('[Header] User:', user?.email);
   console.log('[Header] UserProfile:', userProfile);
   console.log('[Header] UserProfile Role:', userProfile?.role);
@@ -91,7 +92,9 @@ export const Header: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
-          {user ? (
+          {loading ? (
+            <div className="text-sm text-muted-foreground">Loading...</div>
+          ) : user ? (
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4 text-muted-foreground" />
