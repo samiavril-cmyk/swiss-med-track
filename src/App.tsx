@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { HashRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Index from "./pages/Index";
 import { Dashboard } from "./pages/Dashboard";
@@ -41,13 +41,8 @@ const SPARouter = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Handle GitHub Pages SPA routing
-    const search = window.location.search;
-    if (search.startsWith('?/')) {
-      const path = search.slice(2);
-      window.history.replaceState(null, '', path || '/');
-      navigate(path || '/');
-    }
+    // HashRouter handles routing automatically, no special SPA logic needed
+    console.log('HashRouter initialized, current hash:', window.location.hash);
   }, [navigate]);
 
   return (
@@ -140,9 +135,9 @@ const App = () => (
       <AuthErrorBoundary>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <HashRouter>
           <SPARouter />
-        </BrowserRouter>
+        </HashRouter>
         <HealthMonitorWrapper />
       </AuthErrorBoundary>
     </AuthProviderResilient>
