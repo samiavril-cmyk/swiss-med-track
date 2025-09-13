@@ -140,7 +140,7 @@ const App = () => (
       <AuthErrorBoundary>
         <Toaster />
         <Sonner />
-        <BrowserRouter basename="/swiss-med-track">
+        <BrowserRouter>
           <SPARouter />
         </BrowserRouter>
         <HealthMonitorWrapper />
