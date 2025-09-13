@@ -37,13 +37,13 @@ export const SimpleAuth: React.FC = () => {
       const sessionResp = await supabase.auth.getSession();
       if (sessionResp.data.session?.user) {
         toast.success("Anmeldung erfolgreich! Willkommen zurück!");
-        navigate('/fmh', { replace: true });
+        navigate('/dashboard', { replace: true });
       } else {
         toast.message("Anmeldung verarbeitet, Session wird aufgebaut...", { description: "Bitte einen Moment warten." });
         setTimeout(async () => {
           const again = await supabase.auth.getSession();
           if (again.data.session?.user) {
-            navigate('/fmh', { replace: true });
+            navigate('/dashboard', { replace: true });
           } else {
             setError('Session konnte nicht initialisiert werden. Bitte erneut versuchen.');
             toast.error('Session-Initialisierung fehlgeschlagen');
@@ -85,7 +85,7 @@ export const SimpleAuth: React.FC = () => {
         
         // If email confirmation is disabled, redirect immediately
         if (data.session) {
-          navigate('/fmh', { replace: true });
+          navigate('/dashboard', { replace: true });
         }
       }
     } catch (error: unknown) {

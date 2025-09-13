@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
+import { Link } from 'react-router-dom';
 
 import { ArrowRight, CheckCircle, Users, BookOpen, Award } from 'lucide-react';
 
@@ -56,17 +57,23 @@ export const HeroSection: React.FC = () => {
               
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center mb-12">
-                <Button variant="default" size="lg" className="gap-2 shadow-card-hover">
-                  Als Resident starten
-                  <ArrowRight className="w-5 h-5" />
-                </Button>
-                <Button variant="secondary" size="lg" className="gap-2">
-                  <BookOpen className="w-5 h-5" />
-                  Demo ansehen
-                </Button>
-                <Button variant="outline" size="lg">
-                  Kurs anbieten
-                </Button>
+                <Link to="/auth">
+                  <Button variant="default" size="lg" className="gap-2 shadow-card-hover">
+                    Als Resident starten
+                    <ArrowRight className="w-5 h-5" />
+                  </Button>
+                </Link>
+                <Link to="/dashboard">
+                  <Button variant="secondary" size="lg" className="gap-2">
+                    <BookOpen className="w-5 h-5" />
+                    Demo ansehen
+                  </Button>
+                </Link>
+                <Link to="/contact">
+                  <Button variant="outline" size="lg">
+                    Kurs anbieten
+                  </Button>
+                </Link>
               </div>
               
               {/* Trust Indicators */}
