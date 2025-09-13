@@ -54,12 +54,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (session?.user && isMounted) {
           console.debug('[Auth] loading user profile...');
           await loadUserProfile(session.user.id);
-          if (isMounted) {
-            setLoading(false);
-          }
         } else if (isMounted) {
           setUserProfile(null);
           setIsAdmin(false);
+        }
+
+        if (isMounted) {
           setLoading(false);
         }
       }
@@ -75,10 +75,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (session?.user && isMounted) {
         await loadUserProfile(session.user.id);
-        if (isMounted) {
-          setLoading(false);
-        }
-      } else if (isMounted) {
+      }
+
+      if (isMounted) {
         setLoading(false);
       }
     }).catch((error) => {
