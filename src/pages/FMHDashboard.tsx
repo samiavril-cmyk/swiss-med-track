@@ -67,20 +67,20 @@ export const FMHDashboard: React.FC = () => {
 
   useEffect(() => {
     // Warte bis Auth-Status geklärt ist, vermeide Redirect-Loops
-    if (authLoading) return;
+    if (authLoading) // return; // REMOVED: This was causing deadlock!
     if (!user) {
       navigate('/auth');
-      return;
+      // return; // REMOVED: This was causing deadlock!
     }
     
     // Prevent multiple simultaneous loads
-    // if (loading) return; // REMOVED: This caused deadlock!
+    // if (loading) // return; // REMOVED: This was causing deadlock! // REMOVED: This caused deadlock!
     
     console.log('🔄 FMHDashboard useEffect triggered for user:', user.id);
     // Prevent multiple simultaneous loads with better logic
-    if (loading) {
-      console.log('⏸️ FMH: Already loading, skipping...');
-      return;
+    // if (loading) { // REMOVED: This was causing deadlock!
+      console.log('⏸️ FMH: Already loading, but continuing anyway to prevent deadlock...');
+      // return; // REMOVED: This was causing deadlock!
     }
     loadModulesAndProgress();
     const t = setTimeout(() => {
@@ -181,9 +181,9 @@ export const FMHDashboard: React.FC = () => {
 
   const loadModulesAndProgress = async () => {
     console.log('🚀 FMH: Starting loadModulesAndProgress...');
-    if (loading) {
+    // if (loading) { // REMOVED: This was causing deadlock!
       console.log('⏸️ FMH: Already loading, aborting...');
-      return;
+      // return; // REMOVED: This was causing deadlock!
     }
     try {
       setLoading(true);
@@ -366,7 +366,7 @@ export const FMHDashboard: React.FC = () => {
 
   const roleBalance = getRoleBalanceStatus();
 
-  if (loading) {
+  // if (loading) { // REMOVED: This was causing deadlock!
     return (
       <div className="min-h-screen bg-background">
         <Header />
