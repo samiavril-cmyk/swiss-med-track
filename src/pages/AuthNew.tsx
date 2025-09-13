@@ -7,16 +7,26 @@ export default function AuthNew() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is already logged in
+    // Check if user is already logged in with timeout
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        console.log('[AuthNew] User already logged in, navigating to /dashboard');
-        // Use replace to avoid back button issues
-        navigate('/dashboard', { replace: true });
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          console.log('[AuthNew] User already logged in, navigating to /dashboard');
+          // Use replace to avoid back button issues
+          navigate('/dashboard', { replace: true });
+        }
+      } catch (error) {
+        console.log('[AuthNew] Session check failed, showing login form');
       }
     };
-    checkUser();
+    
+    // Timeout nach 1 Sekunde - verhindert endloses Warten
+    const timeout = setTimeout(() => {
+      console.log('[AuthNew] Session check timeout - showing login form');
+    }, 1000);
+    
+    checkUser().finally(() => clearTimeout(timeout));
   }, [navigate]);
 
   return <SimpleAuth />;
