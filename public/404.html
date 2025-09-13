@@ -1,23 +1,19 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Swiss Med Track - Redirecting...</title>
-    <script type="text/javascript">
-      // GitHub Pages SPA redirect
-      var l = window.location;
-      var path = l.pathname.replace('/swiss-med-track/', '');
-      
-      // Redirect to index.html with the path as search parameter
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + 
-        '/swiss-med-track/?/' + path + 
-        (l.search ? '&' + l.search.slice(1) : '') + 
-        l.hash
-      );
-    </script>
-  </head>
-  <body>
-    <p>Redirecting to Swiss Med Track...</p>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <title>Swiss Med Track</title>
+  <script>
+    var pathSegmentsToKeep = 1;
+    var l = window.location;
+    l.replace(
+      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+      l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
+      l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+      l.hash
+    );
+  </script>
+</head>
+<body></body>
 </html>
