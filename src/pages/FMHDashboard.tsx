@@ -70,7 +70,7 @@ export const FMHDashboard: React.FC = () => {
     if (authLoading) return;
     if (!user) {
       console.log('🔄 FMH: No user, redirecting to /auth');
-      navigate('/auth');
+      navigate('/auth', { replace: true });
       return;
     }
     
