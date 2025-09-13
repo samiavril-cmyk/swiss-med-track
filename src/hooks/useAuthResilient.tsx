@@ -234,6 +234,16 @@ export const AuthProviderResilient: React.FC<AuthProviderResilientProps> = ({ ch
     };
   }, [authState.user, authState.retryCount]);
 
+  // Initial loading reset - verhindert endloses "Loading"
+  useEffect(() => {
+    const initialTimeout = setTimeout(() => {
+      console.log('[Auth] Initial loading timeout - setting loading to false');
+      setAuthState(prev => ({ ...prev, loading: false }));
+    }, 2000);
+
+    return () => clearTimeout(initialTimeout);
+  }, []);
+
   // Robuste Profil-Ladung mit Circuit Breaker
   const loadUserProfile = useCallback(async (userId: string): Promise<any> => {
     console.log('[Auth] Loading profile for user ID:', userId);
