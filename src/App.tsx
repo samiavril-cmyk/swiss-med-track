@@ -9,7 +9,6 @@ import Profile from "./pages/Profile";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
 import { FMHDashboard } from "./pages/FMHDashboard";
-import { FMHDashboardDebug } from "./pages/FMHDashboardDebug";
 import SupervisorDashboard from "./pages/SupervisorDashboard";
 import Features from "./pages/Features";
 import Contact from "./pages/Contact";
@@ -51,7 +50,6 @@ const SPARouter = () => {
       <Route path="/features" element={<Features />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/admin" element={<AdminCMS />} />
-      <Route path="/fmh-debug" element={<FMHDashboardDebug />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>
