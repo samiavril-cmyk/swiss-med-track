@@ -69,6 +69,7 @@ export const FMHDashboard: React.FC = () => {
     // Warte bis Auth-Status geklärt ist, vermeide Redirect-Loops
     if (authLoading) return;
     if (!user) {
+      console.log('🔄 FMH: No user, redirecting to /auth');
       navigate('/auth');
       return;
     }

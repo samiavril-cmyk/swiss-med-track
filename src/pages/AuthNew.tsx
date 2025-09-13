@@ -11,6 +11,7 @@ export default function AuthNew() {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
+        console.log('[AuthNew] User already logged in, navigating to /fmh');
         navigate('/fmh');
       }
     };
