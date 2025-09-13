@@ -74,9 +74,14 @@ export const FMHDashboard: React.FC = () => {
     }
     
     // Prevent multiple simultaneous loads
-    if (loading) return;
+    // if (loading) return; // REMOVED: This caused deadlock!
     
     console.log('🔄 FMHDashboard useEffect triggered for user:', user.id);
+    // Prevent multiple simultaneous loads with better logic
+    if (loading) {
+      console.log('⏸️ FMH: Already loading, skipping...');
+      return;
+    }
     loadModulesAndProgress();
     const t = setTimeout(() => {
       console.log('⏰ Timeout reached - stopping loading');
@@ -168,12 +173,18 @@ export const FMHDashboard: React.FC = () => {
         assistant_count: assistantCount
       }];
     } catch (error) {
+      console.error('❌ FMH: Critical error in loadModulesAndProgress:', error);
       console.error('Error in manual calculation:', error);
       return null;
     }
   };
 
   const loadModulesAndProgress = async () => {
+    console.log('🚀 FMH: Starting loadModulesAndProgress...');
+    if (loading) {
+      console.log('⏸️ FMH: Already loading, aborting...');
+      return;
+    }
     try {
       setLoading(true);
       
@@ -236,6 +247,7 @@ export const FMHDashboard: React.FC = () => {
               progressData = data;
             }
           } catch (error) {
+      console.error('❌ FMH: Critical error in loadModulesAndProgress:', error);
             console.error('❌ RPC timeout/error for module', module.key, ':', error);
             // Fallback: Calculate progress manually from procedure_logs
             progressData = await calculateProgressManually(authUser.id, module.key);
@@ -284,6 +296,7 @@ export const FMHDashboard: React.FC = () => {
 
       setModules(modulesWithProgress);
     } catch (error) {
+      console.error('❌ FMH: Critical error in loadModulesAndProgress:', error);
       console.error('Error loading modules:', error);
       // Set fallback modules to prevent endless loading
       setModules([
@@ -321,6 +334,7 @@ export const FMHDashboard: React.FC = () => {
         }
       ]);
     } finally {
+      console.log('✅ FMH: loadModulesAndProgress completed, setting loading to false');
       setLoading(false);
     }
   };
