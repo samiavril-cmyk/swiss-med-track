@@ -26,13 +26,12 @@ const SPARouter = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if there's an intended route stored in sessionStorage
-    const intendedRoute = sessionStorage.getItem('intendedRoute');
-    if (intendedRoute) {
-      // Clear the stored route
-      sessionStorage.removeItem('intendedRoute');
-      // Navigate to the intended route
-      navigate(intendedRoute);
+    // Handle GitHub Pages SPA routing
+    const search = window.location.search;
+    if (search.startsWith('?/')) {
+      const path = search.slice(2);
+      window.history.replaceState(null, '', path || '/');
+      navigate(path || '/');
     }
   }, [navigate]);
 
