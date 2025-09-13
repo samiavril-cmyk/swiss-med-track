@@ -77,6 +77,8 @@ export const FMHDashboard: React.FC = () => {
     // if (loading) // return; // REMOVED: This was causing deadlock! // REMOVED: This caused deadlock!
     
     console.log('🔄 FMHDashboard useEffect triggered for user:', user.id);
+    console.log('🔍 FMH: Current loading state:', loading);
+    console.log('🔍 FMH: Current modules count:', modules.length);
     // Prevent multiple simultaneous loads with better logic
     // if (loading) { // REMOVED: This was causing deadlock!
       console.log('⏸️ FMH: Already loading, but continuing anyway to prevent deadlock...');
@@ -180,6 +182,8 @@ export const FMHDashboard: React.FC = () => {
   };
 
   const loadModulesAndProgress = async () => {
+    console.log('🚀 FMH: Starting loadModulesAndProgress...');
+    console.log('🔍 FMH: Current state - loading:', loading, 'modules:', modules.length);
     console.log('🚀 FMH: Starting loadModulesAndProgress...');
     // if (loading) { // REMOVED: This was causing deadlock!
       console.log('⏸️ FMH: Already loading, aborting...');
