@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 export const SimpleAuth: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState('samihosari13@gmail.com');
+  const [email, setEmail] = useState('samihosari@me.com');
   const [password, setPassword] = useState('password123');
   const [fullName, setFullName] = useState('');
   const [institution, setInstitution] = useState('');
@@ -27,10 +27,14 @@ export const SimpleAuth: React.FC = () => {
 
     try {
       console.log('[SimpleAuth] Attempting sign in with:', email);
+      console.log('[SimpleAuth] Supabase URL:', supabase.supabaseUrl);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
+
+      console.log('[SimpleAuth] Auth response:', { data, error });
 
       if (error) {
         console.error('[SimpleAuth] Sign in error:', error);
@@ -41,6 +45,7 @@ export const SimpleAuth: React.FC = () => {
       toast.success("Anmeldung erfolgreich! Willkommen zurück!");
       
       // Direkte Navigation ohne komplexe Session-Checks
+      console.log('[SimpleAuth] Navigating to /dashboard');
       navigate('/dashboard', { replace: true });
       
     } catch (error: unknown) {
