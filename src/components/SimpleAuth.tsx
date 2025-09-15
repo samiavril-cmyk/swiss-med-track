@@ -13,8 +13,8 @@ import { toast } from 'sonner';
 export const SimpleAuth: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('samihosari13@gmail.com');
+  const [password, setPassword] = useState('password123');
   const [fullName, setFullName] = useState('');
   const [institution, setInstitution] = useState('');
   const [pgyLevel, setPgyLevel] = useState('1');
@@ -26,32 +26,25 @@ export const SimpleAuth: React.FC = () => {
     setLoading(true);
 
     try {
+      console.log('[SimpleAuth] Attempting sign in with:', email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
-
-      // Warte auf bestätigte Session, bevor navigiert wird
-      const sessionResp = await supabase.auth.getSession();
-      if (sessionResp.data.session?.user) {
-        toast.success("Anmeldung erfolgreich! Willkommen zurück!");
-        navigate('/dashboard', { replace: true });
-      } else {
-        toast.message("Anmeldung verarbeitet, Session wird aufgebaut...", { description: "Bitte einen Moment warten." });
-        setTimeout(async () => {
-          const again = await supabase.auth.getSession();
-          if (again.data.session?.user) {
-            navigate('/dashboard', { replace: true });
-          } else {
-            setError('Session konnte nicht initialisiert werden. Bitte erneut versuchen.');
-            toast.error('Session-Initialisierung fehlgeschlagen');
-          }
-        }, 1200);
+      if (error) {
+        console.error('[SimpleAuth] Sign in error:', error);
+        throw error;
       }
+
+      console.log('[SimpleAuth] Sign in successful, user:', data.user?.id);
+      toast.success("Anmeldung erfolgreich! Willkommen zurück!");
+      
+      // Direkte Navigation ohne komplexe Session-Checks
+      navigate('/dashboard', { replace: true });
+      
     } catch (error: unknown) {
-      console.error('Sign in error:', error);
+      console.error('[SimpleAuth] Sign in error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Anmeldung fehlgeschlagen';
       setError(errorMessage);
       toast.error(errorMessage);
