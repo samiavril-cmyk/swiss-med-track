@@ -3,263 +3,166 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
+  Search, 
+  Filter, 
+  Calendar, 
+  User, 
   Stethoscope, 
-  Plus, 
-  Minus, 
-  CheckCircle, 
-  AlertCircle,
-  Target,
-  Activity,
-  TrendingUp
+  Edit, 
+  Trash2,
+  Plus,
+  Download
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthResilient } from '@/hooks/useAuthResilient';
 import { toast } from 'sonner';
-
-interface Procedure {
-  id: string;
-  code: string;
-  title_de: string;
-  min_required_by_pgy: Record<string, number>;
-  category_id: string;
-  active: boolean;
-}
-
-interface ProcedureCategory {
-  id: string;
-  key: string;
-  title_de: string;
-  minimum_required: number;
-  module_type: string;
-  sort_index: number;
-}
 
 interface ProcedureLog {
   id: string;
   procedure_id: string;
-  role_in_surgery: 'primary' | 'instructing' | 'assistant';
-  count: number;
-}
-
-interface ProcedureProgress {
-  procedure: Procedure;
-  responsible: number;
-  instructing: number;
-  assistant: number;
-  total: number;
-  required: number;
-  progress: number;
-  status: 'completed' | 'in-progress' | 'not-started';
+  role_in_surgery: string;
+  date_performed: string;
+  notes: string;
+  supervisor_name: string;
+  institution: string;
+  created_at: string;
+  procedure: {
+    code: string;
+    title_de: string;
+    category: {
+      title_de: string;
+      module_type: string;
+    };
+  };
 }
 
 export const FMHProcedureTracking: React.FC = () => {
-  const { user } = useAuth();
-  const [categories, setCategories] = useState<ProcedureCategory[]>([]);
-  const [procedures, setProcedures] = useState<Procedure[]>([]);
-  const [procedureProgress, setProcedureProgress] = useState<ProcedureProgress[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('basis_notfallchirurgie');
-  const [userPgyLevel, setUserPgyLevel] = useState<number>(5);
+  const { user } = useAuthResilient();
+  const [logs, setLogs] = useState<ProcedureLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterRole, setFilterRole] = useState<string>('all');
+  const [filterModule, setFilterModule] = useState<string>('all');
+  const [filterDate, setFilterDate] = useState<string>('');
 
   useEffect(() => {
     if (user) {
-      loadData();
+      loadProcedureLogs();
     }
   }, [user]);
 
-  const loadData = async () => {
+  const loadProcedureLogs = async () => {
+    if (!user) return;
+
     try {
       setLoading(true);
-      
-      // Load user PGY level
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('pgy_level')
-        .eq('user_id', user!.id)
-        .single();
-      
-      if (profile?.pgy_level) {
-        setUserPgyLevel(profile.pgy_level);
-      }
+      const { data, error } = await supabase
+        .from('procedure_logs')
+        .select(`
+          id,
+          procedure_id,
+          role_in_surgery,
+          date_performed,
+          notes,
+          supervisor_name,
+          institution,
+          created_at,
+          procedure:procedures(
+            code,
+            title_de,
+            category:procedure_categories(
+              title_de,
+              module_type
+            )
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('date_performed', { ascending: false });
 
-      // Load categories
-      const { data: categoryData } = await supabase
-        .from('procedure_categories')
-        .select('*')
-        .not('module_type', 'is', null)
-        .order('sort_index');
-
-      if (categoryData) {
-        setCategories(categoryData);
-        if (categoryData.length > 0 && !selectedCategory) {
-          setSelectedCategory(categoryData[0].key);
-        }
-      }
-
-      // Load procedures
-      const { data: procedureData } = await supabase
-        .from('procedures')
-        .select('*')
-        .eq('active', true)
-        .order('code');
-
-      if (procedureData) {
-        setProcedures(procedureData);
-      }
-
-      // Load procedure logs
-      await loadProcedureProgress(procedureData || [], profile?.pgy_level || 5);
-
+      if (error) throw error;
+      setLogs(data || []);
     } catch (error) {
-      console.error('Error loading data:', error);
-      toast.error('Fehler beim Laden der Daten');
+      console.error('Error loading procedure logs:', error);
+      toast.error('Fehler beim Laden der Prozeduren');
     } finally {
       setLoading(false);
     }
   };
 
-  const loadProcedureProgress = async (procedures: Procedure[], pgyLevel: number) => {
-    if (!user || procedures.length === 0) return;
+  const deleteLog = async (logId: string) => {
+    if (!confirm('Sind Sie sicher, dass Sie diese Prozedur löschen möchten?')) return;
 
     try {
-      const { data: logs } = await supabase
+      const { error } = await supabase
         .from('procedure_logs')
-        .select('procedure_id, role_in_surgery')
-        .eq('user_id', user.id);
+        .delete()
+        .eq('id', logId);
 
-      const progressData: ProcedureProgress[] = procedures.map(procedure => {
-        const procedureLogs = logs?.filter(log => log.procedure_id === procedure.id) || [];
-        
-        const responsible = procedureLogs.filter(log => log.role_in_surgery === 'primary').length;
-        const instructing = procedureLogs.filter(log => log.role_in_surgery === 'instructing').length;
-        const assistant = procedureLogs.filter(log => log.role_in_surgery === 'assistant').length;
-        
-        const total = responsible + instructing + assistant;
-        const required = procedure.min_required_by_pgy[`pgy${pgyLevel}`] || 0;
-        const progress = required > 0 ? Math.min((total / required) * 100, 100) : 0;
-        
-        let status: 'completed' | 'in-progress' | 'not-started' = 'not-started';
-        if (total >= required && required > 0) {
-          status = 'completed';
-        } else if (total > 0) {
-          status = 'in-progress';
-        }
-
-        return {
-          procedure,
-          responsible,
-          instructing,
-          assistant,
-          total,
-          required,
-          progress,
-          status
-        };
-      });
-
-      setProcedureProgress(progressData);
+      if (error) throw error;
+      
+      toast.success('Prozedur gelöscht');
+      loadProcedureLogs();
     } catch (error) {
-      console.error('Error loading procedure progress:', error);
+      console.error('Error deleting log:', error);
+      toast.error('Fehler beim Löschen der Prozedur');
     }
   };
 
-  const updateProcedureCount = async (procedureId: string, role: 'primary' | 'instructing' | 'assistant', increment: boolean) => {
-    if (!user) return;
-
-    try {
-      setSaving(true);
-
-      if (increment) {
-        // Add new procedure log
-        const { error } = await supabase
-          .from('procedure_logs')
-          .insert({
-            user_id: user.id,
-            procedure_id: procedureId,
-            performed_date: new Date().toISOString().split('T')[0],
-            role_in_surgery: role,
-            supervisor: 'Dr. Supervisor',
-            hospital: 'Klinik',
-            case_id: `CASE-${Date.now()}`
-          });
-
-        if (error) throw error;
-      } else {
-        // Remove most recent procedure log for this role
-        const { data: logs } = await supabase
-          .from('procedure_logs')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('procedure_id', procedureId)
-          .eq('role_in_surgery', role)
-          .order('created_at', { ascending: false })
-          .limit(1);
-
-        if (logs && logs.length > 0) {
-          const { error } = await supabase
-            .from('procedure_logs')
-            .delete()
-            .eq('id', logs[0].id);
-
-          if (error) throw error;
-        }
-      }
-
-      // Reload data
-      await loadData();
-      toast.success('Prozedur erfolgreich aktualisiert');
-
-    } catch (error) {
-      console.error('Error updating procedure:', error);
-      toast.error('Fehler beim Aktualisieren der Prozedur');
-    } finally {
-      setSaving(false);
+  const getRoleBadgeVariant = (role: string) => {
+    switch (role) {
+      case 'responsible': return 'default';
+      case 'instructing': return 'secondary';
+      case 'assistant': return 'outline';
+      default: return 'outline';
     }
   };
 
-  const getCategoryProcedures = (categoryKey: string) => {
-    const category = categories.find(c => c.key === categoryKey);
-    if (!category) return [];
-
-    return procedureProgress.filter(progress => 
-      progress.procedure.category_id === category.id
-    );
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'responsible': return 'Verantwortlich';
+      case 'instructing': return 'Instruierend';
+      case 'assistant': return 'Assistent';
+      default: return role;
+    }
   };
 
-  const getCategoryProgress = (categoryKey: string) => {
-    const categoryProcedures = getCategoryProcedures(categoryKey);
-    const totalRequired = categoryProcedures.reduce((sum, p) => sum + p.required, 0);
-    const totalCompleted = categoryProcedures.reduce((sum, p) => sum + p.total, 0);
+  const filteredLogs = logs.filter(log => {
+    const matchesSearch = log.procedure.title_de.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         log.procedure.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         log.supervisor_name.toLowerCase().includes(searchTerm.toLowerCase());
     
-    return {
-      total: totalCompleted,
-      required: totalRequired,
-      progress: totalRequired > 0 ? (totalCompleted / totalRequired) * 100 : 0,
-      completed: categoryProcedures.filter(p => p.status === 'completed').length,
-      totalProcedures: categoryProcedures.length
-    };
-  };
+    const matchesRole = filterRole === 'all' || log.role_in_surgery === filterRole;
+    const matchesModule = filterModule === 'all' || log.procedure.category.module_type === filterModule;
+    const matchesDate = !filterDate || log.date_performed.startsWith(filterDate);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'text-green-600 bg-green-50 border-green-200';
-      case 'in-progress': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
-    }
-  };
+    return matchesSearch && matchesRole && matchesModule && matchesDate;
+  });
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed': return <CheckCircle className="w-4 h-4" />;
-      case 'in-progress': return <TrendingUp className="w-4 h-4" />;
-      default: return <Target className="w-4 h-4" />;
-    }
+  const exportToCSV = () => {
+    const csvContent = [
+      ['Datum', 'Prozedur', 'Code', 'Rolle', 'Supervisor', 'Institution', 'Notizen'],
+      ...filteredLogs.map(log => [
+        log.date_performed,
+        log.procedure.title_de,
+        log.procedure.code,
+        getRoleLabel(log.role_in_surgery),
+        log.supervisor_name,
+        log.institution,
+        log.notes
+      ])
+    ].map(row => row.join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `fmh-procedures-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   if (loading) {
@@ -275,167 +178,213 @@ export const FMHProcedureTracking: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-card-foreground">FMH Prozeduren Tracking</h2>
-          <p className="text-muted-foreground">Verfolgen Sie Ihre chirurgischen Prozeduren nach FMH-Standards</p>
-          <p className="text-sm text-muted-foreground mt-1">Aktueller PGY-Level: {userPgyLevel}</p>
+          <h2 className="text-2xl font-bold">Prozeduren Tracking</h2>
+          <p className="text-muted-foreground">
+            Übersicht aller erfassten chirurgischen Eingriffe
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={exportToCSV} className="gap-2">
+            <Download className="w-4 h-4" />
+            Export CSV
+          </Button>
         </div>
       </div>
 
-      {/* Category Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        {categories.map(category => {
-          const progress = getCategoryProgress(category.key);
-          return (
-            <Card 
-              key={category.id} 
-              className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                selectedCategory === category.key ? 'ring-2 ring-primary' : ''
-              }`}
-              onClick={() => setSelectedCategory(category.key)}
-            >
-              <CardContent className="p-4">
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-2">
-                    <Stethoscope className="w-6 h-6 text-primary" />
-                  </div>
-                  <h3 className="font-semibold text-sm mb-2">{category.title_de}</h3>
-                  <div className="space-y-2">
-                    <Progress value={progress.progress} className="h-2" />
-                    <div className="text-xs text-muted-foreground">
-                      {progress.completed}/{progress.totalProcedures} abgeschlossen
-                    </div>
-                    <div className="text-xs font-medium">
-                      {progress.total}/{progress.required} Prozeduren
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Stethoscope className="w-4 h-4 text-primary" />
+              <div>
+                <p className="text-sm text-muted-foreground">Gesamt</p>
+                <p className="text-2xl font-bold">{logs.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-green-500" />
+              <div>
+                <p className="text-sm text-muted-foreground">Verantwortlich</p>
+                <p className="text-2xl font-bold">
+                  {logs.filter(l => l.role_in_surgery === 'responsible').length}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-blue-500" />
+              <div>
+                <p className="text-sm text-muted-foreground">Instruierend</p>
+                <p className="text-2xl font-bold">
+                  {logs.filter(l => l.role_in_surgery === 'instructing').length}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p4">
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-gray-500" />
+              <div>
+                <p className="text-sm text-muted-foreground">Assistent</p>
+                <p className="text-2xl font-bold">
+                  {logs.filter(l => l.role_in_surgery === 'assistant').length}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Procedure Details */}
+      {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="w-5 h-5" />
-            {categories.find(c => c.key === selectedCategory)?.title_de}
-          </CardTitle>
+          <CardTitle className="text-lg">Filter & Suche</CardTitle>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-[600px]">
-            <div className="space-y-4">
-              {getCategoryProcedures(selectedCategory).map(progress => (
-                <Card key={progress.procedure.id} className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Badge variant="outline" className="text-xs">
-                          {progress.procedure.code}
-                        </Badge>
-                        <Badge 
-                          variant="outline" 
-                          className={`text-xs ${getStatusColor(progress.status)}`}
-                        >
-                          {getStatusIcon(progress.status)}
-                          <span className="ml-1">
-                            {progress.status === 'completed' ? 'Abgeschlossen' : 
-                             progress.status === 'in-progress' ? 'In Bearbeitung' : 'Nicht begonnen'}
-                          </span>
-                        </Badge>
-                      </div>
-                      <h4 className="font-medium text-card-foreground">
-                        {progress.procedure.title_de}
-                      </h4>
-                      <p className="text-sm text-muted-foreground">
-                        Erforderlich: {progress.required} | Aktuell: {progress.total}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-primary">
-                        {Math.round(progress.progress)}%
-                      </div>
-                      <Progress value={progress.progress} className="w-20 h-2 mt-1" />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <Label className="text-xs text-muted-foreground">Verantwortlich</Label>
-                      <div className="flex items-center justify-center gap-2 mt-1">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateProcedureCount(progress.procedure.id, 'primary', false)}
-                          disabled={saving || progress.responsible === 0}
-                        >
-                          <Minus className="w-3 h-3" />
-                        </Button>
-                        <span className="font-medium w-8 text-center">{progress.responsible}</span>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateProcedureCount(progress.procedure.id, 'primary', true)}
-                          disabled={saving}
-                        >
-                          <Plus className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="text-center">
-                      <Label className="text-xs text-muted-foreground">Instruierend</Label>
-                      <div className="flex items-center justify-center gap-2 mt-1">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateProcedureCount(progress.procedure.id, 'instructing', false)}
-                          disabled={saving || progress.instructing === 0}
-                        >
-                          <Minus className="w-3 h-3" />
-                        </Button>
-                        <span className="font-medium w-8 text-center">{progress.instructing}</span>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateProcedureCount(progress.procedure.id, 'instructing', true)}
-                          disabled={saving}
-                        >
-                          <Plus className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="text-center">
-                      <Label className="text-xs text-muted-foreground">Assistent</Label>
-                      <div className="flex items-center justify-center gap-2 mt-1">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateProcedureCount(progress.procedure.id, 'assistant', false)}
-                          disabled={saving || progress.assistant === 0}
-                        >
-                          <Minus className="w-3 h-3" />
-                        </Button>
-                        <span className="font-medium w-8 text-center">{progress.assistant}</span>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateProcedureCount(progress.procedure.id, 'assistant', true)}
-                          disabled={saving}
-                        >
-                          <Plus className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              ))}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Suche</label>
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Prozedur, Code, Supervisor..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
-          </ScrollArea>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Rolle</label>
+              <Select value={filterRole} onValueChange={setFilterRole}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle Rollen</SelectItem>
+                  <SelectItem value="responsible">Verantwortlich</SelectItem>
+                  <SelectItem value="instructing">Instruierend</SelectItem>
+                  <SelectItem value="assistant">Assistent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Modul</label>
+              <Select value={filterModule} onValueChange={setFilterModule}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle Module</SelectItem>
+                  <SelectItem value="basis">Basis</SelectItem>
+                  <SelectItem value="viszeral">Viszeral</SelectItem>
+                  <SelectItem value="trauma">Trauma</SelectItem>
+                  <SelectItem value="kombi">Kombination</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Datum</label>
+              <Input
+                type="month"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+              />
+            </div>
+          </div>
         </CardContent>
       </Card>
+
+      {/* Results */}
+      {filteredLogs.length === 0 ? (
+        <Alert>
+          <AlertDescription>
+            {logs.length === 0 
+              ? 'Noch keine Prozeduren erfasst. Verwenden Sie "Prozedur erfassen" um eine neue Prozedur hinzuzufügen.'
+              : 'Keine Prozeduren entsprechen den aktuellen Filtern.'
+            }
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              Prozeduren ({filteredLogs.length} von {logs.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Datum</TableHead>
+                    <TableHead>Prozedur</TableHead>
+                    <TableHead>Code</TableHead>
+                    <TableHead>Rolle</TableHead>
+                    <TableHead>Supervisor</TableHead>
+                    <TableHead>Institution</TableHead>
+                    <TableHead>Aktionen</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredLogs.map((log) => (
+                    <TableRow key={log.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-muted-foreground" />
+                          {new Date(log.date_performed).toLocaleDateString('de-CH')}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{log.procedure.title_de}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {log.procedure.category.title_de}
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <code className="text-sm bg-muted px-2 py-1 rounded">
+                          {log.procedure.code}
+                        </code>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getRoleBadgeVariant(log.role_in_surgery)}>
+                          {getRoleLabel(log.role_in_surgery)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{log.supervisor_name || '-'}</TableCell>
+                      <TableCell>{log.institution || '-'}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => deleteLog(log.id)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

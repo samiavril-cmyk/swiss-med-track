@@ -1,775 +1,349 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  Save, 
-  X, 
-  FileText, 
-  Calendar,
-  User,
-  Stethoscope,
-  Plus,
-  Minus,
-  Loader2
-} from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Calendar, Clock, User, Stethoscope, Plus, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthResilient } from '@/hooks/useAuthResilient';
 import { toast } from 'sonner';
 
-interface DbProcedure {
+interface Procedure {
   id: string;
-  title_de: string;
   code: string;
-  min_required_by_pgy: Record<string, number>;
-  category_id: string;
+  title_de: string;
+  min_required_by_pgy: any;
 }
 
-interface DbCategory {
+interface ProcedureCategory {
   id: string;
   key: string;
   title_de: string;
-  minimum_required: number;
+  module_type: string;
 }
 
-interface ProcedureEntry {
-  id: string;
-  name: string;
-  minimum: number;
-  verantwortlich: number;
-  instruierend: number;
-  assistent: number;
-  total: number;
+interface ManualEntryData {
+  procedure_id: string;
+  role_in_surgery: string;
+  date_performed: string;
+  notes: string;
+  supervisor_name: string;
+  institution: string;
 }
 
-interface ModuleData {
-  id: string;
-  key: string;
-  title: string;
-  procedures: ProcedureEntry[];
-  totalMinimum: number;
-  totalCount: number;
-}
-
-interface FMHManualEntryProps {
+export const FMHManualEntry: React.FC<{
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess?: () => void;
-}
-
-export const FMHManualEntry: React.FC<FMHManualEntryProps> = ({
-  open,
-  onOpenChange,
-  onSuccess
-}) => {
-  const { user } = useAuth();
-  const [modules, setModules] = useState<Record<string, ModuleData>>({});
-  const [savedModules, setSavedModules] = useState<Record<string, ModuleData>>({});
-  const [currentDate, setCurrentDate] = useState(new Date().toLocaleDateString('de-CH'));
-  const [patientInfo, setPatientInfo] = useState({
-    name: 'Sami Zacharia Hosari',
-    id: '175214',
-    institution: 'USZ'
+  onSuccess: () => void;
+}> = ({ open, onOpenChange, onSuccess }) => {
+  const { user } = useAuthResilient();
+  const [categories, setCategories] = useState<ProcedureCategory[]>([]);
+  const [procedures, setProcedures] = useState<Procedure[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  
+  const [formData, setFormData] = useState<ManualEntryData>({
+    procedure_id: '',
+    role_in_surgery: 'responsible',
+    date_performed: new Date().toISOString().split('T')[0],
+    notes: '',
+    supervisor_name: '',
+    institution: ''
   });
-  const [isSaving, setIsSaving] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [dbProcedures, setDbProcedures] = useState<DbProcedure[]>([]);
-  const [userPgyLevel, setUserPgyLevel] = useState<number>(5); // Default to PGY5
 
-  // Load modules and procedures from database
-  const loadModulesAndProcedures = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      // Load user's PGY level first
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('pgy_level')
-          .eq('user_id', user.id)
-          .single();
-        
-        if (profile?.pgy_level) {
-          setUserPgyLevel(profile.pgy_level);
-        }
-      }
-
-      // Load categories (modules) - only the 5 correct FMH modules
-      const { data: categories, error: categoriesError } = await supabase
-        .from('procedure_categories')
-        .select('*')
-        .in('key', ['basis_notfallchirurgie', 'basis_allgemeinchirurgie', 'viszeralchirurgie', 'traumatologie', 'kombination'])
-        .order('sort_index');
-
-      // Load procedures
-      const { data: procedures, error: proceduresError } = await supabase
-        .from('procedures')
-        .select('*')
-        .eq('active', true)
-        .order('code');
-
-      if (proceduresError) {
-        console.error('Error loading procedures:', proceduresError);
-        toast.error('Fehler beim Laden der Prozeduren');
-        return;
-      }
-
-      setDbProcedures(procedures || []);
-
-      // Build module structure
-      const moduleData: Record<string, ModuleData> = {};
-      
-      categories?.forEach(category => {
-        const categoryProcedures = procedures?.filter(p => p.category_id === category.id) || [];
-        
-        moduleData[category.key] = {
-          id: category.id,
-          key: category.key,
-          title: category.title_de,
-          totalMinimum: category.minimum_required || 0,
-          totalCount: 0,
-          procedures: categoryProcedures.map(procedure => ({
-            id: procedure.id,
-            name: procedure.title_de,
-            minimum: (procedure.min_required_by_pgy)?.[`pgy${userPgyLevel}`] || 0, // Use user's PGY level
-            verantwortlich: 0,
-            instruierend: 0,
-            assistent: 0,
-            total: 0
-          }))
-        };
-      });
-
-      setModules(moduleData);
-      setSavedModules(moduleData);
-      
-      // Load existing data after modules are set
-      if (user) {
-        await loadExistingData(moduleData);
-      }
-    } catch (error) {
-      console.error('Error loading modules and procedures:', error);
-      toast.error('Fehler beim Laden der Daten');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user, userPgyLevel, loadExistingData]);
-
+  // Load categories on mount
   useEffect(() => {
     if (open) {
-      loadModulesAndProcedures();
-    }
-  }, [open, loadModulesAndProcedures]);
-
-  // Prevent background scrolling when modal is open
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = 'unset';
-      };
+      loadCategories();
     }
   }, [open]);
 
+  // Load procedures when category changes
   useEffect(() => {
-    if (user) {
-      // Auto-fill user information if available
-      const { user_metadata } = user;
-      if (user_metadata?.full_name) {
-        setPatientInfo(prev => ({
-          ...prev,
-          name: user_metadata.full_name,
-          institution: user_metadata.institution || 'USZ'
-        }));
-      }
+    if (selectedCategory) {
+      loadProcedures(selectedCategory);
     }
-  }, [user]);
+  }, [selectedCategory]);
 
-  const loadExistingData = useCallback(async (moduleData: Record<string, ModuleData>) => {
+  const loadCategories = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('procedure_categories')
+        .select('id, key, title_de, module_type')
+        .not('module_type', 'is', null)
+        .order('sort_index');
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+      toast.error('Fehler beim Laden der Kategorien');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadProcedures = async (categoryId: string) => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('procedures')
+        .select('id, code, title_de, min_required_by_pgy')
+        .eq('category_id', categoryId)
+        .eq('active', true)
+        .order('title_de');
+
+      if (error) throw error;
+      setProcedures(data || []);
+    } catch (error) {
+      console.error('Error loading procedures:', error);
+      toast.error('Fehler beim Laden der Prozeduren');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!user) return;
 
     try {
-      console.log('🔍 FMHManualEntry - Loading data for user ID:', user.id);
+      setSubmitting(true);
       
-      // Load existing procedure logs for the user
-      const { data: logs, error } = await supabase
+      const { error } = await supabase
         .from('procedure_logs')
-        .select(`
-          id,
-          procedure_id,
-          role_in_surgery,
-          performed_date
-        `)
-        .eq('user_id', user.id)
-        .gte('performed_date', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-
-      if (error) {
-        console.error('Error loading existing data:', error);
-        return;
-      }
-
-      console.log('📊 FMHManualEntry - Loaded', logs?.length || 0, 'procedure logs for user', user.id);
-
-      // Group logs by procedure ID and count by role
-      const procedureCounts: Record<string, { verantwortlich: number; instruierend: number; assistent: number }> = {};
-      
-      logs?.forEach(log => {
-        if (!procedureCounts[log.procedure_id]) {
-          procedureCounts[log.procedure_id] = { verantwortlich: 0, instruierend: 0, assistent: 0 };
-        }
-        
-        if (log.role_in_surgery === 'primary' || log.role_in_surgery === 'responsible') {
-          procedureCounts[log.procedure_id].verantwortlich++;
-        } else if (log.role_in_surgery === 'instructing') {
-          procedureCounts[log.procedure_id].instruierend++;
-        } else if (log.role_in_surgery === 'assistant' || log.role_in_surgery === 'assist') {
-          procedureCounts[log.procedure_id].assistent++;
-        }
-      });
-
-      // Update module data with existing counts
-      const newSavedModules = { ...moduleData };
-      const newCurrentModules = { ...moduleData };
-      
-      Object.keys(newSavedModules).forEach(moduleKey => {
-        newSavedModules[moduleKey].procedures.forEach((procedure, index) => {
-          const counts = procedureCounts[procedure.id];
-          if (counts) {
-            const updatedProcedure = {
-              ...procedure,
-              verantwortlich: counts.verantwortlich,
-              instruierend: counts.instruierend,
-              assistent: counts.assistent,
-              total: counts.verantwortlich + counts.instruierend + counts.assistent
-            };
-            
-            newSavedModules[moduleKey].procedures[index] = updatedProcedure;
-            newCurrentModules[moduleKey].procedures[index] = { ...updatedProcedure };
-            
-            console.log(`✅ Loaded counts for "${procedure.name}" - V:${counts.verantwortlich} I:${counts.instruierend} A:${counts.assistent}`);
-          }
+        .insert({
+          user_id: user.id,
+          procedure_id: formData.procedure_id,
+          role_in_surgery: formData.role_in_surgery,
+          date_performed: formData.date_performed,
+          notes: formData.notes,
+          supervisor_name: formData.supervisor_name,
+          institution: formData.institution,
+          created_at: new Date().toISOString()
         });
-        
-        // Update module totals
-        newSavedModules[moduleKey].totalCount = newSavedModules[moduleKey].procedures.reduce(
-          (sum, proc) => sum + proc.total, 0
-        );
-        newCurrentModules[moduleKey].totalCount = newCurrentModules[moduleKey].procedures.reduce(
-          (sum, proc) => sum + proc.total, 0
-        );
+
+      if (error) throw error;
+
+      toast.success('Prozedur erfolgreich erfasst!');
+      onSuccess();
+      onOpenChange(false);
+      
+      // Reset form
+      setFormData({
+        procedure_id: '',
+        role_in_surgery: 'responsible',
+        date_performed: new Date().toISOString().split('T')[0],
+        notes: '',
+        supervisor_name: '',
+        institution: ''
       });
+      setSelectedCategory('');
+      setProcedures([]);
       
-      setSavedModules(newSavedModules);
-      setModules(newCurrentModules);
-      
-      console.log('✅ Form initialized with existing data');
     } catch (error) {
-      console.error('Error loading existing procedure data:', error);
-    }
-  }, [user]);
-
-  const updateProcedureValue = (
-    moduleKey: string,
-    procedureIndex: number,
-    field: 'verantwortlich' | 'instruierend' | 'assistent',
-    value: number
-  ) => {
-    setModules(prev => {
-      const newModules = { ...prev };
-      const procedure = { ...newModules[moduleKey].procedures[procedureIndex] };
-      
-      procedure[field] = Math.max(0, value);
-      procedure.total = procedure.verantwortlich + procedure.instruierend + procedure.assistent;
-      
-      newModules[moduleKey] = {
-        ...newModules[moduleKey],
-        procedures: [
-          ...newModules[moduleKey].procedures.slice(0, procedureIndex),
-          procedure,
-          ...newModules[moduleKey].procedures.slice(procedureIndex + 1)
-        ]
-      };
-      
-      // Update module total
-      newModules[moduleKey].totalCount = newModules[moduleKey].procedures.reduce(
-        (sum, proc) => sum + proc.total, 0
-      );
-      
-      return newModules;
-    });
-  };
-
-  // Find or create procedure by name with improved matching
-  const findOrCreateProcedure = async (procedureName: string): Promise<string | null> => {
-    console.log(`🔍 Searching for procedure: "${procedureName}"`);
-    
-    // First try exact match in our loaded procedures
-    let matchedProcedure = dbProcedures.find(p => 
-      p.title_de.toLowerCase().trim() === procedureName.toLowerCase().trim()
-    );
-    
-    if (matchedProcedure) {
-      console.log(`✅ Exact match found: ${matchedProcedure.title_de} (${matchedProcedure.id})`);
-      return matchedProcedure.id;
-    }
-    
-    // Try fuzzy match
-    const normalizedName = procedureName.toLowerCase().trim();
-    
-    const fuzzyMatches = dbProcedures.filter(p => {
-      const procName = p.title_de.toLowerCase().trim();
-      
-      // Check if either contains the other (partial match)
-      if (procName.includes(normalizedName) || normalizedName.includes(procName)) {
-        return true;
-      }
-      
-      return false;
-    });
-    
-    if (fuzzyMatches.length > 0) {
-      matchedProcedure = fuzzyMatches[0];
-      console.log(`✅ Fuzzy match found: ${matchedProcedure.title_de} (${matchedProcedure.id})`);
-      return matchedProcedure.id;
-    }
-    
-    console.log(`❌ No match found for: "${procedureName}"`);
-    return null;
-  };
-
-  const handleSave = async () => {
-    if (!user) {
-      toast.error('Sie müssen angemeldet sein um Daten zu speichern');
-      return;
-    }
-
-    setIsSaving(true);
-    console.log('🚀 Starting procedure save process...');
-    console.log('💾 FMHManualEntry - Saving data for user ID:', user.id);
-    
-    try {
-      // Calculate differences and prepare procedure logs for database insertion/deletion
-      const procedureLogsToInsert = [];
-      const procedureLogsToDelete = [];
-      const failedProcedures: string[] = [];
-      const successfulProcedures: string[] = [];
-      
-      for (const [moduleKey, moduleData] of Object.entries(modules)) {
-        console.log(`📋 Processing module: ${moduleData.title}`);
-        
-        for (let i = 0; i < moduleData.procedures.length; i++) {
-          const currentProcedure = moduleData.procedures[i];
-          const savedProcedure = savedModules[moduleKey].procedures[i];
-          
-          // Calculate differences (positive = add, negative = remove)
-          const diffVerantwortlich = currentProcedure.verantwortlich - savedProcedure.verantwortlich;
-          const diffInstruierend = currentProcedure.instruierend - savedProcedure.instruierend;
-          const diffAssistent = currentProcedure.assistent - savedProcedure.assistent;
-          
-          if (diffVerantwortlich === 0 && diffInstruierend === 0 && diffAssistent === 0) {
-            continue; // Skip if no changes
-          }
-          
-          console.log(`📝 Processing procedure: "${currentProcedure.name}" (Changes: V:${diffVerantwortlich} I:${diffInstruierend} A:${diffAssistent})`);
-          
-          // Use existing procedure ID instead of finding/creating
-          const procedureId = currentProcedure.id;
-          if (!procedureId) {
-            console.warn(`❌ No procedure ID for: ${currentProcedure.name}`);
-            failedProcedures.push(currentProcedure.name);
-            continue;
-          }
-          
-          successfulProcedures.push(currentProcedure.name);
-          
-          // Handle additions (positive differences)
-          if (diffVerantwortlich > 0) {
-            for (let j = 0; j < diffVerantwortlich; j++) {
-              procedureLogsToInsert.push({
-                user_id: user.id,
-                procedure_id: procedureId,
-                role_in_surgery: 'primary',
-                performed_date: new Date().toISOString().split('T')[0],
-                notes: `Manuelle Eingabe - ${moduleData.title}`
-              });
-            }
-          }
-          
-          if (diffInstruierend > 0) {
-            for (let j = 0; j < diffInstruierend; j++) {
-              procedureLogsToInsert.push({
-                user_id: user.id,
-                procedure_id: procedureId,
-                role_in_surgery: 'instructing',
-                performed_date: new Date().toISOString().split('T')[0],
-                notes: `Manuelle Eingabe - ${moduleData.title}`
-              });
-            }
-          }
-          
-          if (diffAssistent > 0) {
-            for (let j = 0; j < diffAssistent; j++) {
-              procedureLogsToInsert.push({
-                user_id: user.id,
-                procedure_id: procedureId,
-                role_in_surgery: 'assistant',
-                performed_date: new Date().toISOString().split('T')[0],
-                notes: `Manuelle Eingabe - ${moduleData.title}`
-              });
-            }
-          }
-          
-          // Handle removals (negative differences)
-          if (diffVerantwortlich < 0) {
-            // Get the most recent logs to delete
-            const { data: logsToRemove } = await supabase
-              .from('procedure_logs')
-              .select('id')
-              .eq('user_id', user.id)
-              .eq('procedure_id', procedureId)
-              .in('role_in_surgery', ['primary', 'responsible'])
-              .order('created_at', { ascending: false })
-              .limit(Math.abs(diffVerantwortlich));
-            
-            if (logsToRemove) {
-              procedureLogsToDelete.push(...logsToRemove.map(log => log.id));
-            }
-          }
-          
-          // Handle removals for instructing role
-          if (diffInstruierend < 0) {
-            const { data: logsToRemove } = await supabase
-              .from('procedure_logs')
-              .select('id')
-              .eq('user_id', user.id)
-              .eq('procedure_id', procedureId)
-              .eq('role_in_surgery', 'instructing')
-              .order('created_at', { ascending: false })
-              .limit(Math.abs(diffInstruierend));
-            
-            if (logsToRemove) {
-              procedureLogsToDelete.push(...logsToRemove.map(log => log.id));
-            }
-          }
-          
-          // Handle removals for assistant role
-          if (diffAssistent < 0) {
-            const { data: logsToRemove } = await supabase
-              .from('procedure_logs')
-              .select('id')
-              .eq('user_id', user.id)
-              .eq('procedure_id', procedureId)
-              .eq('role_in_surgery', 'assistant')
-              .order('created_at', { ascending: false })
-              .limit(Math.abs(diffAssistent));
-            
-            if (logsToRemove) {
-              procedureLogsToDelete.push(...logsToRemove.map(log => log.id));
-            }
-          }
-        }
-      }
-
-      console.log(`📊 Summary: ${procedureLogsToInsert.length} logs to insert, ${procedureLogsToDelete.length} logs to delete`);
-      console.log(`✅ Successful procedures: ${successfulProcedures.length}`, successfulProcedures);
-      if (failedProcedures.length > 0) {
-        console.log(`❌ Failed procedures: ${failedProcedures.length}`, failedProcedures);
-      }
-
-      // Execute database operations
-      let operationsCount = 0;
-      
-      if (procedureLogsToInsert.length > 0) {
-        console.log('💾 Inserting procedure logs into database...');
-        
-        const { error: insertError } = await supabase
-          .from('procedure_logs')
-          .insert(procedureLogsToInsert);
-
-        if (insertError) {
-          console.error('❌ Database insertion error:', insertError);
-          throw insertError;
-        }
-        
-        operationsCount += procedureLogsToInsert.length;
-        console.log(`✅ Successfully inserted ${procedureLogsToInsert.length} procedure logs`);
-      }
-      
-      if (procedureLogsToDelete.length > 0) {
-        console.log('🗑️ Deleting procedure logs from database...');
-        
-        const { error: deleteError } = await supabase
-          .from('procedure_logs')
-          .delete()
-          .in('id', procedureLogsToDelete);
-
-        if (deleteError) {
-          console.error('❌ Database deletion error:', deleteError);
-          throw deleteError;
-        }
-        
-        operationsCount += procedureLogsToDelete.length;
-        console.log(`✅ Successfully deleted ${procedureLogsToDelete.length} procedure logs`);
-      }
-
-      if (operationsCount > 0) {
-        let message = `${operationsCount} Änderungen erfolgreich gespeichert`;
-        if (failedProcedures.length > 0) {
-          message += `. ${failedProcedures.length} Prozeduren konnten nicht verarbeitet werden.`;
-        }
-        
-        toast.success(message);
-        
-        // Update saved modules to current state
-        setSavedModules({ ...modules });
-        
-        // Call onSuccess callback to refresh FMH progress
-        console.log('🔄 Refreshing FMH progress...');
-        onSuccess?.();
-        onOpenChange(false);
-      } else {
-        console.log('⚠️ No changes to save');
-        toast.warning('Keine Änderungen zum Speichern gefunden');
-      }
-    } catch (error) {
-      console.error('❌ Error saving procedures:', error);
-      const errorMessage = error?.message || error?.toString() || 'Unbekannter Fehler';
-      toast.error(`Fehler beim Speichern der Prozeduren: ${errorMessage}`);
+      console.error('Error submitting procedure:', error);
+      toast.error('Fehler beim Erfassen der Prozedur');
     } finally {
-      setIsSaving(false);
-      console.log('🏁 Save process completed');
+      setSubmitting(false);
     }
   };
 
-  if (!open) return null;
+  const selectedProcedure = procedures.find(p => p.id === formData.procedure_id);
+  const minRequired = selectedProcedure?.min_required_by_pgy?.pgy5 || 0;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white border border-gray-200 rounded-lg shadow-lg w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
-          <div className="flex items-center gap-3">
-            <FileText className="h-6 w-6 text-blue-600" />
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900">FMH Operationsstatistik</h1>
-              <p className="text-sm text-gray-600">Manuelle Eingabe der Operationen</p>
-            </div>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onOpenChange(false)}
-            className="h-8 w-8 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Stethoscope className="w-5 h-5" />
+            Manuelle Prozedur-Eingabe
+          </DialogTitle>
+        </DialogHeader>
 
-        {isLoading ? (
-          <div className="flex-1 flex items-center justify-center bg-white">
-            <div className="flex items-center gap-2">
-              <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
-              <span className="text-gray-700">Module und Prozeduren werden geladen...</span>
-            </div>
-          </div>
-        ) : Object.keys(modules).length === 0 ? (
-          <div className="flex-1 flex items-center justify-center bg-white">
-            <p className="text-gray-600">Keine Module gefunden</p>
-          </div>
-        ) : (
-        <div className="flex-1 flex flex-col overflow-hidden bg-white">
-          <div className="flex-1 flex flex-col p-6 overflow-hidden bg-white">
-            <Tabs defaultValue={Object.keys(modules)[0]} className="flex-1 flex flex-col">
-              <TabsList className="flex w-full mb-6 bg-gray-100 p-1 rounded-lg overflow-x-auto">
-                {Object.entries(modules).map(([key, module]) => (
-                  <TabsTrigger 
-                    key={key} 
-                    value={key} 
-                    className="flex-shrink-0 whitespace-nowrap px-4 py-2 data-[state=active]:bg-white data-[state=active]:text-gray-900 text-gray-600 hover:text-gray-900 text-sm"
-                  >
-                    {module.title}
-                  </TabsTrigger>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Category Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="category">FMH Modul</Label>
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger>
+                <SelectValue placeholder="Wählen Sie ein FMH Modul" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.title_de}
+                  </SelectItem>
                 ))}
-              </TabsList>
+              </SelectContent>
+            </Select>
+          </div>
 
-              {Object.entries(modules).map(([moduleKey, moduleData]) => (
-                <TabsContent key={moduleKey} value={moduleKey} className="flex-1 flex flex-col mt-0 overflow-hidden">
-                  <Card className="flex-1 flex flex-col bg-white border border-gray-200 shadow-sm overflow-hidden">
-                    <CardHeader className="flex-shrink-0 bg-gray-50 border-b border-gray-200 p-4">
-                      <div className="flex items-center justify-between flex-wrap gap-2">
-                        <CardTitle className="text-lg text-gray-900">{moduleData.title}</CardTitle>
-                        <div className="flex items-center gap-4 flex-wrap">
-                          <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
-                            Minimum: {moduleData.totalMinimum}
-                          </Badge>
-                          <Badge variant={moduleData.totalCount >= moduleData.totalMinimum ? "default" : "outline"} className="bg-green-100 text-green-800 border-green-200">
-                            Total: {moduleData.totalCount}
-                          </Badge>
-                        </div>
+          {/* Procedure Selection */}
+          {selectedCategory && (
+            <div className="space-y-2">
+              <Label htmlFor="procedure">Prozedur</Label>
+              <Select 
+                value={formData.procedure_id} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, procedure_id: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Wählen Sie eine Prozedur" />
+                </SelectTrigger>
+                <SelectContent>
+                  {procedures.map((procedure) => (
+                    <SelectItem key={procedure.id} value={procedure.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{procedure.title_de}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {procedure.code} • Min: {minRequired}
+                        </span>
                       </div>
-                    </CardHeader>
-                    
-                    <CardContent className="flex-1 p-0 bg-white overflow-hidden">
-                      <ScrollArea className="h-[400px]">
-                        <table className="w-full min-w-[800px]">
-                          <thead className="sticky top-0 border-b border-gray-200 bg-gray-50">
-                            <tr>
-                              <th className="text-left p-3 font-medium text-gray-700 min-w-[250px]">Prozedur</th>
-                              <th className="text-center p-3 font-medium w-20 text-gray-700">Min</th>
-                              <th className="text-center p-3 font-medium w-28 text-gray-700">Verantwortlich</th>
-                              <th className="text-center p-3 font-medium w-28 text-gray-700">Instruierend</th>
-                              <th className="text-center p-3 font-medium w-28 text-gray-700">Assistent</th>
-                              <th className="text-center p-3 font-medium w-20 text-gray-700">Total</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white">
-                            {moduleData.procedures.map((procedure, index) => (
-                              <tr key={procedure.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                                <td className="p-3">
-                                  <div className="font-medium text-gray-900 text-sm">{procedure.name}</div>
-                                  {savedModules[moduleKey]?.procedures[index]?.total > 0 && (
-                                    <div className="text-xs text-gray-500 mt-1">
-                                      Gespeichert: V:{savedModules[moduleKey].procedures[index].verantwortlich} I:{savedModules[moduleKey].procedures[index].instruierend} A:{savedModules[moduleKey].procedures[index].assistent}
-                                    </div>
-                                  )}
-                                </td>
-                                <td className="text-center p-3">
-                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs">{procedure.minimum}</Badge>
-                                </td>
-                                <td className="text-center p-3">
-                                  <div className="flex items-center justify-center gap-1">
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-7 w-7 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                                      onClick={() => updateProcedureValue(moduleKey, index, 'verantwortlich', procedure.verantwortlich - 1)}
-                                    >
-                                      <Minus className="w-3 h-3" />
-                                    </Button>
-                                    <Input
-                                      type="number"
-                                      min="0"
-                                      value={procedure.verantwortlich}
-                                      onChange={(e) => updateProcedureValue(moduleKey, index, 'verantwortlich', parseInt(e.target.value) || 0)}
-                                      className="w-14 h-8 text-center text-sm bg-white text-gray-900 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                    />
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-7 w-7 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                                      onClick={() => updateProcedureValue(moduleKey, index, 'verantwortlich', procedure.verantwortlich + 1)}
-                                    >
-                                      <Plus className="w-3 h-3" />
-                                    </Button>
-                                  </div>
-                                </td>
-                                <td className="text-center p-3">
-                                  <div className="flex items-center justify-center gap-1">
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-7 w-7 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                                      onClick={() => updateProcedureValue(moduleKey, index, 'instruierend', procedure.instruierend - 1)}
-                                    >
-                                      <Minus className="w-3 h-3" />
-                                    </Button>
-                                    <Input
-                                      type="number"
-                                      min="0"
-                                      value={procedure.instruierend}
-                                      onChange={(e) => updateProcedureValue(moduleKey, index, 'instruierend', parseInt(e.target.value) || 0)}
-                                      className="w-14 h-8 text-center text-sm bg-white text-gray-900 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                    />
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-7 w-7 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                                      onClick={() => updateProcedureValue(moduleKey, index, 'instruierend', procedure.instruierend + 1)}
-                                    >
-                                      <Plus className="w-3 h-3" />
-                                    </Button>
-                                  </div>
-                                </td>
-                                <td className="text-center p-3">
-                                  <div className="flex items-center justify-center gap-1">
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-7 w-7 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                                      onClick={() => updateProcedureValue(moduleKey, index, 'assistent', procedure.assistent - 1)}
-                                    >
-                                      <Minus className="w-3 h-3" />
-                                    </Button>
-                                    <Input
-                                      type="number"
-                                      min="0"
-                                      value={procedure.assistent}
-                                      onChange={(e) => updateProcedureValue(moduleKey, index, 'assistent', parseInt(e.target.value) || 0)}
-                                      className="w-14 h-8 text-center text-sm bg-white text-gray-900 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                    />
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-7 w-7 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                                      onClick={() => updateProcedureValue(moduleKey, index, 'assistent', procedure.assistent + 1)}
-                                    >
-                                      <Plus className="w-3 h-3" />
-                                    </Button>
-                                  </div>
-                                </td>
-                                <td className="text-center p-3">
-                                  <Badge 
-                                    variant={procedure.total >= procedure.minimum ? "default" : "secondary"}
-                                    className="font-medium text-xs bg-green-100 text-green-800 border-green-200"
-                                  >
-                                    {procedure.total}
-                                  </Badge>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </ScrollArea>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              ))}
-            </Tabs>
-          </div>
-          
-          {/* Footer */}
-          <div className="flex-shrink-0 border-t border-gray-200 p-4 bg-gray-50">
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <div className="text-sm text-gray-600">
-                Gesamtanzahl Eingriffe: {Object.values(modules).reduce((sum, mod) => sum + mod.totalCount, 0)}
-              </div>
-              <div className="flex gap-3">
-                <Button 
-                  variant="outline" 
-                  onClick={() => onOpenChange(false)}
-                  disabled={isSaving}
-                  className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
-                >
-                  Abbrechen
-                </Button>
-                <Button 
-                  onClick={handleSave}
-                  disabled={isSaving || Object.values(modules).every(mod => mod.totalCount === 0)}
-                  className="gap-2 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400"
-                >
-                  <Save className="w-4 h-4" />
-                  {isSaving ? 'Speichere...' : 'Prozeduren speichern'}
-                </Button>
-              </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+          )}
+
+          {/* Procedure Details */}
+          {selectedProcedure && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">{selectedProcedure.title_de}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Code</Label>
+                    <p className="font-mono">{selectedProcedure.code}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Mindestanforderung PGY-5</Label>
+                    <p className="font-semibold">{minRequired} Eingriffe</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Role Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="role">Rolle im Eingriff</Label>
+            <Select 
+              value={formData.role_in_surgery} 
+              onValueChange={(value) => setFormData(prev => ({ ...prev, role_in_surgery: value }))}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="responsible">
+                  <div className="flex flex-col">
+                    <span>Verantwortlich (1.0x Gewichtung)</span>
+                    <span className="text-xs text-muted-foreground">Hauptverantwortlicher Chirurg</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="instructing">
+                  <div className="flex flex-col">
+                    <span>Instruierend (0.5x Gewichtung)</span>
+                    <span className="text-xs text-muted-foreground">Unter Aufsicht</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="assistant">
+                  <div className="flex flex-col">
+                    <span>Assistent (0.25x Gewichtung)</span>
+                    <span className="text-xs text-muted-foreground">Assistierend</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        </div>
-        )}
-      </div>
-    </div>
+
+          {/* Date */}
+          <div className="space-y-2">
+            <Label htmlFor="date">Datum des Eingriffs</Label>
+            <Input
+              id="date"
+              type="date"
+              value={formData.date_performed}
+              onChange={(e) => setFormData(prev => ({ ...prev, date_performed: e.target.value }))}
+              required
+            />
+          </div>
+
+          {/* Supervisor */}
+          <div className="space-y-2">
+            <Label htmlFor="supervisor">Supervisor/Chefarzt</Label>
+            <Input
+              id="supervisor"
+              value={formData.supervisor_name}
+              onChange={(e) => setFormData(prev => ({ ...prev, supervisor_name: e.target.value }))}
+              placeholder="Dr. Max Mustermann"
+            />
+          </div>
+
+          {/* Institution */}
+          <div className="space-y-2">
+            <Label htmlFor="institution">Institution</Label>
+            <Input
+              id="institution"
+              value={formData.institution}
+              onChange={(e) => setFormData(prev => ({ ...prev, institution: e.target.value }))}
+              placeholder="Universitätsspital Zürich"
+            />
+          </div>
+
+          {/* Notes */}
+          <div className="space-y-2">
+            <Label htmlFor="notes">Notizen (optional)</Label>
+            <Textarea
+              id="notes"
+              value={formData.notes}
+              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+              placeholder="Besondere Umstände, Komplikationen, etc."
+              rows={3}
+            />
+          </div>
+
+          {/* Submit Buttons */}
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={submitting}
+            >
+              Abbrechen
+            </Button>
+            <Button
+              type="submit"
+              disabled={!formData.procedure_id || submitting}
+              className="gap-2"
+            >
+              {submitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Erfasse...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4" />
+                  Prozedur erfassen
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
