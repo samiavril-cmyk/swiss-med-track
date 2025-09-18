@@ -10,14 +10,14 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, MapPin, Clock, Star, BookOpen, Plus, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthResilient } from '@/hooks/useAuthResilient';
 
 interface CourseInputModalProps {
   onCourseAdded?: (course: any) => void;
 }
 
 export const CourseInputModal: React.FC<CourseInputModalProps> = ({ onCourseAdded }) => {
-  const { user } = useAuth();
+  const { user } = useAuthResilient();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({

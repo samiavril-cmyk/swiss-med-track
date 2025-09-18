@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthResilient } from '@/hooks/useAuthResilient';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -61,7 +61,7 @@ interface TeamStats {
 }
 
 const SupervisorDashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user } = useAuthResilient();
   const [residents, setResidents] = useState<Resident[]>([]);
   const [selectedResident, setSelectedResident] = useState<Resident | null>(null);
   const [residentProgress, setResidentProgress] = useState<ModuleProgress[]>([]);

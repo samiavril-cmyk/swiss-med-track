@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Filter, MapPin, Calendar, Star, Clock, Users } from "lucide-react";
 import { Header } from "@/components/Header";
 import { CourseInputModal } from "@/components/CourseInputModal";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthResilient } from "@/hooks/useAuthResilient";
 
 interface Course {
   id: string;
@@ -37,7 +37,7 @@ interface Course {
 }
 
 export default function Courses() {
-  const { user } = useAuth();
+  const { user } = useAuthResilient();
   const [searchParams, setSearchParams] = useSearchParams();
   const [courses, setCourses] = useState<Course[]>([]);
   const [userCourses, setUserCourses] = useState<Course[]>([]);
