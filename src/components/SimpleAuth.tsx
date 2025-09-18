@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 export const SimpleAuth: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState('samihosari13@gmail.com');
+  const [email, setEmail] = useState('jose.obermann@hospital.ch');
   const [password, setPassword] = useState('password123');
   const [fullName, setFullName] = useState('');
   const [institution, setInstitution] = useState('');
