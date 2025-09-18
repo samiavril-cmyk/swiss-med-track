@@ -2,10 +2,10 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { GraduationCap, LogOut, Settings, User, Users } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthResilient } from '@/hooks/useAuthResilient';
 
 export const Header: React.FC = () => {
-  const { user, signOut, isAdmin, userProfile, loading } = useAuth();
+  const { user, signOut, isAdmin, userProfile, loading } = useAuthResilient();
   const navigate = useNavigate();
   
   // Debug logging
