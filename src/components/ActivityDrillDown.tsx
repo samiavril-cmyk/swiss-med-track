@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,9 +9,26 @@ import { VerticalCourseTimeline, mockCourses2024, mockCourses2025, mockCourses20
 import PublicationsShowcase from '@/components/PublicationsShowcase';
 import { X, Calendar, TrendingUp, BookOpen, Award, FileText, Stethoscope } from 'lucide-react';
 
+interface ActivityAward {
+  icon: ReactNode;
+  title: string;
+  organization: string;
+  date: string;
+}
+
+interface ActivityDetailData {
+  completed?: number;
+  target?: number;
+  points?: number;
+  count?: number;
+  byYear?: Record<string, number>;
+  items?: ActivityAward[];
+  [key: string]: unknown;
+}
+
 interface ActivityDrillDownProps {
   activityId: string;
-  data: Record<string, unknown>;
+  data: ActivityDetailData;
   onClose: () => void;
 }
 
@@ -59,24 +76,31 @@ export const ActivityDrillDown: React.FC<ActivityDrillDownProps> = ({
   const config = getActivityConfig(activityId);
   const IconComponent = config.icon;
 
+  const metrics = {
+    completed: typeof data.completed === 'number' ? data.completed : 0,
+    target: typeof data.target === 'number' ? data.target : 0,
+    count: typeof data.count === 'number' ? data.count : 0,
+    points: typeof data.points === 'number' ? data.points : 0
+  };
+
   const renderCoursesContent = () => (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="p-4">
           <div className="text-center">
-            <p className="text-2xl font-bold text-card-foreground">{data.completed}</p>
+            <p className="text-2xl font-bold text-card-foreground">{metrics.completed}</p>
             <p className="text-sm text-muted-foreground">Abgeschlossen</p>
           </div>
         </Card>
         <Card className="p-4">
           <div className="text-center">
-            <p className="text-2xl font-bold text-card-foreground">{data.target - data.completed}</p>
+            <p className="text-2xl font-bold text-card-foreground">{Math.max(metrics.target - metrics.completed, 0)}</p>
             <p className="text-sm text-muted-foreground">Verbleibend</p>
           </div>
         </Card>
         <Card className="p-4">
           <div className="text-center">
-            <p className="text-2xl font-bold text-card-foreground">{data.points}</p>
+            <p className="text-2xl font-bold text-card-foreground">{metrics.points}</p>
             <p className="text-sm text-muted-foreground">Punkte</p>
           </div>
         </Card>
@@ -237,20 +261,20 @@ export const ActivityDrillDown: React.FC<ActivityDrillDownProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="p-4">
           <div className="text-center">
-            <p className="text-2xl font-bold text-card-foreground">{data.completed}</p>
+            <p className="text-2xl font-bold text-card-foreground">{metrics.completed}</p>
             <p className="text-sm text-muted-foreground">Durchgeführt</p>
           </div>
         </Card>
         <Card className="p-4">
           <div className="text-center">
-            <p className="text-2xl font-bold text-card-foreground">{data.target}</p>
+            <p className="text-2xl font-bold text-card-foreground">{metrics.target}</p>
             <p className="text-sm text-muted-foreground">FMH-Ziel</p>
           </div>
         </Card>
         <Card className="p-4">
           <div className="text-center">
             <p className="text-2xl font-bold text-card-foreground">
-              {Math.round((data.completed / data.target) * 100)}%
+              {metrics.target > 0 ? Math.round((metrics.completed / metrics.target) * 100) : 0}%
             </p>
             <p className="text-sm text-muted-foreground">Fortschritt</p>
           </div>
@@ -260,19 +284,23 @@ export const ActivityDrillDown: React.FC<ActivityDrillDownProps> = ({
       <div className="space-y-4">
         <h4 className="font-semibold text-card-foreground">Jahresverlauf</h4>
         <div className="space-y-3">
-          {Object.entries(data.byYear || {}).map(([year, count]) => (
+          {Object.entries(data.byYear ?? {}).map(([year, count]) => {
+            const numericCount = typeof count === 'number' ? count : 0;
+
+            return (
             <div key={year} className="flex items-center justify-between p-4 border border-card-border rounded-medical">
               <span className="font-medium">{year}</span>
               <div className="flex items-center gap-3">
-                <ProgressBar 
-                  progress={Math.min((count as number / 200) * 100, 100)} 
-                  variant="compact" 
+                <ProgressBar
+                  progress={Math.min((numericCount / 200) * 100, 100)}
+                  variant="compact"
                   className="w-32"
                 />
-                <Badge variant="outline">{String(count)} Prozeduren</Badge>
+                <Badge variant="outline">{String(numericCount)} Prozeduren</Badge>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -304,7 +332,7 @@ export const ActivityDrillDown: React.FC<ActivityDrillDownProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="p-4">
           <div className="text-center">
-            <p className="text-2xl font-bold text-card-foreground">{data.count}</p>
+            <p className="text-2xl font-bold text-card-foreground">{metrics.count}</p>
             <p className="text-sm text-muted-foreground">Auszeichnungen</p>
           </div>
         </Card>
@@ -325,8 +353,8 @@ export const ActivityDrillDown: React.FC<ActivityDrillDownProps> = ({
       <div className="space-y-4">
         <h4 className="font-semibold text-card-foreground">Alle Auszeichnungen</h4>
         <div className="space-y-3">
-          {data.items.map((award: { icon: React.ReactNode; title: string; organization: string; date: string }, index: number) => (
-            <div key={index} className="p-4 border border-card-border rounded-medical">
+          {data.items?.map((award, index) => (
+            <div key={`${award.title}-${award.date}-${index}`} className="p-4 border border-card-border rounded-medical">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{award.icon}</span>
                 <div className="flex-1">
@@ -359,22 +387,22 @@ export const ActivityDrillDown: React.FC<ActivityDrillDownProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="p-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-card-foreground">{data.completed}</p>
-              <p className="text-sm text-muted-foreground">Abgeschlossen</p>
-            </div>
-          </Card>
-          <Card className="p-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-card-foreground">{data.target - data.completed}</p>
-              <p className="text-sm text-muted-foreground">Verbleibend</p>
-            </div>
-          </Card>
-          <Card className="p-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-card-foreground">{data.points}</p>
-              <p className="text-sm text-muted-foreground">Punkte</p>
-            </div>
-          </Card>
+            <p className="text-2xl font-bold text-card-foreground">{metrics.completed}</p>
+            <p className="text-sm text-muted-foreground">Abgeschlossen</p>
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-card-foreground">{Math.max(metrics.target - metrics.completed, 0)}</p>
+            <p className="text-sm text-muted-foreground">Verbleibend</p>
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-card-foreground">{metrics.points}</p>
+            <p className="text-sm text-muted-foreground">Punkte</p>
+          </div>
+        </Card>
         </div>
 
         <div className="space-y-4">
@@ -425,14 +453,12 @@ export const ActivityDrillDown: React.FC<ActivityDrillDownProps> = ({
     }
   };
 
-  const safeCompleted = typeof (data as any)?.completed === 'number' ? (data as any).completed : 0;
-  const safeTarget = typeof (data as any)?.target === 'number' && (data as any).target > 0 ? (data as any).target : 1;
-  const safeCount = typeof (data as any)?.count === 'number' ? (data as any).count : 0;
-  const progress = activityId === 'procedures' 
-    ? (safeCompleted / safeTarget) * 100
+  const safeTarget = metrics.target > 0 ? metrics.target : 1;
+  const progress = activityId === 'procedures'
+    ? (metrics.completed / safeTarget) * 100
     : activityId === 'courses' || activityId === 'mandatory'
-    ? (safeCompleted / safeTarget) * 100
-    : Math.min((safeCount / 5) * 100, 100);
+    ? (metrics.completed / safeTarget) * 100
+    : Math.min((metrics.count / 5) * 100, 100);
 
   return (
     <Card className="medical-card p-6 mb-8 animate-fade-in">

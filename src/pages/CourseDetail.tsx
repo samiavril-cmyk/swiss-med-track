@@ -109,7 +109,7 @@ export default function CourseDetail() {
 
   const fetchCourseDetails = useCallback(async () => {
     if (!id) return;
-    
+
     setLoading(true);
     try {
       // Fetch course details

@@ -1,12 +1,16 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
+
+type ProfileRow = Database['public']['Tables']['profiles']['Row'];
+type AuthUserProfile = Partial<ProfileRow> & Pick<ProfileRow, 'user_id' | 'email' | 'full_name'>;
 
 // Types für robuste Auth-Architektur
 interface AuthState {
   user: User | null;
   session: Session | null;
-  userProfile: any;
+  userProfile: AuthUserProfile | null;
   isAdmin: boolean;
   loading: boolean;
   error: string | null;
@@ -80,25 +84,25 @@ class RetryManager {
     maxRetries = 3,
     baseDelay = 1000
   ): Promise<T> {
-    let lastError: Error;
-    
+    let lastError: unknown;
+
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         return await operation();
       } catch (error) {
-        lastError = error as Error;
-        
+        lastError = error;
+
         if (attempt === maxRetries) {
-          throw lastError;
+          throw error;
         }
-        
+
         const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000;
         console.log(`[Retry] Attempt ${attempt + 1} failed, retrying in ${delay}ms`);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
-    
-    throw lastError!;
+
+    throw lastError instanceof Error ? lastError : new Error('Unknown retry error');
   }
 
   static withRetry<T>(operation: () => Promise<T>, maxRetries = 3) {
@@ -179,8 +183,8 @@ export const AuthProviderResilient: React.FC<AuthProviderResilientProps> = ({ ch
   // Refs für Instanzen
   const circuitBreaker = useRef(new CircuitBreaker());
   const healthManager = useRef(HealthCheckManager.getInstance());
-  const retryTimeoutRef = useRef<NodeJS.Timeout>();
-  const healthCheckIntervalRef = useRef<NodeJS.Timeout>();
+  const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const healthCheckIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Online/Offline Detection
   useEffect(() => {
@@ -230,6 +234,7 @@ export const AuthProviderResilient: React.FC<AuthProviderResilientProps> = ({ ch
     return () => {
       if (healthCheckIntervalRef.current) {
         clearInterval(healthCheckIntervalRef.current);
+        healthCheckIntervalRef.current = null;
       }
     };
   }, [authState.user, authState.retryCount]);
@@ -245,19 +250,20 @@ export const AuthProviderResilient: React.FC<AuthProviderResilientProps> = ({ ch
   }, []);
 
   // Robuste Profil-Ladung mit Circuit Breaker
-  const loadUserProfile = useCallback(async (userId: string): Promise<any> => {
+  const loadUserProfile = useCallback(async (userId: string): Promise<AuthUserProfile> => {
     console.log('[Auth] Loading profile for user ID:', userId);
-    
+
     // Fallback für bekannten Admin-User
     if (userId === '1e9ce13f-3444-40dd-92e4-3b36364bb930') {
       console.log('[Auth] Using direct fallback for known admin user');
-      return {
+      const fallbackProfile: AuthUserProfile = {
         user_id: userId,
         email: 'samihosari13@gmail.com',
         full_name: 'Sami Hosari',
         role: 'admin',
         pgy_level: 10
       };
+      return fallbackProfile;
     }
 
     // Robuste Datenbank-Abfrage mit Circuit Breaker
@@ -266,7 +272,7 @@ export const AuthProviderResilient: React.FC<AuthProviderResilientProps> = ({ ch
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .single<ProfileRow>();
 
       if (error) {
         throw new Error(`Profile query failed: ${error.message}`);
@@ -282,17 +288,18 @@ export const AuthProviderResilient: React.FC<AuthProviderResilientProps> = ({ ch
 
       console.log('[Auth] Profile loaded successfully:', profile);
       return profile;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('[Auth] Failed to load profile after retries:', error);
-      
+
       // Graceful Degradation - verwende minimale Fallback-Daten
-      return {
+      const fallbackProfile: AuthUserProfile = {
         user_id: userId,
         email: 'unknown@example.com',
         full_name: 'Unknown User',
         role: 'user',
         pgy_level: 1
       };
+      return fallbackProfile;
     }
   }, []);
 
@@ -303,7 +310,7 @@ export const AuthProviderResilient: React.FC<AuthProviderResilientProps> = ({ ch
 
       // Prüfe bestehende Session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
+
       if (sessionError) {
         throw new Error(`Session check failed: ${sessionError.message}`);
       }
@@ -313,7 +320,7 @@ export const AuthProviderResilient: React.FC<AuthProviderResilientProps> = ({ ch
         
         // Lade User-Profil
         const profile = await loadUserProfile(session.user.id);
-        
+
         setAuthState(prev => ({
           ...prev,
           user: session.user,
@@ -337,9 +344,9 @@ export const AuthProviderResilient: React.FC<AuthProviderResilientProps> = ({ ch
           retryCount: 0
         }));
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('[Auth] Initialization failed:', error);
-      
+
       setAuthState(prev => ({
         ...prev,
         loading: false,
@@ -366,7 +373,7 @@ export const AuthProviderResilient: React.FC<AuthProviderResilientProps> = ({ ch
         try {
           if (session?.user) {
             const profile = await loadUserProfile(session.user.id);
-            
+
             setAuthState(prev => ({
               ...prev,
               user: session.user,
@@ -390,7 +397,7 @@ export const AuthProviderResilient: React.FC<AuthProviderResilientProps> = ({ ch
               retryCount: 0
             }));
           }
-        } catch (error) {
+        } catch (error: unknown) {
           console.error('[Auth] State change error:', error);
           setAuthState(prev => ({
             ...prev,
@@ -408,6 +415,7 @@ export const AuthProviderResilient: React.FC<AuthProviderResilientProps> = ({ ch
       subscription.unsubscribe();
       if (retryTimeoutRef.current) {
         clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
       }
     };
   }, [initializeAuth, loadUserProfile]);
