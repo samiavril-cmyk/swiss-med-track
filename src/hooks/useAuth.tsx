@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
+
+type ProfileRow = Database['public']['Tables']['profiles']['Row'];
+type UserProfile = Partial<ProfileRow> & Pick<ProfileRow, 'user_id' | 'email' | 'full_name'>;
 
 interface AuthContextType {
   user: User | null;
@@ -8,17 +12,10 @@ interface AuthContextType {
   loading: boolean;
   signOut: () => Promise<void>;
   isAdmin: boolean;
-  userProfile: any;
+  userProfile: UserProfile | null;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  session: null,
-  loading: true,
-  signOut: async () => {},
-  isAdmin: false,
-  userProfile: null,
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -37,7 +34,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [userProfile, setUserProfile] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -73,7 +70,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setSession(session);
       setUser(session?.user ?? null);
 
-      if (session?.user && isMounted) {
+        if (session?.user && isMounted) {
         await loadUserProfile(session.user.id);
         if (isMounted) {
           setLoading(false);
@@ -96,11 +93,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const loadUserProfile = async (userId: string) => {
     console.log('[Auth] Loading profile for user ID:', userId);
-    
+
     // Für den spezifischen User - direkter Fallback
     if (userId === '1e9ce13f-3444-40dd-92e4-3b36364bb930') {
       console.log('[Auth] Using direct fallback for known admin user');
-      const fallbackProfile = {
+      const fallbackProfile: UserProfile = {
         user_id: userId,
         email: 'samihosari13@gmail.com',
         full_name: 'Sami Hosari',
@@ -119,7 +116,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .single<ProfileRow>();
 
       console.log('[Auth] Profile query result:', { profile, error });
 
@@ -132,7 +129,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('[Auth] User role:', profile?.role);
       setUserProfile(profile);
       setIsAdmin(profile?.role === 'admin');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('[Auth] Exception loading user profile:', error);
     }
   };
@@ -153,9 +150,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.error('[Auth] Sign out error:', error);
         // Don't throw error, just log it since we already cleared local state
       }
-      
+
       console.log('[Auth] Sign out successful');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('[Auth] Error signing out:', error);
       // Ensure local state is cleared even if there's an error
       setUser(null);

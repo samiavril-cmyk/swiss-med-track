@@ -12,22 +12,46 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthResilient } from '@/hooks/useAuthResilient';
 
+type CourseType = 'required' | 'optional';
+type CourseStatus = 'completed' | 'upcoming' | 'in-progress';
+
+interface CourseFormData {
+  title: string;
+  description: string;
+  date: string;
+  location: string;
+  duration: string;
+  type: CourseType;
+  status: CourseStatus;
+  points: number;
+  category: string;
+  provider: string;
+  certificate_url: string;
+}
+
+interface UserCourseRecord extends CourseFormData {
+  id?: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
 interface CourseInputModalProps {
-  onCourseAdded?: (course: any) => void;
+  onCourseAdded?: (course: UserCourseRecord) => void;
 }
 
 export const CourseInputModal: React.FC<CourseInputModalProps> = ({ onCourseAdded }) => {
   const { user } = useAuthResilient();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CourseFormData>({
     title: '',
     description: '',
     date: '',
     location: '',
     duration: '',
-    type: 'optional' as 'required' | 'optional',
-    status: 'completed' as 'completed' | 'upcoming' | 'in-progress',
+    type: 'optional',
+    status: 'completed',
     points: 0,
     category: '',
     provider: '',
@@ -56,7 +80,7 @@ export const CourseInputModal: React.FC<CourseInputModalProps> = ({ onCourseAdde
     'Sonstiges'
   ];
 
-  const handleInputChange = (field: string, value: string | number) => {
+  const handleInputChange = <Field extends keyof CourseFormData>(field: Field, value: CourseFormData[Field]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -72,7 +96,7 @@ export const CourseInputModal: React.FC<CourseInputModalProps> = ({ onCourseAdde
 
     setLoading(true);
     try {
-      const courseData = {
+      const courseData: UserCourseRecord = {
         ...formData,
         user_id: user.id,
         points: Number(formData.points),
@@ -84,7 +108,7 @@ export const CourseInputModal: React.FC<CourseInputModalProps> = ({ onCourseAdde
         .from('user_courses')
         .insert([courseData])
         .select()
-        .single();
+        .single<UserCourseRecord>();
 
       if (error) throw error;
 
@@ -104,10 +128,10 @@ export const CourseInputModal: React.FC<CourseInputModalProps> = ({ onCourseAdde
         certificate_url: ''
       });
 
-      if (onCourseAdded) {
+      if (data && onCourseAdded) {
         onCourseAdded(data);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error adding course:', error);
       toast.error('Fehler beim Hinzufügen des Kurses');
     } finally {
@@ -208,7 +232,7 @@ export const CourseInputModal: React.FC<CourseInputModalProps> = ({ onCourseAdde
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="type">Typ *</Label>
-              <Select value={formData.type} onValueChange={(value: 'required' | 'optional') => handleInputChange('type', value)}>
+              <Select value={formData.type} onValueChange={(value) => handleInputChange('type', value as CourseType)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -226,7 +250,7 @@ export const CourseInputModal: React.FC<CourseInputModalProps> = ({ onCourseAdde
 
             <div className="space-y-2">
               <Label htmlFor="status">Status *</Label>
-              <Select value={formData.status} onValueChange={(value: 'completed' | 'upcoming' | 'in-progress') => handleInputChange('status', value)}>
+              <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value as CourseStatus)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

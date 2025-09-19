@@ -13,11 +13,20 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthResilient } from '@/hooks/useAuthResilient';
 import { toast } from 'sonner';
 
+type ProcedureRequirements = {
+  [key: string]: number | null | undefined;
+  pgy1?: number | null;
+  pgy2?: number | null;
+  pgy3?: number | null;
+  pgy4?: number | null;
+  pgy5?: number | null;
+};
+
 interface Procedure {
   id: string;
   code: string;
   title_de: string;
-  min_required_by_pgy: any;
+  min_required_by_pgy: ProcedureRequirements | null;
 }
 
 interface ProcedureCategory {
@@ -82,7 +91,7 @@ export const FMHManualEntry: React.FC<{
 
       if (error) throw error;
       setCategories(data || []);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error loading categories:', error);
       toast.error('Fehler beim Laden der Kategorien');
     } finally {
@@ -102,7 +111,7 @@ export const FMHManualEntry: React.FC<{
 
       if (error) throw error;
       setProcedures(data || []);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error loading procedures:', error);
       toast.error('Fehler beim Laden der Prozeduren');
     } finally {
@@ -148,7 +157,7 @@ export const FMHManualEntry: React.FC<{
       setSelectedCategory('');
       setProcedures([]);
       
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error submitting procedure:', error);
       toast.error('Fehler beim Erfassen der Prozedur');
     } finally {
@@ -157,7 +166,9 @@ export const FMHManualEntry: React.FC<{
   };
 
   const selectedProcedure = procedures.find(p => p.id === formData.procedure_id);
-  const minRequired = selectedProcedure?.min_required_by_pgy?.pgy5 || 0;
+  const minRequired = typeof selectedProcedure?.min_required_by_pgy?.pgy5 === 'number'
+    ? selectedProcedure.min_required_by_pgy.pgy5
+    : 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -9,18 +9,19 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Activity, 
-  AlertTriangle, 
-  Calendar, 
-  Settings, 
+import {
+  Activity,
+  AlertTriangle,
+  Calendar,
+  Settings,
   TrendingUp,
   Users,
   Plus,
   Download,
   Upload,
   FileText,
-  Stethoscope
+  Stethoscope,
+  ClipboardList
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { FMHModuleDetail } from '@/components/FMHModuleDetail';
@@ -30,7 +31,39 @@ import { PDFUploadModal } from '@/components/PDFUploadModal';
 import { FMHManualEntry } from '@/components/FMHManualEntry';
 import { FMHCorrections } from '@/components/FMHCorrections';
 import { FMHProcedureTracking } from '@/components/FMHProcedureTracking';
+import { FMHPdfDataEntry } from '@/components/FMHPdfDataEntry';
 import ErrorBoundary from '@/components/ErrorBoundary';
+
+type PgyLevel = 'pgy1' | 'pgy2' | 'pgy3' | 'pgy4' | 'pgy5';
+
+interface ProcedureRequirements {
+  [key: string]: number | null | undefined;
+  pgy1?: number | null;
+  pgy2?: number | null;
+  pgy3?: number | null;
+  pgy4?: number | null;
+  pgy5?: number | null;
+}
+
+interface ProcedureWithRequirements {
+  id: string;
+  code: string;
+  title_de: string;
+  min_required_by_pgy: ProcedureRequirements | null;
+}
+
+interface ProcedureLog {
+  procedure_id: string;
+  role_in_surgery: string;
+}
+
+interface ProcedureCategoryRow {
+  id: string;
+  key: string;
+  title_de: string;
+  module_type: string | null;
+  minimum_required: number;
+}
 
 interface ModuleProgress {
   module_name: string;
@@ -56,7 +89,7 @@ export const FMHDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [modules, setModules] = useState<FMHModule[]>([]);
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [timeoutReached, setTimeoutReached] = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [showPDFUpload, setShowPDFUpload] = useState(false);
@@ -64,6 +97,7 @@ export const FMHDashboard: React.FC = () => {
   const [showCorrections, setShowCorrections] = useState(false);
   const [showProcedureTracking, setShowProcedureTracking] = useState(false);
   const [userPgyLevel, setUserPgyLevel] = useState<number>(4);
+  const [showPdfDataEntry, setShowPdfDataEntry] = useState(false);
 
   useEffect(() => {
     // Warte bis Auth-Status geklärt ist, vermeide Redirect-Loops
@@ -74,15 +108,9 @@ export const FMHDashboard: React.FC = () => {
       return;
     }
     
-    // Prevent multiple simultaneous loads
-    // if (loading) return; // REMOVED: This caused deadlock!
-    
+    // Prevent multiple simultaneous loads - loadModulesAndProgress() guards internally.
     console.log('🔄 FMHDashboard useEffect triggered for user:', user.id);
-    // Prevent multiple simultaneous loads with better logic
-    if (loading) {
-      console.log('⏸️ FMH: Already loading, skipping...');
-      return;
-    }
+    setLoading(true);
     loadModulesAndProgress();
     const t = setTimeout(() => {
       console.log('⏰ Timeout reached - stopping loading');
@@ -93,10 +121,15 @@ export const FMHDashboard: React.FC = () => {
   }, [user, authLoading]); // Remove navigate from dependencies to prevent loops
 
   // Manual progress calculation fallback when RPC fails
-  const calculateProgressManually = async (userId: string, moduleKey: string) => {
+  const getRequirementValue = (requirements: ProcedureRequirements | null | undefined, level: PgyLevel) => {
+    const value = requirements?.[level];
+    return typeof value === 'number' ? value : 0;
+  };
+
+  const calculateProgressManually = async (userId: string, moduleKey: string): Promise<ModuleProgress[] | null> => {
     try {
       console.log('🔄 Calculating progress manually for module:', moduleKey);
-      
+
       // Get category ID first
       const { data: categoryData, error: categoryError } = await supabase
         .from('procedure_categories')
@@ -139,11 +172,14 @@ export const FMHDashboard: React.FC = () => {
       let instructingCount = 0;
       let assistantCount = 0;
 
-      procedures.forEach(proc => {
-        const procLogs = logs?.filter(log => log.procedure_id === proc.id) || [];
-        const minRequired = (proc.min_required_by_pgy as any)?.pgy5 || 0;
-        
-        const responsible = procLogs.filter(log => 
+      const typedProcedures: ProcedureWithRequirements[] = procedures as ProcedureWithRequirements[];
+      const typedLogs: ProcedureLog[] = (logs ?? []) as ProcedureLog[];
+
+      typedProcedures.forEach(proc => {
+        const procLogs = typedLogs.filter(log => log.procedure_id === proc.id);
+        const minRequired = getRequirementValue(proc.min_required_by_pgy, 'pgy5');
+
+        const responsible = procLogs.filter(log =>
           ['primary', 'responsible'].includes(log.role_in_surgery)
         ).length;
         const instructing = procLogs.filter(log => 
@@ -206,7 +242,7 @@ export const FMHDashboard: React.FC = () => {
       }
 
       // Load FMH modules
-      const { data: moduleData, error: moduleError } = await supabase
+      const { data: moduleDataRaw, error: moduleError } = await supabase
         .from('procedure_categories')
         .select('*')
         .not('module_type', 'is', null)
@@ -214,38 +250,40 @@ export const FMHDashboard: React.FC = () => {
 
       if (moduleError) throw moduleError;
 
+      const moduleData: ProcedureCategoryRow[] = (moduleDataRaw ?? []) as ProcedureCategoryRow[];
       const modulesWithProgress: FMHModule[] = [];
 
-      for (const module of moduleData || []) {
+      for (const module of moduleData) {
         if (authUser) {
           console.log('📊 FMHDashboard - Getting progress for module:', module.key, 'user:', authUser.id);
-          
+
           // Robust RPC call with comprehensive error handling
-          let progressData = null;
+          let progressData: ModuleProgress[] | null = null;
           try {
             console.log('🔄 Starting RPC call for module:', module.key);
-            
+
             const rpcPromise = supabase
               .rpc('get_module_progress', {
                 user_id_param: authUser.id,
                 module_key: module.key
               });
-            
+
             // Shorter timeout with immediate fallback
-            const timeoutPromise = new Promise((_, reject) => 
+            const timeoutPromise: Promise<never> = new Promise((_, reject) =>
               setTimeout(() => reject(new Error('RPC timeout after 3 seconds')), 3000)
             );
-            
-            const result = await Promise.race([rpcPromise, timeoutPromise]) as any;
-            const { data, error } = result;
-            
+
+            type RpcResponse = Awaited<typeof rpcPromise>;
+            const result = await Promise.race([rpcPromise, timeoutPromise]);
+            const { data, error } = result as RpcResponse;
+
             if (error) {
               console.error('❌ RPC error for module', module.key, ':', error);
               // Fallback: Calculate progress manually from procedure_logs
               progressData = await calculateProgressManually(authUser.id, module.key);
             } else {
               console.log('✅ RPC success for module', module.key, ':', data);
-              progressData = data;
+              progressData = data as ModuleProgress[] | null;
             }
           } catch (error) {
       console.error('❌ FMH: Critical error in loadModulesAndProgress:', error);
@@ -420,18 +458,27 @@ export const FMHDashboard: React.FC = () => {
               <Plus className="w-4 h-4" />
               Prozedur erfassen
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               className="gap-2"
               onClick={() => setShowManualEntry(true)}
             >
               <FileText className="w-4 h-4" />
               Manual eingabe
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => setShowPdfDataEntry(true)}
+            >
+              <ClipboardList className="w-4 h-4" />
+              PDF Daten
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               className="gap-2"
               onClick={() => setShowPDFUpload(true)}
             >
@@ -589,6 +636,11 @@ export const FMHDashboard: React.FC = () => {
           open={showPDFUpload}
           onOpenChange={setShowPDFUpload}
           onSuccess={loadModulesAndProgress}
+        />
+
+        <FMHPdfDataEntry
+          open={showPdfDataEntry}
+          onOpenChange={setShowPdfDataEntry}
         />
 
         {/* Corrections Modal */}
