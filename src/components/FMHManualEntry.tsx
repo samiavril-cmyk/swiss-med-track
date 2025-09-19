@@ -7,17 +7,28 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Calendar, Clock, User, Stethoscope, Plus, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthResilient } from '@/hooks/useAuthResilient';
 import { toast } from 'sonner';
 
+type ProcedureRequirements = {
+  [key: string]: number | null | undefined;
+  pgy1?: number | null;
+  pgy2?: number | null;
+  pgy3?: number | null;
+  pgy4?: number | null;
+  pgy5?: number | null;
+};
+
+type SurgeryRole = 'primary' | 'instructing' | 'assistant';
+type PgyLevel = 'pgy5' | 'pgy4' | 'pgy3' | 'pgy2' | 'pgy1';
+
 interface Procedure {
   id: string;
   code: string;
   title_de: string;
-  min_required_by_pgy: any;
+  min_required_by_pgy: ProcedureRequirements | null;
 }
 
 interface ProcedureCategory {
@@ -29,12 +40,31 @@ interface ProcedureCategory {
 
 interface ManualEntryData {
   procedure_id: string;
-  role_in_surgery: string;
+  role_in_surgery: SurgeryRole;
   date_performed: string;
   notes: string;
-  supervisor_name: string;
-  institution: string;
+  supervisor: string;
+  hospital: string;
 }
+
+const ROLE_WEIGHTS: Record<SurgeryRole, number> = {
+  primary: 1,
+  instructing: 0.5,
+  assistant: 0.25
+};
+
+const PGY_PRIORITY: PgyLevel[] = ['pgy5', 'pgy4', 'pgy3', 'pgy2', 'pgy1'];
+
+const getMinimumRequirement = (requirements: ProcedureRequirements | null | undefined) => {
+  if (!requirements) return 0;
+  for (const level of PGY_PRIORITY) {
+    const value = requirements[level];
+    if (typeof value === 'number') {
+      return value;
+    }
+  }
+  return 0;
+};
 
 export const FMHManualEntry: React.FC<{
   open: boolean;
@@ -50,11 +80,11 @@ export const FMHManualEntry: React.FC<{
   
   const [formData, setFormData] = useState<ManualEntryData>({
     procedure_id: '',
-    role_in_surgery: 'responsible',
+    role_in_surgery: 'primary',
     date_performed: new Date().toISOString().split('T')[0],
     notes: '',
-    supervisor_name: '',
-    institution: ''
+    supervisor: '',
+    hospital: ''
   });
 
   // Load categories on mount
@@ -82,7 +112,7 @@ export const FMHManualEntry: React.FC<{
 
       if (error) throw error;
       setCategories(data || []);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error loading categories:', error);
       toast.error('Fehler beim Laden der Kategorien');
     } finally {
@@ -102,7 +132,7 @@ export const FMHManualEntry: React.FC<{
 
       if (error) throw error;
       setProcedures(data || []);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error loading procedures:', error);
       toast.error('Fehler beim Laden der Prozeduren');
     } finally {
@@ -117,17 +147,22 @@ export const FMHManualEntry: React.FC<{
     try {
       setSubmitting(true);
       
+      const timestamp = new Date().toISOString();
+      const weightedScore = ROLE_WEIGHTS[formData.role_in_surgery];
+
       const { error } = await supabase
         .from('procedure_logs')
         .insert({
           user_id: user.id,
           procedure_id: formData.procedure_id,
           role_in_surgery: formData.role_in_surgery,
-          date_performed: formData.date_performed,
-          notes: formData.notes,
-          supervisor_name: formData.supervisor_name,
-          institution: formData.institution,
-          created_at: new Date().toISOString()
+          performed_date: formData.date_performed,
+          notes: formData.notes || null,
+          supervisor: formData.supervisor || null,
+          hospital: formData.hospital || null,
+          weighted_score: weightedScore,
+          created_at: timestamp,
+          updated_at: timestamp
         });
 
       if (error) throw error;
@@ -139,16 +174,16 @@ export const FMHManualEntry: React.FC<{
       // Reset form
       setFormData({
         procedure_id: '',
-        role_in_surgery: 'responsible',
+        role_in_surgery: 'primary',
         date_performed: new Date().toISOString().split('T')[0],
         notes: '',
-        supervisor_name: '',
-        institution: ''
+        supervisor: '',
+        hospital: ''
       });
       setSelectedCategory('');
       setProcedures([]);
       
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error submitting procedure:', error);
       toast.error('Fehler beim Erfassen der Prozedur');
     } finally {
@@ -157,7 +192,7 @@ export const FMHManualEntry: React.FC<{
   };
 
   const selectedProcedure = procedures.find(p => p.id === formData.procedure_id);
-  const minRequired = selectedProcedure?.min_required_by_pgy?.pgy5 || 0;
+  const selectedProcedureMinimum = getMinimumRequirement(selectedProcedure?.min_required_by_pgy);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -173,7 +208,11 @@ export const FMHManualEntry: React.FC<{
           {/* Category Selection */}
           <div className="space-y-2">
             <Label htmlFor="category">FMH Modul</Label>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <Select
+              value={selectedCategory}
+              onValueChange={setSelectedCategory}
+              disabled={loading || categories.length === 0}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Wählen Sie ein FMH Modul" />
               </SelectTrigger>
@@ -191,9 +230,10 @@ export const FMHManualEntry: React.FC<{
           {selectedCategory && (
             <div className="space-y-2">
               <Label htmlFor="procedure">Prozedur</Label>
-              <Select 
-                value={formData.procedure_id} 
+              <Select
+                value={formData.procedure_id}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, procedure_id: value }))}
+                disabled={loading || procedures.length === 0}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Wählen Sie eine Prozedur" />
@@ -204,7 +244,7 @@ export const FMHManualEntry: React.FC<{
                       <div className="flex flex-col">
                         <span className="font-medium">{procedure.title_de}</span>
                         <span className="text-xs text-muted-foreground">
-                          {procedure.code} • Min: {minRequired}
+                          {procedure.code} • Min: {getMinimumRequirement(procedure.min_required_by_pgy)}
                         </span>
                       </div>
                     </SelectItem>
@@ -228,7 +268,7 @@ export const FMHManualEntry: React.FC<{
                   </div>
                   <div>
                     <Label className="text-sm text-muted-foreground">Mindestanforderung PGY-5</Label>
-                    <p className="font-semibold">{minRequired} Eingriffe</p>
+                    <p className="font-semibold">{selectedProcedureMinimum} Eingriffe</p>
                   </div>
                 </div>
               </CardContent>
@@ -238,15 +278,15 @@ export const FMHManualEntry: React.FC<{
           {/* Role Selection */}
           <div className="space-y-2">
             <Label htmlFor="role">Rolle im Eingriff</Label>
-            <Select 
-              value={formData.role_in_surgery} 
-              onValueChange={(value) => setFormData(prev => ({ ...prev, role_in_surgery: value }))}
+            <Select
+              value={formData.role_in_surgery}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, role_in_surgery: value as SurgeryRole }))}
             >
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue placeholder="Rolle auswählen" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="responsible">
+                <SelectItem value="primary">
                   <div className="flex flex-col">
                     <span>Verantwortlich (1.0x Gewichtung)</span>
                     <span className="text-xs text-muted-foreground">Hauptverantwortlicher Chirurg</span>
@@ -285,8 +325,8 @@ export const FMHManualEntry: React.FC<{
             <Label htmlFor="supervisor">Supervisor/Chefarzt</Label>
             <Input
               id="supervisor"
-              value={formData.supervisor_name}
-              onChange={(e) => setFormData(prev => ({ ...prev, supervisor_name: e.target.value }))}
+              value={formData.supervisor}
+              onChange={(e) => setFormData(prev => ({ ...prev, supervisor: e.target.value }))}
               placeholder="Dr. Max Mustermann"
             />
           </div>
@@ -296,8 +336,8 @@ export const FMHManualEntry: React.FC<{
             <Label htmlFor="institution">Institution</Label>
             <Input
               id="institution"
-              value={formData.institution}
-              onChange={(e) => setFormData(prev => ({ ...prev, institution: e.target.value }))}
+              value={formData.hospital}
+              onChange={(e) => setFormData(prev => ({ ...prev, hospital: e.target.value }))}
               placeholder="Universitätsspital Zürich"
             />
           </div>
@@ -326,7 +366,7 @@ export const FMHManualEntry: React.FC<{
             </Button>
             <Button
               type="submit"
-              disabled={!formData.procedure_id || submitting}
+              disabled={!formData.procedure_id || submitting || loading}
               className="gap-2"
             >
               {submitting ? (

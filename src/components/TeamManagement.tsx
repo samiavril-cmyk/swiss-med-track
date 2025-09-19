@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthResilient } from '@/hooks/useAuthResilient';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,20 +10,24 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  Users, 
-  Plus, 
-  UserPlus, 
-  Edit, 
-  Trash2, 
+import { Progress } from '@/components/ui/progress';
+import {
+  Users,
+  Plus,
+  UserPlus,
+  Trash2,
   AlertTriangle,
-  CheckCircle,
   Clock,
   UserCheck,
   Building,
-  MapPin
+  MapPin,
+  BarChart3
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+
+interface TeamManagementProps {
+  onMembershipChange?: () => void;
+}
 
 interface Team {
   id: string;
@@ -46,6 +50,10 @@ interface TeamMember {
   joined_at: string;
   status: string;
   notes: string;
+  overall_progress: number;
+  total_procedures: number;
+  last_activity: string | null;
+  modules: ModuleProgressSummary[];
 }
 
 interface AvailableResident {
@@ -57,7 +65,19 @@ interface AvailableResident {
   hospital: string;
 }
 
-const TeamManagement: React.FC = () => {
+interface ModuleProgressSummary {
+  module_key: string;
+  module_name: string;
+  progress_percentage: number;
+  total_weighted_score: number;
+  total_minimum: number;
+  responsible_count: number;
+  instructing_count: number;
+  assistant_count: number;
+  last_procedure_date: string | null;
+}
+
+const TeamManagement: React.FC<TeamManagementProps> = ({ onMembershipChange }) => {
   const { user } = useAuthResilient();
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
@@ -78,13 +98,7 @@ const TeamManagement: React.FC = () => {
   const [selectedResident, setSelectedResident] = useState<string>('');
   const [memberNotes, setMemberNotes] = useState('');
 
-  useEffect(() => {
-    if (user) {
-      loadTeams();
-    }
-  }, [user]);
-
-  const loadTeams = async () => {
+  const loadTeams = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -118,7 +132,13 @@ const TeamManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (user?.id) {
+      loadTeams();
+    }
+  }, [user?.id, loadTeams]);
 
   const loadTeamMembers = async (teamId: string) => {
     try {
@@ -136,6 +156,7 @@ const TeamManagement: React.FC = () => {
           )
         `)
         .eq('team_id', teamId)
+        .eq('status', 'active')
         .order('joined_at', { ascending: false });
 
       if (membersError) {
@@ -153,10 +174,64 @@ const TeamManagement: React.FC = () => {
         hospital: member.profiles?.hospital || '',
         joined_at: member.joined_at,
         status: member.status,
-        notes: member.notes || ''
+        notes: member.notes || '',
+        overall_progress: 0,
+        total_procedures: 0,
+        last_activity: null,
+        modules: []
       })) || [];
 
-      setTeamMembers(members);
+      const membersWithProgress = await Promise.all(members.map(async (member) => {
+        try {
+          const { data: progressData, error: progressError } = await supabase
+            .rpc('get_resident_progress_summary', { resident_user_id: member.resident_id });
+
+          if (progressError) {
+            console.error('Error loading member progress:', progressError);
+            return member;
+          }
+
+          const modules = (progressData || []).map((module) => ({
+            module_key: module.module_key,
+            module_name: module.module_name,
+            progress_percentage: Number(module.progress_percentage || 0),
+            total_weighted_score: Number(module.total_weighted_score || 0),
+            total_minimum: Number(module.total_minimum || 0),
+            responsible_count: Number(module.responsible_count || 0),
+            instructing_count: Number(module.instructing_count || 0),
+            assistant_count: Number(module.assistant_count || 0),
+            last_procedure_date: module.last_procedure_date || null
+          })) as ModuleProgressSummary[];
+
+          const totals = modules.reduce((acc, module) => {
+            return {
+              weighted: acc.weighted + module.total_weighted_score,
+              minimum: acc.minimum + module.total_minimum,
+              procedures: acc.procedures + module.responsible_count + module.instructing_count + module.assistant_count,
+              lastActivity: module.last_procedure_date && (!acc.lastActivity || module.last_procedure_date > acc.lastActivity)
+                ? module.last_procedure_date
+                : acc.lastActivity
+            };
+          }, { weighted: 0, minimum: 0, procedures: 0, lastActivity: null as string | null });
+
+          const overallProgress = totals.minimum > 0
+            ? Math.min(100, Number(((totals.weighted / totals.minimum) * 100).toFixed(1)))
+            : 0;
+
+          return {
+            ...member,
+            overall_progress: overallProgress,
+            total_procedures: totals.procedures,
+            last_activity: totals.lastActivity,
+            modules
+          };
+        } catch (progressErr) {
+          console.error('Unexpected error while loading member progress:', progressErr);
+          return member;
+        }
+      }));
+
+      setTeamMembers(membersWithProgress);
     } catch (err) {
       console.error('Error in loadTeamMembers:', err);
     }
@@ -207,6 +282,7 @@ const TeamManagement: React.FC = () => {
       setNewTeam({ team_name: '', department: '', hospital: '', description: '' });
       setShowCreateTeam(false);
       loadTeams();
+      onMembershipChange?.();
     } catch (err) {
       console.error('Error creating team:', err);
       toast({
@@ -223,11 +299,13 @@ const TeamManagement: React.FC = () => {
     try {
       const { error } = await supabase
         .from('team_members')
-        .insert({
+        .upsert({
           team_id: selectedTeam.id,
           resident_id: selectedResident,
-          notes: memberNotes
-        });
+          notes: memberNotes,
+          status: 'active',
+          joined_at: new Date().toISOString()
+        }, { onConflict: 'team_id,resident_id' });
 
       if (error) throw error;
 
@@ -241,6 +319,8 @@ const TeamManagement: React.FC = () => {
       setShowAddMember(false);
       loadTeamMembers(selectedTeam.id);
       loadTeams(); // Update team count
+      loadAvailableResidents();
+      onMembershipChange?.();
     } catch (err) {
       console.error('Error adding member:', err);
       toast({
@@ -255,7 +335,7 @@ const TeamManagement: React.FC = () => {
     try {
       const { error } = await supabase
         .from('team_members')
-        .update({ status: 'inactive' })
+        .update({ status: 'inactive', updated_at: new Date().toISOString() })
         .eq('id', memberId);
 
       if (error) throw error;
@@ -268,7 +348,9 @@ const TeamManagement: React.FC = () => {
       if (selectedTeam) {
         loadTeamMembers(selectedTeam.id);
         loadTeams(); // Update team count
+        loadAvailableResidents();
       }
+      onMembershipChange?.();
     } catch (err) {
       console.error('Error removing member:', err);
       toast({
@@ -470,16 +552,22 @@ const TeamManagement: React.FC = () => {
                             <SelectValue placeholder="Resident auswählen..." />
                           </SelectTrigger>
                           <SelectContent>
-                            {availableResidents.map((resident) => (
-                              <SelectItem key={resident.user_id} value={resident.user_id}>
-                                <div className="flex flex-col">
-                                  <span className="font-medium">{resident.full_name}</span>
-                                  <span className="text-sm text-muted-foreground">
-                                    PGY {resident.pgy_level} - {resident.department}
-                                  </span>
-                                </div>
+                            {availableResidents.length === 0 ? (
+                              <SelectItem value="__none" disabled>
+                                Keine freien Residents verfügbar
                               </SelectItem>
-                            ))}
+                            ) : (
+                              availableResidents.map((resident) => (
+                                <SelectItem key={resident.user_id} value={resident.user_id}>
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">{resident.full_name}</span>
+                                    <span className="text-sm text-muted-foreground">
+                                      PGY {resident.pgy_level} - {resident.department}
+                                    </span>
+                                  </div>
+                                </SelectItem>
+                              ))
+                            )}
                           </SelectContent>
                         </Select>
                       </div>
@@ -509,43 +597,87 @@ const TeamManagement: React.FC = () => {
           <CardContent>
             {selectedTeam ? (
               <div className="space-y-3">
-                {teamMembers.map((member) => (
-                  <Card key={member.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h4 className="font-semibold">{member.resident_name}</h4>
-                          <p className="text-sm text-gray-600">{member.resident_email}</p>
+                {teamMembers.map((member) => {
+                  const focusModules = [...member.modules]
+                    .sort((a, b) => a.progress_percentage - b.progress_percentage)
+                    .slice(0, 2);
+
+                  return (
+                    <Card key={member.id}>
+                      <CardContent className="p-4 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-semibold">{member.resident_name}</h4>
+                            <p className="text-sm text-gray-600">{member.resident_email}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">PGY {member.pgy_level}</Badge>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleRemoveMember(member.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline">PGY {member.pgy_level}</Badge>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleRemoveMember(member.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm text-gray-600">
+                            <span>Fortschritt gesamt</span>
+                            <span className="font-semibold">{Math.round(member.overall_progress)}%</span>
+                          </div>
+                          <Progress value={member.overall_progress} />
                         </div>
-                      </div>
-                      
-                      <div className="space-y-1 text-sm text-gray-600">
-                        <div className="flex items-center gap-2">
-                          <Building className="h-4 w-4" />
-                          {member.department}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-600">
+                          <div className="flex items-center gap-2">
+                            <Building className="h-4 w-4" />
+                            {member.department}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            Seit: {new Date(member.joined_at).toLocaleDateString('de-DE')}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <UserCheck className="h-4 w-4" />
+                            {member.total_procedures} dokumentierte Einsätze
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <BarChart3 className="h-4 w-4" />
+                            {member.last_activity
+                              ? `Letzte Aktivität: ${new Date(member.last_activity).toLocaleDateString('de-DE')}`
+                              : 'Keine Aktivitäten'}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
-                          Seit: {new Date(member.joined_at).toLocaleDateString('de-DE')}
-                        </div>
-                        {member.notes && (
-                          <p className="text-xs text-gray-500 mt-2">{member.notes}</p>
+
+                        {focusModules.length > 0 && (
+                          <div className="space-y-2">
+                            <span className="text-sm font-medium text-gray-700">Fokus-Module</span>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              {focusModules.map((module) => (
+                                <div key={module.module_key} className="border rounded-lg p-2">
+                                  <div className="flex items-center justify-between text-sm">
+                                    <span className="font-medium">{module.module_name}</span>
+                                    <Badge variant="outline">{Math.round(module.progress_percentage)}%</Badge>
+                                  </div>
+                                  <div className="mt-2">
+                                    <Progress value={module.progress_percentage} />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                
+
+                        {member.notes && (
+                          <p className="text-xs text-gray-500">{member.notes}</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+
                 {teamMembers.length === 0 && (
                   <div className="text-center py-8">
                     <UserCheck className="h-12 w-12 text-gray-400 mx-auto mb-4" />

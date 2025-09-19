@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthResilient } from '@/hooks/useAuthResilient';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,23 +11,20 @@ import {
   Users,
   TrendingUp,
   AlertTriangle,
-  CheckCircle,
   Clock,
   UserCheck,
   BarChart3,
   FileText,
   Calendar,
-  Stethoscope,
   GraduationCap,
   UserPlus,
   Settings,
-  BookOpen,
-  Award
+  Loader2
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import TeamManagement from '@/components/TeamManagement';
 
-interface Resident {
+interface ResidentSummary {
   resident_id: string;
   resident_name: string;
   resident_email: string;
@@ -38,6 +35,7 @@ interface Resident {
   joined_at: string;
   total_procedures: number;
   last_activity: string | null;
+  overall_progress?: number;
 }
 
 interface ModuleProgress {
@@ -60,10 +58,76 @@ interface TeamStats {
   needsAttention: number;
 }
 
+type RawModuleProgress = {
+  module_name: string;
+  module_key: string;
+  total_weighted_score: number | string | null;
+  total_minimum: number | string | null;
+  progress_percentage: number | string | null;
+  responsible_count: number | string | null;
+  instructing_count: number | string | null;
+  assistant_count: number | string | null;
+  last_procedure_date: string | null;
+};
+
+const calculateOverallProgress = (modules: ModuleProgress[]): number => {
+  const totals = modules.reduce(
+    (acc, module) => ({
+      weighted: acc.weighted + module.total_weighted_score,
+      minimum: acc.minimum + module.total_minimum
+    }),
+    { weighted: 0, minimum: 0 }
+  );
+
+  if (totals.minimum <= 0) {
+    return 0;
+  }
+
+  const progress = (totals.weighted / totals.minimum) * 100;
+  return Math.min(100, Number(progress.toFixed(1)));
+};
+
+const recalculateTeamStats = (residentList: ResidentSummary[]): TeamStats => {
+  const totalResidents = residentList.length;
+  const activeResidents = residentList.filter((resident) => !!resident.last_activity).length;
+  const totalProcedures = residentList.reduce((sum, resident) => sum + (resident.total_procedures || 0), 0);
+  const averageProgress = totalResidents > 0
+    ? residentList.reduce((sum, resident) => sum + (resident.overall_progress ?? 0), 0) / totalResidents
+    : 0;
+  const needsAttention = residentList.filter((resident) => (resident.overall_progress ?? 0) < 60).length;
+
+  return {
+    totalResidents,
+    activeResidents,
+    totalProcedures,
+    averageProgress,
+    needsAttention
+  };
+};
+
+const normalizeModule = (module: RawModuleProgress): ModuleProgress => ({
+  module_name: module.module_name,
+  module_key: module.module_key,
+  total_weighted_score: Number(module.total_weighted_score ?? 0),
+  total_minimum: Number(module.total_minimum ?? 0),
+  progress_percentage: Number(module.progress_percentage ?? 0),
+  responsible_count: Number(module.responsible_count ?? 0),
+  instructing_count: Number(module.instructing_count ?? 0),
+  assistant_count: Number(module.assistant_count ?? 0),
+  last_procedure_date: module.last_procedure_date ?? null
+});
+
+const getProgressColor = (percentage: number) => {
+  if (percentage >= 80) return 'text-green-600';
+  if (percentage >= 60) return 'text-yellow-600';
+  return 'text-red-600';
+};
+
 const SupervisorDashboard: React.FC = () => {
   const { user } = useAuthResilient();
-  const [residents, setResidents] = useState<Resident[]>([]);
-  const [selectedResident, setSelectedResident] = useState<Resident | null>(null);
+  const [residents, setResidents] = useState<ResidentSummary[]>([]);
+  const [residentProgressMap, setResidentProgressMap] = useState<Record<string, ModuleProgress[]>>({});
+  const [selectedResident, setSelectedResident] = useState<ResidentSummary | null>(null);
   const [residentProgress, setResidentProgress] = useState<ModuleProgress[]>([]);
   const [teamStats, setTeamStats] = useState<TeamStats>({
     totalResidents: 0,
@@ -72,23 +136,20 @@ const SupervisorDashboard: React.FC = () => {
     averageProgress: 0,
     needsAttention: 0
   });
+  const [activeTab, setActiveTab] = useState<'team' | 'management' | 'progress' | 'reports'>('team');
   const [loading, setLoading] = useState(true);
+  const [progressLoading, setProgressLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      loadSupervisorData();
-    }
-  }, [user]);
+  const loadSupervisorData = useCallback(async () => {
+    if (!user?.id) return;
 
-  const loadSupervisorData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Load supervisor's residents
       const { data: residentsData, error: residentsError } = await supabase
-        .rpc('get_supervisor_residents', { supervisor_user_id: user?.id });
+        .rpc('get_supervisor_residents', { supervisor_user_id: user.id });
 
       if (residentsError) {
         console.error('Error loading residents:', residentsError);
@@ -96,35 +157,72 @@ const SupervisorDashboard: React.FC = () => {
         return;
       }
 
-      console.log('Raw residents data:', residentsData);
-      
-      // Parse JSON response (our RPC function returns JSON)
-      const parsedResidents = Array.isArray(residentsData) ? residentsData : (residentsData || []);
-      console.log('Parsed residents:', parsedResidents);
-      
-      setResidents(parsedResidents);
+      const parsedResidents = (residentsData ?? []) as ResidentSummary[];
 
-      // Calculate team statistics
-      const stats: TeamStats = {
-        totalResidents: parsedResidents?.length || 0,
-        activeResidents: parsedResidents?.filter((r: Resident) => r.last_activity)?.length || 0,
-        totalProcedures: parsedResidents?.reduce((sum: number, r: Resident) => sum + (r.total_procedures || 0), 0) || 0,
-        averageProgress: 0, // Will be calculated per resident
-        needsAttention: 0 // Will be calculated based on progress
-      };
+      const progressResults = await Promise.all(parsedResidents.map(async (resident) => {
+        try {
+          const { data: progressData, error: progressError } = await supabase
+            .rpc('get_resident_progress_summary', { resident_user_id: resident.resident_id });
 
-      setTeamStats(stats);
+          if (progressError) {
+            console.error('Error loading resident progress:', progressError);
+            return { id: resident.resident_id, modules: [] as ModuleProgress[], overall: 0 };
+          }
 
+          const modules = (progressData ?? []).map(normalizeModule);
+          return { id: resident.resident_id, modules, overall: calculateOverallProgress(modules) };
+        } catch (progressErr) {
+          console.error('Unexpected error while loading progress:', progressErr);
+          return { id: resident.resident_id, modules: [] as ModuleProgress[], overall: 0 };
+        }
+      }));
+
+      const progressMap: Record<string, ModuleProgress[]> = {};
+      const residentsWithProgress = parsedResidents.map((resident) => {
+        const progressEntry = progressResults.find((entry) => entry.id === resident.resident_id);
+        if (progressEntry) {
+          progressMap[resident.resident_id] = progressEntry.modules;
+          return { ...resident, overall_progress: progressEntry.overall };
+        }
+        return { ...resident, overall_progress: 0 };
+      });
+
+      setResidentProgressMap(progressMap);
+      setResidents(residentsWithProgress);
+      setTeamStats(recalculateTeamStats(residentsWithProgress));
+
+      setSelectedResident((current) => {
+        if (!current) {
+          setResidentProgress([]);
+          return null;
+        }
+
+        const updatedSelected = residentsWithProgress.find((resident) => resident.resident_id === current.resident_id) || null;
+        if (updatedSelected) {
+          setResidentProgress(progressMap[updatedSelected.resident_id] || []);
+        } else {
+          setResidentProgress([]);
+        }
+
+        return updatedSelected;
+      });
     } catch (err) {
       console.error('Error in loadSupervisorData:', err);
       setError('Fehler beim Laden der Supervisor-Daten');
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (user?.id) {
+      loadSupervisorData();
+    }
+  }, [user?.id, loadSupervisorData]);
 
   const loadResidentProgress = async (residentId: string) => {
     try {
+      setProgressLoading(true);
       const { data: progressData, error: progressError } = await supabase
         .rpc('get_resident_progress_summary', { resident_user_id: residentId });
 
@@ -133,27 +231,49 @@ const SupervisorDashboard: React.FC = () => {
         return;
       }
 
-      setResidentProgress(progressData || []);
+      const modules = (progressData ?? []).map(normalizeModule);
+      setResidentProgressMap((prev) => ({ ...prev, [residentId]: modules }));
+      setResidentProgress(modules);
+      setResidents((prevResidents) => {
+        const updatedResidents = prevResidents.map((resident) =>
+          resident.resident_id === residentId
+            ? { ...resident, overall_progress: calculateOverallProgress(modules) }
+            : resident
+        );
+        setTeamStats(recalculateTeamStats(updatedResidents));
+        return updatedResidents;
+      });
     } catch (err) {
       console.error('Error in loadResidentProgress:', err);
+    } finally {
+      setProgressLoading(false);
     }
   };
 
-  const handleResidentSelect = (resident: Resident) => {
+  const handleResidentSelect = (resident: ResidentSummary) => {
     setSelectedResident(resident);
+    setActiveTab('progress');
+
+    const cachedProgress = residentProgressMap[resident.resident_id];
+    if (cachedProgress) {
+      setResidentProgress(cachedProgress);
+      return;
+    }
+
     loadResidentProgress(resident.resident_id);
   };
 
-  const getProgressColor = (percentage: number) => {
-    if (percentage >= 80) return 'text-green-600';
-    if (percentage >= 60) return 'text-yellow-600';
-    return 'text-red-600';
-  };
+  const formatDate = (value: string | null) => {
+    if (!value) {
+      return 'Keine Aktivität';
+    }
 
-  const getProgressBarColor = (percentage: number) => {
-    if (percentage >= 80) return 'bg-green-500';
-    if (percentage >= 60) return 'bg-yellow-500';
-    return 'bg-red-500';
+    try {
+      return new Date(value).toLocaleDateString('de-DE');
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Unbekannt';
+    }
   };
 
   if (loading) {
@@ -186,12 +306,13 @@ const SupervisorDashboard: React.FC = () => {
     );
   }
 
+  const sortedResidents = [...residents].sort((a, b) => (b.overall_progress ?? 0) - (a.overall_progress ?? 0));
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <Header />
-      
+
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Supervisor Dashboard
@@ -201,9 +322,7 @@ const SupervisorDashboard: React.FC = () => {
           </p>
         </div>
 
-        {/* New Layout: Stats on Left, Residents on Right */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          {/* Left Side: Team Statistics */}
           <div className="lg:col-span-1 space-y-6">
             <Card>
               <CardHeader>
@@ -252,13 +371,12 @@ const SupervisorDashboard: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Quick Actions */}
             <Card>
               <CardHeader>
                 <CardTitle>Schnellaktionen</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => setActiveTab('management')}>
                   <UserPlus className="h-4 w-4 mr-2" />
                   Resident hinzufügen
                 </Button>
@@ -274,175 +392,58 @@ const SupervisorDashboard: React.FC = () => {
             </Card>
           </div>
 
-          {/* Right Side: Residents with Milestone Charts */}
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <GraduationCap className="h-5 w-5 text-purple-600" />
-                  Ihre Residents
+                  Team Fortschritt
                 </CardTitle>
                 <CardDescription>
-                  Klicken Sie auf einen Resident, um detaillierte Milestone-Informationen zu sehen
+                  Übersicht über die Residents in Ihrem Team und ihren aktuellen Fortschritt
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
-                  {residents.map((resident) => (
-                    <Card
-                      key={resident.user_id}
-                      className={`cursor-pointer transition-all hover:shadow-lg border-l-4 ${
-                        selectedResident?.user_id === resident.user_id
-                          ? 'border-l-blue-500 bg-blue-50/50'
-                          : 'border-l-gray-200'
-                      }`}
-                      onClick={() => handleResidentSelect(resident)}
-                    >
-                      <CardContent className="p-6">
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                          {/* Resident Info */}
-                          <div className="lg:col-span-1 space-y-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                                <span className="text-white font-bold text-lg">
-                                  {resident.full_name?.split(' ').map(n => n[0]).join('') || 'R'}
-                                </span>
-                              </div>
-                              <div>
-                                <h3 className="font-semibold text-lg">{resident.full_name}</h3>
-                                <div className="flex items-center gap-2">
-                                  <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                                    PGY {resident.pgy_level}
-                                  </Badge>
-                                  <span className="text-sm text-gray-600">{resident.department}</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-gray-600">Prozeduren</span>
-                                <span className="font-semibold">{resident.total_procedures || 0}</span>
-                              </div>
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-gray-600">Klinik</span>
-                                <span className="font-semibold">{resident.hospital}</span>
-                              </div>
+                {sortedResidents.length > 0 ? (
+                  <div className="space-y-4">
+                    {sortedResidents.map((resident) => (
+                      <div key={resident.resident_id} className="border rounded-lg p-4 bg-white/60 backdrop-blur">
+                        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                          <div>
+                            <h3 className="font-semibold text-lg">{resident.resident_name}</h3>
+                            <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 mt-1">
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                                PGY {resident.pgy_level}
+                              </Badge>
+                              {resident.team_name && <span>{resident.team_name}</span>}
+                              {resident.hospital && <span>{resident.hospital}</span>}
                             </div>
                           </div>
-
-                          {/* Milestone Charts */}
-                          <div className="lg:col-span-2 space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                              {/* Prozeduren Chart */}
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <Stethoscope className="h-4 w-4 text-green-600" />
-                                    <span className="text-sm font-medium">Prozeduren</span>
-                                  </div>
-                                  <Badge variant="outline" className="text-xs">Q4 2024</Badge>
-                                </div>
-                                <div className="h-16 bg-gray-100 rounded-lg p-2">
-                                  <div className="h-full flex items-end gap-1">
-                                    {[20, 35, 45, 50, 55, 60, 65, 70, 75, 78, 82, 85].map((height, i) => (
-                                      <div
-                                        key={i}
-                                        className="bg-gradient-to-t from-green-500 to-green-400 rounded-sm flex-1"
-                                        style={{ height: `${height}%` }}
-                                      ></div>
-                                    ))}
-                                  </div>
-                                </div>
-                                <div className="flex justify-between text-xs text-gray-500">
-                                  <span>Jan</span><span>Jun</span><span>Dez</span>
-                                </div>
-                              </div>
-
-                              {/* Prüfungen Chart */}
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <FileText className="h-4 w-4 text-blue-600" />
-                                    <span className="text-sm font-medium">Prüfungen</span>
-                                  </div>
-                                  <Badge variant="outline" className="text-xs">3/4</Badge>
-                                </div>
-                                <div className="h-16 bg-gray-100 rounded-lg p-2">
-                                  <div className="h-full flex items-end gap-1">
-                                    {[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((height, i) => (
-                                      <div
-                                        key={i}
-                                        className={`rounded-sm flex-1 ${i < 9 ? 'bg-gradient-to-t from-blue-500 to-blue-400' : 'bg-gray-200'}`}
-                                        style={{ height: i < 9 ? '100%' : '20%' }}
-                                      ></div>
-                                    ))}
-                                  </div>
-                                </div>
-                                <div className="flex justify-between text-xs text-gray-500">
-                                  <span>Q1</span><span>Q2</span><span>Q3</span><span>Q4</span>
-                                </div>
-                              </div>
+                          <div className="w-full md:w-64">
+                            <div className="flex justify-between text-sm text-gray-600">
+                              <span>Fortschritt</span>
+                              <span className="font-semibold">{Math.round(resident.overall_progress ?? 0)}%</span>
                             </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                              {/* Publikationen Chart */}
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <BookOpen className="h-4 w-4 text-purple-600" />
-                                    <span className="text-sm font-medium">Publikationen</span>
-                                  </div>
-                                  <Badge variant="outline" className="text-xs">2/3</Badge>
-                                </div>
-                                <div className="h-16 bg-gray-100 rounded-lg p-2">
-                                  <div className="h-full flex items-end gap-1">
-                                    {[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((height, i) => (
-                                      <div
-                                        key={i}
-                                        className={`rounded-sm flex-1 ${i < 8 ? 'bg-gradient-to-t from-purple-500 to-purple-400' : 'bg-gray-200'}`}
-                                        style={{ height: i < 8 ? '100%' : '20%' }}
-                                      ></div>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Awards Chart */}
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <Award className="h-4 w-4 text-amber-600" />
-                                    <span className="text-sm font-medium">Awards</span>
-                                  </div>
-                                  <Badge variant="outline" className="text-xs">1/2</Badge>
-                                </div>
-                                <div className="h-16 bg-gray-100 rounded-lg p-2">
-                                  <div className="h-full flex items-end gap-1">
-                                    {[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((height, i) => (
-                                      <div
-                                        key={i}
-                                        className={`rounded-sm flex-1 ${i < 6 ? 'bg-gradient-to-t from-amber-500 to-amber-400' : 'bg-gray-200'}`}
-                                        style={{ height: i < 6 ? '100%' : '20%' }}
-                                      ></div>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+                            <Progress value={resident.overall_progress ?? 0} className="mt-2" />
                           </div>
+                          <Button variant="outline" size="sm" onClick={() => handleResidentSelect(resident)}>
+                            Details ansehen
+                          </Button>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-10 text-gray-600">
+                    Keine Residents vorhanden. Legen Sie Teams und Mitglieder im Tab "Team Management" an.
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
         </div>
 
-        {/* Main Content */}
-        <Tabs defaultValue="team" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)} className="space-y-6">
           <TabsList>
             <TabsTrigger value="team">Team Übersicht</TabsTrigger>
             <TabsTrigger value="management">Team Management</TabsTrigger>
@@ -455,45 +456,57 @@ const SupervisorDashboard: React.FC = () => {
               <CardHeader>
                 <CardTitle>Ihre Residents</CardTitle>
                 <CardDescription>
-                  Klicken Sie auf einen Resident, um detaillierte Informationen zu sehen
+                  Wählen Sie einen Resident aus, um detaillierte Informationen zu sehen
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {residents.map((resident) => (
-                    <Card 
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {sortedResidents.map((resident) => (
+                    <Card
                       key={resident.resident_id}
                       className={`cursor-pointer transition-all hover:shadow-md ${
-                        selectedResident?.resident_id === resident.resident_id 
-                          ? 'ring-2 ring-blue-500' 
-                          : ''
+                        selectedResident?.resident_id === resident.resident_id ? 'ring-2 ring-blue-500' : ''
                       }`}
                       onClick={() => handleResidentSelect(resident)}
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-semibold text-lg">{resident.resident_name}</h3>
-                          <Badge variant="outline">PGY {resident.pgy_level}</Badge>
+                      <CardContent className="p-4 space-y-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <h3 className="font-semibold text-lg">{resident.resident_name}</h3>
+                            <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 mt-1">
+                              <Badge variant="outline">PGY {resident.pgy_level}</Badge>
+                              {resident.department && <span>{resident.department}</span>}
+                            </div>
+                          </div>
                         </div>
-                        
-                        <div className="space-y-2 text-sm text-gray-600">
+
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm text-gray-600">
+                            <span>Fortschritt</span>
+                            <span className="font-semibold">{Math.round(resident.overall_progress ?? 0)}%</span>
+                          </div>
+                          <Progress value={resident.overall_progress ?? 0} />
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
                           <div className="flex items-center gap-2">
                             <UserCheck className="h-4 w-4" />
-                            {resident.total_procedures} Prozeduren
+                            {resident.total_procedures} dokumentierte Prozeduren
                           </div>
-                          
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4" />
-                            {resident.last_activity 
-                              ? `Letzte Aktivität: ${new Date(resident.last_activity).toLocaleDateString('de-DE')}`
-                              : 'Keine Aktivität'
-                            }
+                            {resident.last_activity ? `Letzte Aktivität: ${formatDate(resident.last_activity)}` : 'Keine Aktivität'}
                           </div>
-                          
                           <div className="flex items-center gap-2">
                             <Clock className="h-4 w-4" />
-                            Seit: {new Date(resident.joined_at).toLocaleDateString('de-DE')}
+                            Seit {new Date(resident.joined_at).toLocaleDateString('de-DE')}
                           </div>
+                          {resident.team_name && (
+                            <div className="flex items-center gap-2">
+                              <Users className="h-4 w-4" />
+                              {resident.team_name}
+                            </div>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -504,7 +517,7 @@ const SupervisorDashboard: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="management" className="space-y-6">
-            <TeamManagement />
+            <TeamManagement onMembershipChange={loadSupervisorData} />
           </TabsContent>
 
           <TabsContent value="progress" className="space-y-6">
@@ -514,46 +527,83 @@ const SupervisorDashboard: React.FC = () => {
                   <CardHeader>
                     <CardTitle>Fortschritt: {selectedResident.resident_name}</CardTitle>
                     <CardDescription>
-                      Detaillierte Übersicht über FMH-Module
+                      Übersicht über alle FMH-Module von {selectedResident.resident_name}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {residentProgress.map((module) => (
-                        <div key={module.module_key} className="border rounded-lg p-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-semibold">{module.module_name}</h4>
-                            <Badge className={getProgressColor(module.progress_percentage)}>
-                              {Math.round(module.progress_percentage)}%
-                            </Badge>
-                          </div>
-                          
-                          <Progress 
-                            value={module.progress_percentage} 
-                            className="mb-2"
-                          />
-                          
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                            <div>
-                              <span className="text-gray-600">Verantwortlich:</span>
-                              <div className="font-semibold">{module.responsible_count}</div>
-                            </div>
-                            <div>
-                              <span className="text-gray-600">Instruierend:</span>
-                              <div className="font-semibold">{module.instructing_count}</div>
-                            </div>
-                            <div>
-                              <span className="text-gray-600">Assistent:</span>
-                              <div className="font-semibold">{module.assistant_count}</div>
-                            </div>
-                            <div>
-                              <span className="text-gray-600">Minimum:</span>
-                              <div className="font-semibold">{module.total_minimum}</div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                      <div>
+                        <span className="block text-gray-500">Klinik</span>
+                        <span className="font-semibold">{selectedResident.hospital || 'Unbekannt'}</span>
+                      </div>
+                      <div>
+                        <span className="block text-gray-500">Team</span>
+                        <span className="font-semibold">{selectedResident.team_name || 'Nicht zugewiesen'}</span>
+                      </div>
+                      <div>
+                        <span className="block text-gray-500">Fortschritt gesamt</span>
+                        <span className={`font-semibold ${getProgressColor(selectedResident.overall_progress ?? 0)}`}>
+                          {Math.round(selectedResident.overall_progress ?? 0)}%
+                        </span>
+                      </div>
                     </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Module & Meilensteine</CardTitle>
+                    <CardDescription>Detailübersicht über die erfassten Prozeduren</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {progressLoading ? (
+                      <div className="py-10 text-center text-gray-600">
+                        <Loader2 className="h-6 w-6 animate-spin mx-auto mb-3 text-blue-600" />
+                        Fortschritt wird geladen...
+                      </div>
+                    ) : residentProgress.length > 0 ? (
+                      <div className="space-y-4">
+                        {residentProgress.map((module) => (
+                          <div key={module.module_key} className="border rounded-lg p-4 bg-white/70 backdrop-blur">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-semibold">{module.module_name}</h4>
+                              <Badge className={getProgressColor(module.progress_percentage)}>
+                                {Math.round(module.progress_percentage)}%
+                              </Badge>
+                            </div>
+
+                            <Progress value={module.progress_percentage} className="mb-3" />
+
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                              <div>
+                                <span className="text-gray-600">Verantwortlich</span>
+                                <div className="font-semibold">{module.responsible_count}</div>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">Instruierend</span>
+                                <div className="font-semibold">{module.instructing_count}</div>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">Assistent</span>
+                                <div className="font-semibold">{module.assistant_count}</div>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">Minimum</span>
+                                <div className="font-semibold">{module.total_minimum}</div>
+                              </div>
+                            </div>
+
+                            <div className="mt-3 text-sm text-gray-500">
+                              Letzte Prozedur: {module.last_procedure_date ? formatDate(module.last_procedure_date) : 'Keine Aufzeichnungen'}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="py-10 text-center text-gray-600">
+                        Noch keine Prozeduren für dieses Modul erfasst.
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>

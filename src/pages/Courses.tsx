@@ -148,7 +148,7 @@ export default function Courses() {
           has_certificate: true,
           provider_id: 'demo'
         }
-      ] as any);
+      ]);
     } finally {
       setLoading(false);
     }

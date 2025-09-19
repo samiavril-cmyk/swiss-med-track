@@ -7,30 +7,7 @@ import { AlertTriangle, CheckCircle, Edit, Eye, Upload } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-interface ModuleData {
-  name: string;
-  minimum: number;
-  responsible: number;
-  instructing: number;
-  assistant: number;
-  total: number;
-}
-
-interface StagingProcedure {
-  id: string;
-  module_name: string;
-  proc_name: string;
-  minimum: number;
-  responsible: number;
-  instructing: number;
-  assistant: number;
-  total: number;
-  matched_proc_id: string | null;
-  match_confidence: number;
-  match_method: string;
-  status: string;
-  procedures?: { title_de: string };
-}
+import type { PdfModuleSummary, PdfStagingProcedure } from './ClientPDFProcessor';
 
 interface PDFImportPreviewProps {
   runId: string;
@@ -38,11 +15,11 @@ interface PDFImportPreviewProps {
     filename: string;
     standDate?: string;
     totalProcedures: number;
-    modules: ModuleData[];
+    modules: PdfModuleSummary[];
     matched: number;
     needsReview: number;
   };
-  stagingData: StagingProcedure[];
+  stagingData: PdfStagingProcedure[];
   onClose: () => void;
   onImportComplete: () => void;
 }
@@ -57,15 +34,16 @@ export const PDFImportPreview: React.FC<PDFImportPreviewProps> = ({
   const [isCommitting, setIsCommitting] = useState(false);
   const [previewMode, setPreviewMode] = useState<'summary' | 'procedures' | 'modules'>('summary');
 
-  const getStatusBadge = (item: StagingProcedure) => {
+  const getStatusBadge = (item: PdfStagingProcedure) => {
     switch (item.status) {
       case 'matched':
         return (
           <Badge variant="default" className="bg-success text-success-foreground">
             <CheckCircle className="w-3 h-3 mr-1" />
-            {item.match_method === 'exact' ? 'Exakt' : 
-             item.match_method === 'alias' ? 'Alias' : 
-             item.match_method === 'fuzzy' ? 'Ähnlich' : 'Manuell'}
+            {item.match_method === 'exact' ? 'Exakt'
+              : item.match_method === 'alias' ? 'Alias'
+              : item.match_method === 'fuzzy' ? 'Ähnlich'
+              : 'Manuell'}
           </Badge>
         );
       case 'needs_review':
@@ -80,9 +58,10 @@ export const PDFImportPreview: React.FC<PDFImportPreviewProps> = ({
     }
   };
 
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.95) return 'text-success';
-    if (confidence >= 0.8) return 'text-warning';
+  const getConfidenceColor = (confidence?: number | null) => {
+    const value = confidence ?? 0;
+    if (value >= 0.95) return 'text-success';
+    if (value >= 0.8) return 'text-warning';
     return 'text-destructive';
   };
 
@@ -335,31 +314,39 @@ export const PDFImportPreview: React.FC<PDFImportPreviewProps> = ({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {stagingData.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">{item.proc_name}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{item.module_name}</TableCell>
-                      <TableCell>{getStatusBadge(item)}</TableCell>
-                      <TableCell>
-                        {item.procedures?.title_de ? (
-                          <div>
-                            <div className="font-medium">{item.procedures.title_de}</div>
-                            {item.match_confidence < 1.0 && (
-                              <div className={`text-xs ${getConfidenceColor(item.match_confidence)}`}>
-                                {(item.match_confidence * 100).toFixed(0)}% Übereinstimmung
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground">Keine Zuordnung</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">{item.responsible}</TableCell>
-                      <TableCell className="text-right">{item.instructing}</TableCell>
-                      <TableCell className="text-right">{item.assistant}</TableCell>
-                      <TableCell className="text-right font-semibold">{item.total}</TableCell>
-                    </TableRow>
-                  ))}
+                  {stagingData.map((item) => {
+                    const confidence = item.match_confidence ?? 0;
+                    const responsible = item.responsible ?? 0;
+                    const instructing = item.instructing ?? 0;
+                    const assistant = item.assistant ?? 0;
+                    const total = item.total ?? responsible + instructing + assistant;
+
+                    return (
+                      <TableRow key={item.id}>
+                        <TableCell className="font-medium">{item.proc_name}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{item.module_name}</TableCell>
+                        <TableCell>{getStatusBadge(item)}</TableCell>
+                        <TableCell>
+                          {item.procedures?.title_de ? (
+                            <div>
+                              <div className="font-medium">{item.procedures.title_de}</div>
+                              {confidence > 0 && (
+                                <div className={`text-xs ${getConfidenceColor(confidence)}`}>
+                                  {(confidence * 100).toFixed(0)}% Übereinstimmung
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">Keine Zuordnung</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">{responsible}</TableCell>
+                        <TableCell className="text-right">{instructing}</TableCell>
+                        <TableCell className="text-right">{assistant}</TableCell>
+                        <TableCell className="text-right font-semibold">{total}</TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>

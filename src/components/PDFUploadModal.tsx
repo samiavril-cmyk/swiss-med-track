@@ -6,7 +6,7 @@ import { Upload, FileText, CheckCircle, AlertCircle, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PDFImportPreview } from "./PDFImportPreview";
-import { useClientPDFProcessor } from "./ClientPDFProcessor";
+import { useClientPDFProcessor, type PdfModuleSummary, type PdfStagingProcedure } from "./ClientPDFProcessor";
 
 interface PDFUploadModalProps {
   open: boolean;
@@ -21,12 +21,11 @@ interface UploadResult {
     filename: string;
     standDate?: string;
     totalProcedures: number;
-    modules: unknown[];
+    modules: PdfModuleSummary[];
     matched: number;
     needsReview: number;
   };
-  stagingData?: unknown[];
-  parsedModules?: unknown[];
+  stagingData?: PdfStagingProcedure[];
   message?: string;
   error?: string;
 }
@@ -39,6 +38,7 @@ export const PDFUploadModal = ({ open, onOpenChange, onSuccess }: PDFUploadModal
   const [showPreview, setShowPreview] = useState(false);
   const { toast } = useToast();
   const { processFile, isProcessing } = useClientPDFProcessor();
+  const isBusy = isUploading || isProcessing;
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -76,6 +76,8 @@ export const PDFUploadModal = ({ open, onOpenChange, onSuccess }: PDFUploadModal
       return;
     }
 
+    if (isBusy) return;
+
     setIsUploading(true);
     setUploadProgress(0);
     setUploadResult(null);
@@ -87,12 +89,12 @@ export const PDFUploadModal = ({ open, onOpenChange, onSuccess }: PDFUploadModal
       }, 200);
 
       const result = await processFile(file);
-      
+
       clearInterval(progressInterval);
       setUploadProgress(100);
       setUploadResult(result);
 
-      if (result.success && result.summary) {
+      if (result.success && result.summary && result.stagingData) {
         setShowPreview(true);
         toast({
           title: "PDF erfolgreich analysiert (AI)",
@@ -171,14 +173,14 @@ export const PDFUploadModal = ({ open, onOpenChange, onSuccess }: PDFUploadModal
                     ? 'border-primary bg-primary/5' 
                     : 'border-muted-foreground/25 hover:border-primary/50'
                   }
-                  ${isUploading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  ${isBusy ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                 `}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
                 onClick={() => {
-                  if (!isUploading) {
+                  if (!isBusy) {
                     document.getElementById('pdf-upload')?.click();
                   }
                 }}
@@ -196,7 +198,7 @@ export const PDFUploadModal = ({ open, onOpenChange, onSuccess }: PDFUploadModal
                   accept=".pdf"
                   className="hidden"
                   onChange={handleFileSelect}
-                  disabled={isUploading}
+                  disabled={isBusy}
                 />
               </div>
 
