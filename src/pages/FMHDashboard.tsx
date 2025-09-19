@@ -56,7 +56,7 @@ export const FMHDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [modules, setModules] = useState<FMHModule[]>([]);
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [timeoutReached, setTimeoutReached] = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [showPDFUpload, setShowPDFUpload] = useState(false);
@@ -74,15 +74,9 @@ export const FMHDashboard: React.FC = () => {
       return;
     }
     
-    // Prevent multiple simultaneous loads
-    // if (loading) return; // REMOVED: This caused deadlock!
-    
+    // Prevent multiple simultaneous loads - loadModulesAndProgress() guards internally.
     console.log('🔄 FMHDashboard useEffect triggered for user:', user.id);
-    // Prevent multiple simultaneous loads with better logic
-    if (loading) {
-      console.log('⏸️ FMH: Already loading, skipping...');
-      return;
-    }
+    setLoading(true);
     loadModulesAndProgress();
     const t = setTimeout(() => {
       console.log('⏰ Timeout reached - stopping loading');

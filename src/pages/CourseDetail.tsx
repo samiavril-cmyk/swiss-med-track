@@ -107,12 +107,6 @@ export default function CourseDetail() {
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
   const [isEnrolled, setIsEnrolled] = useState(false);
 
-  useEffect(() => {
-    if (id) {
-      fetchCourseDetails();
-    }
-  }, [id, fetchCourseDetails]);
-
   const fetchCourseDetails = useCallback(async () => {
     if (!id) return;
     
@@ -201,6 +195,12 @@ export default function CourseDetail() {
       setLoading(false);
     }
   }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      fetchCourseDetails();
+    }
+  }, [id, fetchCourseDetails]);
 
   const handleEnrollment = async () => {
     if (!course || !selectedSession) {

@@ -59,7 +59,7 @@
 
 ---
 
-## 👨‍⚕️ **Residents (Matthias's Team - Traumatologie)**
+## 👨‍⚕️ **Residents (Mathias' Team - Traumatologie)**
 
 ### Dr. David Wilson
 - **Email:** `david.wilson@hospital.ch`
