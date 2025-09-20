@@ -110,7 +110,6 @@ export const FMHDashboard: React.FC = () => {
     
     // Prevent multiple simultaneous loads - loadModulesAndProgress() guards internally.
     console.log('🔄 FMHDashboard useEffect triggered for user:', user.id);
-    setLoading(true);
     loadModulesAndProgress();
     const t = setTimeout(() => {
       console.log('⏰ Timeout reached - stopping loading');
