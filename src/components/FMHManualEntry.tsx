@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, User, Stethoscope, Plus, X } from 'lucide-react';
+import { Stethoscope, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthResilient } from '@/hooks/useAuthResilient';
 import { toast } from 'sonner';
@@ -88,20 +88,7 @@ export const FMHManualEntry: React.FC<{
   });
 
   // Load categories on mount
-  useEffect(() => {
-    if (open) {
-      loadCategories();
-    }
-  }, [open]);
-
-  // Load procedures when category changes
-  useEffect(() => {
-    if (selectedCategory) {
-      loadProcedures(selectedCategory);
-    }
-  }, [selectedCategory]);
-
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -118,9 +105,16 @@ export const FMHManualEntry: React.FC<{
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadProcedures = async (categoryId: string) => {
+  useEffect(() => {
+    if (open) {
+      void loadCategories();
+    }
+  }, [open, loadCategories]);
+
+  // Load procedures when category changes
+  const loadProcedures = useCallback(async (categoryId: string) => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -138,7 +132,13 @@ export const FMHManualEntry: React.FC<{
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (selectedCategory) {
+      void loadProcedures(selectedCategory);
+    }
+  }, [selectedCategory, loadProcedures]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -193,6 +193,24 @@ export const FMHManualEntry: React.FC<{
 
   const selectedProcedure = procedures.find(p => p.id === formData.procedure_id);
   const selectedProcedureMinimum = getMinimumRequirement(selectedProcedure?.min_required_by_pgy);
+  const requirementBadges = useMemo(() => {
+    if (!selectedProcedure?.min_required_by_pgy) {
+      return [] as Array<{ label: string; value: number }>;
+    }
+
+    return PGY_PRIORITY
+      .map((level) => {
+        const value = selectedProcedure.min_required_by_pgy?.[level];
+        if (typeof value === 'number' && value > 0) {
+          return {
+            label: level.toUpperCase(),
+            value
+          };
+        }
+        return null;
+      })
+      .filter((entry): entry is { label: string; value: number } => entry !== null);
+  }, [selectedProcedure]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -271,6 +289,18 @@ export const FMHManualEntry: React.FC<{
                     <p className="font-semibold">{selectedProcedureMinimum} Eingriffe</p>
                   </div>
                 </div>
+                {requirementBadges.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <Label className="text-sm text-muted-foreground">PGY-Anforderungen</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {requirementBadges.map(({ label, value }) => (
+                        <Badge key={label} variant="secondary">
+                          {label}: {value}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
